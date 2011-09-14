@@ -1,5 +1,6 @@
 ##########
 # Heterozygosity by scan and chromosome
+# Usage: R --args config.file < het_by_scan.R
 ##########
 
 library(GWASTools)

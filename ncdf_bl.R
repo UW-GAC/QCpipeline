@@ -1,6 +1,6 @@
 ##########
 # BAF/LRR netCDF file
-# Usage: R --args config.file <test> ncdf_bl.R
+# Usage: R --args config.file <test> < ncdf_bl.R
 ##########
 
 library(GWASTools)

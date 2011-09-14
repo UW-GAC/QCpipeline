@@ -1,5 +1,6 @@
 ##########
 # Mean intensity by scan and chromosome
+# Usage: R --args config.file < mean_inten.R
 ##########
 
 library(GWASTools)

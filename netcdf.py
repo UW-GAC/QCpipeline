@@ -1,4 +1,4 @@
-"""Create NetCDF files"""
+"""Create NetCDF and GDS files"""
 
 import sys
 import os
@@ -35,10 +35,23 @@ if test:
 else:
     testStr = ""
 
+driver = os.path.join(pipeline, "runRscript.sh")
+
+jobid = dict()
 for job in ["ncdf_geno", "ncdf_qxy", "ncdf_bl"]:
-    driver = os.path.join(pipeline, "runRscript.sh")
     rscript = os.path.join(pipeline, job + ".R")
     qsub = "qsub %s -N %s %s %s %s %s" % (emailStr, job, driver, rscript, config, testStr)
+    process = subprocess.Popen(qsub, shell=True, stdout=subprocess.PIPE)
+    pipe = process.stdout
+    qsubout = pipe.readline()
+    jobid[job] = qsubout.split()[2]
+    print qsubout
+    
+if not test:
+    job = "gds_geno"
+    rscript = os.path.join(pipeline, job + ".R")
+    qsub = "qsub -hold_jid %s %s -N %s %s %s %s" % (jobid['ncdf_geno'], emailStr, job, driver, rscript, config)
     retcode = subprocess.call(qsub, shell=True)
     if retcode != 0:
         sys.exit("job submission failed for command\n" + qsub)
+    

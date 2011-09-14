@@ -1,6 +1,6 @@
 ##########
 # Quality/XY netCDF file
-# Usage: R --args config.file <test> ncdf_qxy.R
+# Usage: R --args config.file <test> < ncdf_qxy.R
 ##########
 
 library(GWASTools)

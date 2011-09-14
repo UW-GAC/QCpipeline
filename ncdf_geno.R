@@ -1,6 +1,6 @@
 ##########
 # Genotype netCDF file
-# Usage: R --args config.file <test> ncdf_geno.R
+# Usage: R --args config.file <test> < ncdf_geno.R
 ##########
 
 library(GWASTools)
