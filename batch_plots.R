@@ -36,7 +36,7 @@ abline(v=mean(racefrac), lty=2) # mean over all plates
 dev.off()
 
 pdf(config["out_lambda_race_plot"], width=6, height=6)
-plot(racefrac, batch.chisq$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab="ethnic majority fraction")
+plot(racefrac, batch.chisq$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"))
 abline(v=mean(racefrac), lty=2) # mean over all plates
 dev.off()
 
@@ -49,7 +49,7 @@ dev.off()
 
 # mean autosomal missing call rate per batch
 missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"])
-batches <- unique(batch)
+batches <- unique(na.omit(batch))
 n <- length(batches)
 bmiss <- rep(NA,n); names(bmiss) <- batches
 bn <- rep(NA,n); names(bn) <- batches
@@ -59,7 +59,7 @@ for(i in 1:n) {
   bn[i] <- length(x)
 }
 pdf(config["out_meanmcr_nscan_plot"], width=6, height=6)
-plot(bn, bmiss, xlab="number of samples per plate", ylab="mean autosomal missing call rate")
+plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing call rate")
 y <- lm(bmiss ~ bn)
 abline(y$coefficients)
 anova(y)
@@ -86,8 +86,9 @@ study <- scanAnnot[incl.sel,]
 # batch effect on missing call rate
 # make plate names shorter for plotting
 batch <- getVariable(study, config["annot_scan_batchCol"])
+batchLabel <- vapply(strsplit(as.character(batch), "-"), function(x) x[[1]][1], "a")
 missing <- getVariable(study, config["annot_scan_missAutoCol"])
-model <- log10(missing) ~ as.factor(batch)
+model <- log10(missing) ~ as.factor(batchLabel)
 lm.result <- lm(model)
 anova(lm.result)
 pdf(config["out_mcr_plot"], width=6, height=6)
@@ -99,5 +100,5 @@ dev.off()
 mninten <- getobj(config["inten_file"])
 mninten <- mninten[[1]]
 pdf(config["out_inten_plot"], width=6, height=6)
-boxplot(mninten[incl.sel,"1"] ~ as.factor(batch), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"])
+boxplot(mninten[incl.sel,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"])
 dev.off()

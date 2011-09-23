@@ -33,3 +33,6 @@ python chrom_anomalies.py --email user@uw.edu --skipSD chrom_anom.config start e
  e.g. "1 2000 500" means run scans 1-2000 in batches of 500)
 ("skipSD" means skip calculating the BAF standard deviation, since
 this was already done in the test run)
+
+21) Batch quality checks (allele frequency test and plots)
+python batch.py  --email user@uw.edu batch.config
