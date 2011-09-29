@@ -20,10 +20,10 @@ Check output to make sure creation was successful
 13-15) Gender check (heterozygosity and mean intensity)
 python gender_check.py --email user@uw.edu gender.config
 
-19-20) Missing call rate
+18-19) Missing call rate
 python missing.py --email user@uw.edu missing.config
 
-18) Chromosome anomalies (need missing call rate first)
+20) Chromosome anomalies (need missing call rate first)
 test first:
 python chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5
 (first 10 scans in 2 batches of 5 scans each)
@@ -35,4 +35,8 @@ python chrom_anomalies.py --email user@uw.edu --skipSD chrom_anom.config start e
 this was already done in the test run)
 
 21) Batch quality checks (allele frequency test and plots)
-python batch.py  --email user@uw.edu batch.config
+python batch.py --email user@uw.edu batch.config
+
+25-27) IBD (allele frequency, SNP selection, run IBD, plots,
+            inbreeding coefficients)
+python ibd.py --email user@uw.edu ibd.config
