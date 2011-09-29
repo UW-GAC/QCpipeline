@@ -85,7 +85,6 @@ if (sum(unobs.dup.sel) > 0) {
   message(paste(sum(unobs.dup.sel), "duplicate pairs not observed"))
   unobs.dup <- exp.dups[unobs.dup.sel,]
   save(unobs.dup, file=config["out_ibd_unobs_dup_file"])
-}
 } else {
   message("all expected duplicates observed")
 }
