@@ -22,7 +22,11 @@ if (is.na(config["ibd_method"])) {
 snp.ids <- getobj(config["out_snp_file"])
 length(snp.ids)
 
-scan.ids <- getobj(config["scan_ibd_include_file"])
+if (!is.na(config["scan_ibd_include_file"])) {
+  scan.ids <- getobj(config["scan_ibd_include_file"])
+} else {
+  scan.ids <- NULL
+}
 length(scan.ids)
 
 gdsobj <- openfn.gds(config["gds_geno_file"])
