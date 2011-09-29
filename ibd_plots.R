@@ -42,7 +42,6 @@ ibd$exp.rel[is.na(ibd$exp.rel)] <- ibd$rel2[is.na(ibd$exp.rel)]
 table(ibd$exp.rel, exclude=NULL)
 ibd$rel <- NULL
 ibd$rel2 <- NULL
-ibd$ii <- NULL
 
 ibd$exp.rel[ibd$Individ1 == ibd$Individ2] <- "Dup"
 ibd$exp.rel[is.na(ibd$exp.rel)] <- "U"
@@ -58,8 +57,6 @@ ibd$obs.rel <- ibdAssignRelatedness(ibd$k0, ibd$k1)
 pdf(config["out_ibd_obs_plot"], width=6, height=6)
 ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")
 dev.off()
-
-save(ibd, file=config["out_ibd_rel_file"])
 
 
 # check for expected relationships not observed
@@ -88,6 +85,9 @@ if (sum(unobs.dup.sel) > 0) {
 } else {
   message("all expected duplicates observed")
 }
+
+ibd$ii <- NULL
+save(ibd, file=config["out_ibd_rel_file"])
 
 
 # IBD connectivity
