@@ -152,3 +152,9 @@ stopifnot(all(res$chk == 1))
 table(res$snp.order, exclude=NULL)
 stopifnot(all(res$snp.order == 1))
 
+table(res$inten.chk$ballelefreq, exclude=NULL)
+stopifnot(all(res$inten.chk$ballelefreq == 1))
+
+table(res$inten.chk$logrratio, exclude=NULL)
+stopifnot(all(res$inten.chk$logrratio == 1))
+

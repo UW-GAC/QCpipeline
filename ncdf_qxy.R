@@ -118,6 +118,13 @@ nsnp <- nrow(snpAnnot)
 stopifnot(dim(x) == c(nsnp, 5))
 x[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
 x[(nsnp-4):nsnp,] # last 5 snps
+
+y <- getY(data, snp=c(1,-1), scan=c(n,5))
+dim(y)
+nsnp <- nrow(snpAnnot)
+stopifnot(dim(y) == c(nsnp, 5))
+y[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
+y[(nsnp-4):nsnp,] # last 5 snps
 close(data)
 
 
@@ -154,3 +161,9 @@ stopifnot(all(res$snp.order == 1))
 
 table(res$qs.chk, exclude=NULL)
 stopifnot(all(res$qs.chk == 1))
+
+table(res$inten.chk$x, exclude=NULL)
+stopifnot(all(res$inten.chk$x == 1))
+
+table(res$inten.chk$y, exclude=NULL)
+stopifnot(all(res$inten.chk$y == 1))
