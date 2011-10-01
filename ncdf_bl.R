@@ -68,17 +68,22 @@ if (config["raw_scanNameInFile"] == 1) {
   col.nums <- append(col.nums, as.integer(config["raw_sampleCol"]), after=1)
   names(col.nums)[2] <- "sample"
 }
+skip.num <- as.integer(config["raw_skipNum"])
+col.total <- as.integer(config["raw_colTotal"])
+scan.name.in.file <- as.integer(config["raw_scanNameInFile"])
 
 system.time({
   res <- ncdfAddData(path = config["raw_path"], ncdf.filename = ncfile,
                      snp.annotation = snpdf, scan.annotation = scandf,
-                     sep.type=config["raw_sepType"], skip.num=config["raw_skipNum"],
-                     col.total=config["raw_colTotal"],
-                     col.nums=col.nums, scan.name.in.file=config["raw_scanNameInFile"],
+                     sep.type=config["raw_sepType"], skip.num=skip.num,
+                     col.total=col.total,
+                     col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                      diagnostics.filename=config["nc_bl_diagFile"])
 })
 
-# check - diagnostics returned by ncdfAddData
+########################################
+# MANUAL REVIEW - DIAGNOSTICS
+########################################
 names(res)
 table(res$read.file, exclude=NULL)
 stopifnot(all(res$read.file == 1))
@@ -98,7 +103,9 @@ stopifnot(all(res$snp.chk == 1))
 table(res$chk, exclude=NULL)
 stopifnot(all(res$chk == 1))
 
-# look in the netcdf file
+########################################
+# MANUAL REVIEW - DATA VALUES
+########################################
 (nc <- NcdfIntensityReader(ncfile))
 data <- IntensityData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
 scanID <- getScanID(data)
@@ -127,13 +134,16 @@ close(data)
 system.time({
   res <- ncdfCheckIntensity(path = config["raw_path"], ncdf.filename = ncfile,
                             snp.annotation = snpdf, scan.annotation = scandf,
-                            sep.type=config["raw_sepType"], skip.num=config["raw_skipNum"],
-                            col.total=config["raw_colTotal"],
-                            col.nums=col.nums, scan.name.in.file=config["raw_scanNameInFile"],
+                            sep.type=config["raw_sepType"], skip.num=skip.num,
+                            col.total=col.total,
+                            col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                             check.scan.index=1:nsamp, n.scans.loaded=nsamp,
                             diagnostics.filename=config["nc_bl_checkFile"])
 })
 
+########################################
+# MANUAL REVIEW - DIAGNOSTICS
+########################################
 table(res$read.file, exclude=NULL)
 stopifnot(all(res$read.file == 1))
 

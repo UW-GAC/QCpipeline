@@ -15,7 +15,8 @@ python netcdf.py --email user@uw.edu --test ncdf.config
 
 run all:
 python netcdf.py --email user@uw.edu ncdf.config
-Check output to make sure creation was successful
+Check output to make sure creation was successful and all checks were passed
+Pay attention to sections marked "MANUAL REVIEW"
 
 13-15) Gender check (heterozygosity and mean intensity)
 python gender_check.py --email user@uw.edu gender.config
