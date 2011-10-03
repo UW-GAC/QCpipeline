@@ -1,3 +1,5 @@
+#! /usr/local/bin/python2.7
+
 """Batch quality checks"""
 
 import sys

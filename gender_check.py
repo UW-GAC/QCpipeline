@@ -1,3 +1,5 @@
+#! /usr/local/bin/python2.7
+
 """Heterozygosity and mean intensity calculations for gender check"""
 
 import sys

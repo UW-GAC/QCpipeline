@@ -1,3 +1,5 @@
+#! /usr/local/bin/python2.7
+
 """Missing call rate by SNP and scan"""
 
 import sys

@@ -1,3 +1,5 @@
+#! /usr/local/bin/python2.7
+
 """Chromosome anomalies"""
 
 import sys
