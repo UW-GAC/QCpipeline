@@ -21,28 +21,16 @@ config = args[0]
 pipeline = options.pipeline
 email = options.email
 
-if email is not None:
-    emailStr = "-m e -M " + email
-else:
-    emailStr = ""
+sys.path.append(pipeline)
+import QCpipeline
 
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 job = "batch_chisq"
 rscript = os.path.join(pipeline, job + ".R")
-qsub = "qsub %s -N %s %s %s %s" % (emailStr, job, driver, rscript, config)
-process = subprocess.Popen(qsub, shell=True, stdout=subprocess.PIPE)
-pipe = process.stdout
-qsubout = pipe.readline()
-jobid[job] = qsubout.split()[2]
-print qsubout
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
 
 job = "batch_plots"
 rscript = os.path.join(pipeline, job + ".R")
-qsub = "qsub -hold_jid %s %s -N %s %s %s %s" % (jobid["batch_chisq"], emailStr, job, driver, rscript, config)
-process = subprocess.Popen(qsub, shell=True, stdout=subprocess.PIPE)
-pipe = process.stdout
-qsubout = pipe.readline()
-jobid[job] = qsubout.split()[2]
-print qsubout
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['batch_chisq']], email=email)
