@@ -39,14 +39,8 @@ plotcol[sex == "M"] <- "blue"
 # plot labels - X and Y probes
 (snpAnnot <- getobj(config["annot_snp_file"]))
 chr <- getChromosome(snpAnnot, char=TRUE)
-io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
-if (!is.null(io)) {
-  nx <- sum(chr == "X" & io)
-  ny <- sum(chr == "Y" & io)
-} else {
-  nx <- sum(chr == "X")
-  ny <- sum(chr == "Y")
-}
+nx <- sum(chr == "X")
+ny <- sum(chr == "Y")
 xlab <- paste("X intensity (",nx," probes)", sep="")
 ylab <- paste("Y intensity (",ny," probes)", sep="")
 
