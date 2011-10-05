@@ -12,6 +12,7 @@ if (length(args) < 1) stop("missing configuration file")
 config.table <- read.table(args[1], as.is=TRUE)
 config <- config.table[,2]
 names(config) <- config.table[,1]
+print(config.table)
 
 # read start and end scan numbers
 if (length(args) < 3) stop("missing start and end")

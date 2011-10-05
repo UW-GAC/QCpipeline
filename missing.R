@@ -12,6 +12,7 @@ if (length(args) < 1) stop("missing configuration file")
 config.table <- read.table(args[1], as.is=TRUE)
 config <- config.table[,2]
 names(config) <- config.table[,1]
+print(config.table)
 
 (scanAnnot <- getobj(config["annot_scan_file"]))
 scanID <- getScanID(scanAnnot)
@@ -45,11 +46,12 @@ np <- table(chr.type)
 
 # fraction of intensity only per chrom
 snp.io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
-if (!is.null(snp.io)) {
+if (!is.null(snp.io) & sum(snp.io) > 0) {
   xm <- as.matrix(table(chr.type, snp.io))
   io <- xm[,"1"] / rowSums(xm)
   nonio <- snp.io == 0
 } else {
+  snp.io <- NULL
   nonio <- rep(TRUE, nrow(snpAnnot))
 }
 

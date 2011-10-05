@@ -12,6 +12,7 @@ if (length(args) < 1) stop("missing configuration file")
 config.table <- read.table(args[1], as.is=TRUE)
 config <- config.table[,2]
 names(config) <- config.table[,1]
+print(config.table)
 
 ibd <- getobj(config["out_ibd_kc32_file"])
 dim(ibd)

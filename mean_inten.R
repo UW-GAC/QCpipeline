@@ -12,6 +12,7 @@ if (length(args) < 1) stop("missing configuration file")
 config.table <- read.table(args[1], as.is=TRUE)
 config <- config.table[,2]
 names(config) <- config.table[,1]
+print(config.table)
 
 ncfile <- config["nc_qxy_file"]
 nc <- NcdfIntensityReader(ncfile)

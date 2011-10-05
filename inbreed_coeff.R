@@ -13,6 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config.table <- read.table(args[1], as.is=TRUE)
 config <- config.table[,2]
 names(config) <- config.table[,1]
+print(config.table)
 
 # SNP filter - contain the condition of every two SNPs being at least 15kb apart
 # pre-selected SNPs: 15kb apart, autosomal, MAF > 0%, and MCR < 5%
