@@ -1,5 +1,6 @@
 QC Pipeline
 Step numbers refer to the SOP
+see QCpipeline-manual.pdf for R function help
 
 1) Create project directory
 create_project_dir.sh ProjectName user
