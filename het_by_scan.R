@@ -4,15 +4,14 @@
 ##########
 
 library(GWASTools)
+library(QCpipeline)
 sessionInfo()
 
 # read configuration
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
-config.table <- read.table(args[1], as.is=TRUE)
-config <- config.table[,2]
-names(config) <- config.table[,1]
-print(config.table)
+config <- readConfig(args[1])
+print(config)
 
 ncfile <- config["nc_geno_file"]
 nc <- NcdfGenotypeReader(ncfile)

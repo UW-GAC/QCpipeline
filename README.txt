@@ -42,3 +42,6 @@ python batch.py --email user@uw.edu batch.config
 25-27) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
 python ibd.py --email user@uw.edu ibd.config
+
+28) Sample quality check
+python sample_qualty.py --email user@uw.edu sample_quality.config
