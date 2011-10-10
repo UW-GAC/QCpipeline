@@ -32,7 +32,7 @@ length(scan.ids)
 gdsobj <- openfn.gds(config["gds_geno_file"])
 if (config["ibd_method"] == "MoM") {
   ibd <- snpgdsIBDMoM(gdsobj, sample.id=scan.ids, snp.id=snp.ids)
-} else if (config["ibd_method"] == "MoM") {
+} else if (config["ibd_method"] == "MLE") {
   ibd <- snpgdsIBDMLE(gdsobj, sample.id=scan.ids, snp.id=snp.ids, method="EM")
 } else {
   stop("ibd method not recognized")

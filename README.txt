@@ -23,6 +23,7 @@ Pay attention to sections marked "MANUAL REVIEW"
 python gender_check.py --email user@uw.edu gender.config
 
 18-19) Missing call rate
+"round2" in config file should be FALSE
 python missing.py --email user@uw.edu missing.config
 
 20) Chromosome anomalies (need missing call rate first)
@@ -45,3 +46,8 @@ python ibd.py --email user@uw.edu ibd.config
 
 28) Sample quality check
 python sample_qualty.py --email user@uw.edu sample_quality.config
+
+33) Recalculate missing call rates
+"round2" in config file should be TRUE
+python missing.py --email user@uw.edu missing.config
+
