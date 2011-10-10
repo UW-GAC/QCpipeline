@@ -51,3 +51,5 @@ python sample_qualty.py --email user@uw.edu sample_quality.config
 "round2" in config file should be TRUE
 python missing.py --email user@uw.edu missing.config
 
+36) Create subject-level NetCDF genotype file
+python netcdf_subset.py --email user@uw.edu ncdf_subset.config
