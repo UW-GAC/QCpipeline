@@ -22,7 +22,8 @@ stopifnot(allequal(rownames(afreq), snpID))
 chrom <- getChromosome(snpAnnot)
 pos <- getPosition(snpAnnot)
 missing <- getVariable(snpAnnot, config["annot_snp_missingCol"])
-pool <- chrom < 23 & missing < 0.05 & afreq[,"all"] > 0 & afreq[,"all"] < 1
+maf.filt <- !is.na(afreq[,"all"]) & afreq[,"all"] > 0 & afreq[,"all"] < 1
+pool <- chrom < 23 & missing < 0.05 & maf.filt
 table(pool)
 
 rsnp <- apartSnpSelection(chrom, pos, min.dist=15000, init.sel=pool)
