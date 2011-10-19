@@ -1,5 +1,6 @@
 QC Pipeline
 Step numbers refer to the SOP
+Python scripts must be run on pearson, as they submit cluster jobs
 see QCpipeline-manual.pdf for R function help
 
 1) Create project directory
