@@ -6,7 +6,7 @@
   the marginal distributions of x and y.}
 \usage{
 plot2DwithHist(x, y, xlab=NULL, ylab=NULL, xlim=NULL, ylim=NULL,
-  sublab=NULL, col2D="#0000ff22", mn=NULL, sd=NULL)
+  sublab=NULL, mn=NULL, sd=NULL, ...)
 }
 \arguments{
   \item{x}{vector of x coordinates}
@@ -16,9 +16,9 @@ plot2DwithHist(x, y, xlab=NULL, ylab=NULL, xlim=NULL, ylim=NULL,
   \item{xlim}{x-axis limits (defaults to [min,max] of X, plus a bit of space}
   \item{ylim}{y-axis limits (defaults to [min,max] of Y, plus a bit of space}
   \item{sublab}{sub-label (instead of main, since there's no room)}
-  \item{col2D}{color for plotting points}
   \item{mn}{2-element vector with mean of x and y}
   \item{sd}{2-element vector with sd of x and y}
+  \item{...}{additional arguments to pass to \code{points}}
 }
 \details{}
 \author{Leila Zelnick}

@@ -9,9 +9,9 @@ plot2DwithHist <- function(x, y,
   xlim=NULL, # x-axis limits (defaults to [min,max] of X, plus a bit of space
   ylim=NULL, # y-axis limits (defaults to [min,max] of Y, plus a bit of space
   sublab=NULL, # sub-label (instead of main, since there's no room)
-  col2D="#0000ff22",
   mn=NULL, # 2-element vector with mean of x and y
-  sd=NULL  # 2-element vector with sd of x and y
+  sd=NULL,  # 2-element vector with sd of x and y
+  ...
 ){ # number of bins for histograms: defaults to hist default
 
   if(is.null(xlim)) {
@@ -26,7 +26,7 @@ plot2DwithHist <- function(x, y,
   par(mar=c(5,4,1.5,1.5)+0.1, las=1)
   plot(x, y, xlab=xlab, ylab=ylab, sub=sublab,
     cex.sub=1.2, type="n", xlim=xlim, ylim=ylim)
-  points(x, y, col=col2D)
+  points(x, y, ...)
   # mean and SD
   if(!is.null(mn)) {
     abline(v=mn[1], h=mn[2])
