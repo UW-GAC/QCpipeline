@@ -54,3 +54,14 @@ python missing.py --email user@uw.edu missing.config
 
 36) Create subject-level NetCDF genotype file
 python netcdf_subset.py --email user@uw.edu ncdf_subset.config
+
+39) PCA
+First, run 2 rounds of PCA: 1) with external HapMaps and
+2) unrelated study samples
+python pca.py --email user@uw.edu pca.config --combined
+(where "--combined" option means run PCA with external HapMaps in
+additional to unrelated study samples)
+
+For subsequent runs with individual ethnic groups, make a new
+"study_unrelated.RData" file and note in the configuration
+python pca.py --email user@uw.edu pca.config
