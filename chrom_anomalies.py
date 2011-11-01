@@ -38,7 +38,11 @@ driver = os.path.join(pipeline, "runRscript.sh")
 jobid = dict()
 
 # make this optional in case we run script repeatedly for testing
-if not skipSD:
+if skipSD:
+    configdict = QCpipeline.readConfig(config)
+    if not os.path.exists(configdict['out_baf_med_file']):
+        sys.exit("file " + configdict['out_disc_file'] + " missing; cannot use skipSD option")
+else:
     job = "baf_variance"
     rscript = os.path.join(pipeline, job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)

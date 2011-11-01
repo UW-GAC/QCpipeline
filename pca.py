@@ -34,6 +34,12 @@ skipLD = options.skipLD
 sys.path.append(pipeline)
 import QCpipeline
 
+configdict = QCpipeline.readConfig(config)
+if not combined and not os.path.exists(configdict['out_disc_file']):
+    sys.exit("duplicate discordance file " + configdict['out_disc_file'] + " missing; run with '--combined' first")
+if skipLD and not os.path.exists(configdict['out_pruned_file']):
+    sys.exit("pruned file " + configdict['out_pruned_file'] + " missing; cannot use skipLD option")
+
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
@@ -49,8 +55,12 @@ if combined:
 
 if not skipLD:
     job = "ld_pruning"
+    if combined:
+        holdid = [jobid['dup_disc_ext']]
+    else:
+        holdid = None
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
 
 if combined:
     job = "pca_combined"
