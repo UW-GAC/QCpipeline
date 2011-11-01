@@ -30,14 +30,24 @@ for (i in 1:n) {
   racefrac[i] <- nmaj / nsamp
 }
 
+pch <- rep(1, length(batch.chisq$mean.chisq))
+redo <- getVariable(scanAnnot, config["annot_scan_redoCol"])
+if (!is.null(redo)) {
+  redobatches <- unique(batch[redo])
+  pch[names(batch.chisq$mean.chisq) %in% redobatches] <- 2
+}
+
+
 pdf(config["out_meanchisq_race_plot"], width=6, height=6)
-plot(racefrac, batch.chisq$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"))
+plot(racefrac, batch.chisq$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
 abline(v=mean(racefrac), lty=2) # mean over all plates
+legend("bottomright", "redo", pch=2)
 dev.off()
 
 pdf(config["out_lambda_race_plot"], width=6, height=6)
-plot(racefrac, batch.chisq$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"))
+plot(racefrac, batch.chisq$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
 abline(v=mean(racefrac), lty=2) # mean over all plates
+legend("bottomright", "redo", pch=2)
 dev.off()
 
 
@@ -49,8 +59,6 @@ dev.off()
 
 # mean autosomal missing call rate per batch
 missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"])
-batches <- unique(na.omit(batch))
-n <- length(batches)
 bmiss <- rep(NA,n); names(bmiss) <- batches
 bn <- rep(NA,n); names(bn) <- batches
 for(i in 1:n) {
@@ -59,15 +67,17 @@ for(i in 1:n) {
   bn[i] <- length(x)
 }
 pdf(config["out_meanmcr_nscan_plot"], width=6, height=6)
-plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing call rate")
+plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing call rate", pch=pch)
 y <- lm(bmiss ~ bn)
 abline(y$coefficients)
 anova(y)
+legend("topright", "redo", pch=2)
 dev.off()
 
 pdf(config["out_meanmcr_meanchisq_plot"], width=6, height=6)
 tmp <- batch.chisq$mean.chisq[match(names(bmiss), names(batch.chisq$mean.chisq))]
-plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate")
+plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", pch=pch)
+legend("topright", "redo", pch=2)
 dev.off()
 
 
