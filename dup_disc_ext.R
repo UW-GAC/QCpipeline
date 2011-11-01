@@ -41,3 +41,20 @@ discord <- duplicateDiscordanceAcrossDatasets(genoData, extData,
   snp.include=snp.common$rsID)
 
 save(discord, file=config["out_disc_file"])
+
+# print results
+nsubj <- length(discord$discordance.by.subject)
+allpairs <- unlist(discord$discordance.by.subject)
+npairs <- length(allpairs)
+subjsum <- paste(npairs, "duplicate pairs among", nsubj, "subjects")
+print(subjsum)
+
+ndisc <- sum(discord$discordance.by.snp$discordant > 0)
+print(paste(ndisc, "SNPs with > 0 discordant calls"))
+
+# plot
+disc <- allpairs[order(allpairs)]
+rank <- 1:length(disc)
+pdf(config["out_disc_plot"], width=6, height=6)
+plot(disc, rank, xlab="discordance rate", ylab="rank", main=subjsum)
+dev.off()
