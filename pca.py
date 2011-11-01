@@ -35,7 +35,7 @@ sys.path.append(pipeline)
 import QCpipeline
 
 configdict = QCpipeline.readConfig(config)
-if not combined and not os.path.exists(configdict['out_disc_file']):
+if not combined and not skipLD and not os.path.exists(configdict['out_disc_file']):
     sys.exit("duplicate discordance file " + configdict['out_disc_file'] + " missing; run with '--combined' first")
 if skipLD and not os.path.exists(configdict['out_pruned_file']):
     sys.exit("pruned file " + configdict['out_pruned_file'] + " missing; cannot use skipLD option")
