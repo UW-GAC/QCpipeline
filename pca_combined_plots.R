@@ -35,10 +35,11 @@ table(samp$race, exclude=NULL)
 
 # color by race
 Sys.setlocale("LC_COLLATE", "C")
-race <- sort(unique(samp$race))
+race <- as.character(sort(unique(samp$race)))
 stopifnot(all(race %in% names(config)))
+samp$plotcol <- "black"
 for (r in race) {
-  sel <- samp$race == r
+  sel <- samp$race %in% r
   samp$plotcol[sel] <- config[r]
 }
 table(samp$plotcol, exclude=NULL)
@@ -50,20 +51,24 @@ lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 # plot the first four PCs
 png(config["out_comb_pairs_plot"], width=720, height=720)
 par(cex=1.5, lwd=1.5, cex.lab=1.5, cex.axis=1.2)
-pairs(pca$eigenvect[,1:4], labels=lbls, col=samp$plotcol)
+pairs(pca$eigenvect[,1:4], labels=lbls, col=samp$plotcol, pch=samp$plotsym)
 dev.off()
 
 # plot EV1 vs EV2
 # one group at a time so we don't cover up smaller sample sets
 pdf(config["out_comb_ev12_plot"], width=6, height=6)
 plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
-tbl <- table(samp$race)
-raceOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
-for (r in raceOrd) {
-  sel <- samp$race == r
-  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel])
+tbl <- table(samp$plotcol)
+colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
+for (r in colOrd) {
+  sel <- samp$plotcol == r
+  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
 }
-legend("top", legend=race, col=config[race], pch=rep(1, length(race)))
+if (sum(is.na(samp$race)) > 0) {
+  legend("top", legend=c(race, "NA"), col=c(config[race], "black"), pch=c(rep(1, length(race)), 4))
+} else {
+  legend("top", legend=race, col=config[race], pch=rep(1, length(race)))
+}
 dev.off()
 
 
