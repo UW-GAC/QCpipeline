@@ -65,3 +65,6 @@ additional to unrelated study samples)
 For subsequent runs with individual ethnic groups, make a new
 "study_unrelated.RData" file and note in the configuration
 python pca.py --email user@uw.edu pca.config
+
+45)a)iii) HWE
+python hwe.py --email user@uw.edu hwe.config
