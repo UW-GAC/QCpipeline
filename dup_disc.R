@@ -24,8 +24,8 @@ nc <- NcdfGenotypeReader(ncfile)
 genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # are there any scans to exclude?
-if (!is.na(config["scan_exclude_file"])) {
-  scan.exclude <- getobj(config["scan_exclude_file"])
+if (!is.na(config["disc_scan_exclude_file"])) {
+  scan.exclude <- getobj(config["disc_scan_exclude_file"])
   stopifnot(all(scan.exclude %in% scanID))
 } else {
   scan.exclude <- NULL

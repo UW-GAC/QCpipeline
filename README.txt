@@ -23,11 +23,11 @@ Pay attention to sections marked "MANUAL REVIEW"
 13-15) Gender check (heterozygosity and mean intensity)
 python gender_check.py --email user@uw.edu gender.config
 
-18-19) Missing call rate
+17-18) Missing call rate
 "round2" in config file should be FALSE
 python missing.py --email user@uw.edu missing.config
 
-20) Chromosome anomalies (need missing call rate first)
+19) Chromosome anomalies (need missing call rate first)
 test first:
 python chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5
 (first 10 scans in 2 batches of 5 scans each)
@@ -38,24 +38,24 @@ python chrom_anomalies.py --email user@uw.edu --skipSD chrom_anom.config start e
 ("skipSD" means skip calculating the BAF standard deviation, since
 this was already done in the test run)
 
-21) Batch quality checks (allele frequency test and plots)
+20) Batch quality checks (allele frequency test and plots)
 python batch.py --email user@uw.edu batch.config
 
-25-27) IBD (allele frequency, SNP selection, run IBD, plots,
+24-26) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
 python ibd.py --email user@uw.edu ibd.config
 
-28) Sample quality check
+27) Sample quality check
 python sample_qualty.py --email user@uw.edu sample_quality.config
 
-33) Recalculate missing call rates
+32) Recalculate missing call rates
 "round2" in config file should be TRUE
 python missing.py --email user@uw.edu missing.config
 
 36) Create subject-level NetCDF genotype file
 python netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
-39) PCA
+38) PCA
 First, run 2 rounds of PCA: 1) with external HapMaps and
 2) unrelated study samples
 python pca.py --email user@uw.edu pca.config --combined
@@ -66,5 +66,14 @@ For subsequent runs with individual ethnic groups, make a new
 "study_unrelated.RData" file and note in the configuration
 python pca.py --email user@uw.edu pca.config
 
-45)a)iii) HWE
+42a)
+iii) HWE
 python hwe.py --email user@uw.edu hwe.config
+(repeat with different config files for mutiple ethnic groups)
+
+iv-vi) Allele frequency, duplicate discordance and Mendelian errors
+python snp_filt.py --email user@uw.edu snp_filt.config
+
+vii-viii) Allele frequency and heterozygosity by ethnic group and sex
+python snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
+(repeat with different config files for mutiple ethnic groups)
