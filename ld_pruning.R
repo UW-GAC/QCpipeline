@@ -35,7 +35,8 @@ length(snp.sel)
 gdsobj <- openfn.gds(config["gds_geno_file"])
 snpset <- snpgdsLDpruning(gdsobj, sample.id=scan.sel, snp.id=snp.sel,
                           autosome.only=TRUE, maf=0.05, missing.rate=0.05,
-                          method="corr", slide.max.bp=10e6, ld.threshold = 0.45)
+                          method="corr", slide.max.bp=10e6,
+                          ld.threshold=as.numeric(config["ld_r_threshold"]))
 closefn.gds(gdsobj)
 
 snp.pruned <- unlist(snpset, use.names=FALSE)
