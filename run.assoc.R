@@ -1,0 +1,105 @@
+library(GWASTools)
+library(QCpipeline)
+sessionInfo()
+
+# read configuration
+args <- commandArgs(trailingOnly=TRUE)
+if (length(args) < 1) stop("missing configuration file")
+config <- readConfig(args[1])
+print(config)
+
+# make genotypedata
+scanAnnot <- getobj(config["annot_scan_file"])
+# subset samples, e.g. subj.plink
+sub <- config["subset"]
+if (!is.na(sub))
+{
+  scanAnnot <- scanAnnot[pData(scanAnnot)[,sub],] # subsetting
+}
+
+nc <- NcdfGenotypeReader(config["nc_geno_file"])
+sid <- getScanID(nc)
+stopifnot(all(scanAnnot$scanID==sid))
+
+
+# set categorical variables in association models as factor 
+factors <- config["covars_as_factor"]
+factors <- unlist(strsplit(factors," ", fixed=TRUE))
+idx <- which(varLabels(scanAnnot) %in% factors)
+for (i in idx)
+{
+  pData(scanAnnot)[,i] <- as.factor(pData(scanAnnot)[,i])
+}
+  
+# sample/subject chromosome.filter sorted by scanID
+filt <- getobj(config["chrom_filter"])
+stopifnot(all(rownames(filt) == scanAnnot$scanID))
+chk <- apply(filt, 1, function(x) !all(x==F))
+table(chk) # TRUE: to be kept for association
+
+# chromosomes to run analysis on
+chromosome.set <- as.numeric(args[2])  # this sets chromosome numbers given in args on the command line
+chromosome.set
+
+# outcome variables
+outcome <- config["outcome"]
+outcome <- unlist(strsplit(outcome," "))
+outcome
+
+# covariates for each model
+covar.list <- getobj(config["covar.list"])
+# for Y when sex needs to be taken out of model
+if (chromosome.set == 25 & !is.na(args[3]))
+{
+  idx <- sapply(covar.list, function(x) which(x %in% args[3]))
+  for (i in 1:length(idx))
+  {
+    covar.list[[i]] <- covar.list[[i]][-idx[i]]
+  }
+}
+covar.list
+
+# model types
+model.type <- config["model_type"]
+model.type <- unlist(strsplit(model.type," "))
+stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
+model.type
+
+# gene actions
+gene.action <- config["gene_action"]
+gene.action <- unlist(strsplit(gene.action," "))
+gene.action.list <- list()
+for (i in 1:length(gene.action))
+{
+  gene.action.list [[i]] <- gene.action[i]
+}
+gene.action.list
+
+# check lengths
+len <- length(outcome)
+len
+stopifnot(length(outcome) == len & length(model.type) == len &
+          length(gene.action.list) == len & length(covar.list) == len )
+
+# output
+outfile <- config["assoc_output"]
+
+# scan.exclude
+scan.exclude <- NULL
+if (!is.na(config["scan_exclude"]))
+{
+  scan.exclude <- getobj(config["scan_exclude"])
+}
+
+genoData <- GenotypeData(nc,scanAnnot=scanAnnot)
+
+assocTestRegression(			 genoData,
+					 outcome = outcome, 
+					 covar.list = covar.list, 
+					 model.type = model.type,
+                                         scan.exclude = scan.exclude,
+                                         gene.action.list = gene.action.list,
+					 scan.chromosome.filter = filt,
+					 chromosome.set = chromosome.set, 
+                                         outfile = outfile
+)
