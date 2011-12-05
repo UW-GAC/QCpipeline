@@ -30,4 +30,4 @@ length(scan.exclude)
 scan.filt <- getobj(config["scan_chrom_filter"])
 
 gwasExactHW(genoData, scan.chromosome.filter=scan.filt,
-            scan.exclude = scan.exclude, outfile=config["out_hwe_file"])
+            scan.exclude = scan.exclude, outfile=config["out_hwe_prefix"])
