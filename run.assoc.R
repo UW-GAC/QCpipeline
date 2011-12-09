@@ -11,14 +11,15 @@ print(config)
 # make genotypedata
 scanAnnot <- getobj(config["annot_scan_file"])
 # subset samples, e.g. subj.plink
-sub <- config["subset"]
-if (!is.na(sub))
-{
-  scanAnnot <- scanAnnot[pData(scanAnnot)[,sub],] # subsetting
-}
+#sub <- config["subset"]
+#if (!is.na(sub))
+#{
+#  scanAnnot <- scanAnnot[pData(scanAnnot)[,sub],] # subsetting
+#}
 
 nc <- NcdfGenotypeReader(config["nc_geno_file"])
 sid <- getScanID(nc)
+scanAnnot <- scanAnnot[scanAnnot$scanID %in% sid,] 
 stopifnot(all(scanAnnot$scanID==sid))
 
 
