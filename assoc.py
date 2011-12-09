@@ -82,7 +82,7 @@ if assoc:
     else:
         sys.exit("cEnd is smaller than cStart")
 
-    if ((not covarsex) | cStart == 26 & cEnd == 26):
+    if (cStart == 26 & cEnd == 26):
        jobid[job+".26"] = QCpipeline.submitJob(job+".chrom26", driver, [rscript, config, "26"], queue="gcc.q", email=email)
     elif (cEnd < 25 | (cEnd >= 25 & (not covarsex))): # no need to single out y if cEnd is lt 25 or covarsex = False
         for ichrom in chroms:
