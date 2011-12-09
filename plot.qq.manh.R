@@ -52,9 +52,9 @@ for (i in 1:length(actions))
   qqPlot(pvaln, trunc=F, main=paste(test, ",unfiltered", sep=""), cex.main = 0.7, sub=paste("lambda =",format(lambda,digits=4)))
 
   # add filters
-  stopifnot(all(combined$snpID == snpAnnot$snpID))
-  combined$quality.filter <- snpAnnot[,qf]
-  combined$qual.maf.filter <- snpAnnot[,qf] & (!is.na(combined$minor.allele)) & combined$MAF>0.05 & combined$MAF<0.95
+  stopifnot(all(combined$snpID %in% snpAnnot$snpID))
+  combined$quality.filter <- snpAnnot[match(combined$snpID,snpAnnot$snpID), qf]
+  combined$qual.maf.filter <- snpAnnot$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>0.05 & combined$MAF<0.95
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
   save(combined, file=fname)
 
