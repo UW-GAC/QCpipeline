@@ -70,29 +70,29 @@ python pca.py --email user@uw.edu pca.config
 Association tests:
 
 # To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.y \
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config start_chrom end_chrom --assoc --merge --plotQQManh --plotClust --email netID@uw.edu
 
 # To run step by step:
 Association tests: 
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.y \
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config 1 26 --assoc 
 Output merging, QQ and Manhanttan plots, or cluster plots (the code assumes output is ready for chroms 1-26):
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.y \
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config --merge (or --plotQQManh, --plotClust) --email netID@uw.edu
 
 # To run part of the 4 steps:
 e.g.
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.y \
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config 1 26 --assoc --merge --email netID@uw.edu
 
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.y \
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config --merge --plotQQManh --email netID@uw.edu
 
 # --merge will wait till association tests are done for all 26 chroms before it starts; similary,  --plotQQManh will wait till data merging is done before it starts plotting. 
 
 # If there,F"(Bs a sex covariate in the model(s),  add two parameters (--covarsex and --sex) after --assoc:
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.y \
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config 1 26 --assoc --covarsex --sex name_of_sex_covariate, 
 so the code will treat chromosome Y differently.
             
