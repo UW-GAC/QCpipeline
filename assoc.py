@@ -105,9 +105,9 @@ if merge:
             holdid = holdid + [jobid["run.assoc." + str(i)]]
         #print "hold id for merge: "
         #print holdid
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], holdid=holdid, queue="gcc.q", email=email)
     else: # assoc == False means association tests were run in a previous run and will not carry over holdids
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], queue="gcc.q", email=email)
     #print jobid
         
 if plotq:
