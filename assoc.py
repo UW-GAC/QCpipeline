@@ -12,7 +12,7 @@ from optparse import OptionParser
 usage = """python %prog [options] config chromStart chromEnd"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/geneva_sata/stephanie/GCC_code/QCpipeline/trunk",
+                  default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
 # this is temporary 
 # parser.add_option("-l", "--localpipe", dest="localPipe",
@@ -83,7 +83,7 @@ if assoc:
         sys.exit("cEnd is smaller than cStart")
 
     if ((not covarsex) | cStart == 26 & cEnd == 26):
-       jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue="gcc.q", email=email)
+       jobid[job+".26"] = QCpipeline.submitJob(job+".chrom26", driver, [rscript, config, "26"], queue="gcc.q", email=email)
     elif (cEnd < 25 | (cEnd >= 25 & (not covarsex))): # no need to single out y if cEnd is lt 25 or covarsex = False
         for ichrom in chroms:
             jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue="gcc.q", email=email)
@@ -93,7 +93,8 @@ if assoc:
         for ichrom in chroms:
             jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue="gcc.q", email=email)
     #print jobid
-    
+
+
 if merge:
     job = "merge.chroms"
     rscript = os.path.join(pipeline, job + ".R")
