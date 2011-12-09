@@ -54,7 +54,7 @@ for (i in 1:length(actions))
   # add filters
   stopifnot(all(combined$snpID %in% snpAnnot$snpID))
   combined$quality.filter <- snpAnnot[match(combined$snpID,snpAnnot$snpID), qf]
-  combined$qual.maf.filter <- snpAnnot$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>0.05 & combined$MAF<0.95
+  combined$qual.maf.filter <- combined$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>0.05 & combined$MAF<0.95
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
   save(combined, file=fname)
 
@@ -67,8 +67,9 @@ for (i in 1:length(actions))
 
   # Manhattan plots - filtered
   png(paste(qqfname,".model.", i, ".",actions[i],".manh.filt.png",sep=""), width=1200, height=600)
-  chromosome <- snpAnnot$chromosome[combined$quality.filter]
-  manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=c(1:22,"X","Y","XY","M"),
+  chromosome <- snpAnnot$chromosome[snpAnnot[match(combined$snpID,snpAnnot$snpID), qf]]
+  idx <- 1:26 %in% unique(chromosome)
+  manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=c(1:22,"X","Y","XY","M")[idx],
                 main=paste(test,"- filtered"), cex.main=1.5)	
   dev.off()
 }
