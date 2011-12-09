@@ -14,11 +14,12 @@ pathprefix <- config["assoc_output"]
 actions <-  config["gene_action"]
 actions <- unlist(strsplit(actions," "))
 
-cnt <- NULL
+
 for (i in 1:length(actions))
 {
+  cnt <- NULL
   combined <- NULL
-  for (j in 1:26)
+  for (j in (args[2]:args[3]))
   {
     fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".chr.",j,"_",j,".RData", sep="")
     dat <- NULL
@@ -30,12 +31,10 @@ for (i in 1:length(actions))
     combined <- rbind(combined, dat)
   }
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.RData", sep="")
-  if (all(cnt==1:26))
-  {
-    warning("Combined data is lacking output for some of the chromosomes.")
-  }
-  print(fname)
+
+  cat(paste("Saving", fname, "...\n"))
   save(combined, file=fname)
 }
 
+cat(paste("Combined data contains output for the follwing chromosomes: \n", cnt, "\n"))
 
