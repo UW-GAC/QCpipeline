@@ -101,7 +101,7 @@ if merge:
     # generate holdid list (chroms 1-26 should have been done)
     if assoc: # need to wait till association tests finish running
         holdid = []
-        for i in range(1,27):
+        for i in range(cStart, cEnd+1):
             holdid = holdid + [jobid["run.assoc." + str(i)]]
         #print "hold id for merge: "
         #print holdid
