@@ -52,15 +52,20 @@ plotq = options.plotqq
 plotc = options.plotcl
 
 # 3 arguments (config file, starting chrom,and end chrom) when assoc = True
-if assoc:
-    if (len(args) != 3):
-        parser.error("incorrect number of arguments")
-    else:
-        cStart = max(1,int(args[1])) # lower bound = 1 
-        cEnd = min(26,int(args[2])) # upper bound = 26
+#if assoc:
+#    if (len(args) != 3):
+#        parser.error("incorrect number of arguments")
+#    else:
+#        cStart = max(1,int(args[1])) # lower bound = 1 
+#        cEnd = min(26,int(args[2])) # upper bound = 26
 # 1 argument when assoc = False
-if ((not assoc) & (merge | plotq | plotc) & (len(args) != 1)):
-    parser.error("incorrect number of arguments")
+#if ((not assoc) & (merge | plotq | plotc) & (len(args) != 1)):
+
+# require 3 arguments all the time (config, start chrom, and end chrom)
+if (len(args) == 3):
+    cStart = max(1,int(args[1])) # lower bound = 1 
+    cEnd = min(26,int(args[2])) # upper bound = 26
+
     
 sys.path.append(pipeline)
 import QCpipeline
@@ -98,7 +103,7 @@ if assoc:
 if merge:
     job = "merge.chroms"
     rscript = os.path.join(pipeline, job + ".R")
-    # generate holdid list (chroms 1-26 should have been done)
+    # generate holdid list 
     if assoc: # need to wait till association tests finish running
         holdid = []
         for i in range(cStart, cEnd+1):
@@ -113,7 +118,7 @@ if merge:
 if plotq:
     job = "plot.qq.manh"
     rscript = os.path.join(pipeline, job + ".R")
-    # generate holdid list (chroms 1-26 should have been combined into one)
+    # generate holdid list 
     if merge:
         holdid = [jobid["merge.chroms"]]
         #print "hold id for plotq: "
@@ -125,7 +130,7 @@ if plotq:
 if plotc:
     job = "plot.cluster"
     rscript = os.path.join(pipeline, job + ".R")
-    # generate holdid list (chroms 1-26 should have been combined into one)
+    # generate holdid list 
     holdid = []
     if merge:
         holdid = [jobid["merge.chroms"]]
