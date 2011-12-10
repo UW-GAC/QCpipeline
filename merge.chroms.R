@@ -36,5 +36,6 @@ for (i in 1:length(actions))
   save(combined, file=fname)
 }
 
-cat(paste("Combined data contains output for the follwing chromosomes: \n", cnt, "\n"))
+cat("Combined data contains output for the following chromosomes: \n")
+cat(cnt, "\n")
 
