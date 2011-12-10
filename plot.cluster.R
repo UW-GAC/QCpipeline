@@ -28,8 +28,6 @@ stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
 model.type
 qf <- config["quality.filter"]
 qf
-afs <- config["A.freq.study"]
-afs
 
 # make genotypedata and intensityData
 scanAnnot <- getobj(config["annot_scan_file"])
