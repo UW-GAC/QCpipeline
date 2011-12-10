@@ -74,22 +74,18 @@ Association tests:
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config start_chrom end_chrom --assoc --merge --plotQQManh --plotClust --email netID@uw.edu
 
 # To run step by step:
-Association tests: 
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config 1 26 --assoc 
-Output merging, QQ and Manhanttan plots, or cluster plots (the code assumes output is ready for chroms 1-26):
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config --merge (or --plotQQManh, --plotClust) --email netID@uw.edu
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config
+start_chrom end_chrom --assoc (or --merge) --email netID@uw.edu
 
-# To run part of the 4 steps:
-e.g.
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config 1 26 --assoc --merge --email netID@uw.edu
+--merge generates a combined file for each model
 
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config --merge --plotQQManh --email netID@uw.edu
-
-# --merge will wait till association tests are done for all 26 chroms before it starts; similary,  --plotQQManh will wait till data merging is done before it starts plotting. 
+--plotQQManh and --plotClust can be run similarly, but they just use
+  the combined file(s) created by merge in the assoc_output directory (see
+  config), so start_chrom end_chrom will not be useful (can be left
+  out of the command).  That is, you
+  cannot specify which chromosomes to plot. The code plots the
+  chromosomes in the combined file(s). 
 
 # If there,F"(Bs a sex covariate in the model(s),  add two parameters (--covarsex and --sex) after --assoc:
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
