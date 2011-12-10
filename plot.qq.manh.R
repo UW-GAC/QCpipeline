@@ -67,7 +67,7 @@ for (i in 1:length(actions))
 
   # Manhattan plots - filtered
   png(paste(qqfname,".model.", i, ".",actions[i],".manh.filt.png",sep=""), width=1200, height=600)
-  chromosome <- snpAnnot$chromosome[snpAnnot[match(combined$snpID,snpAnnot$snpID), qf]]
+  chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
   idx <- 1:26 %in% unique(chromosome)
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=c(1:22,"X","Y","XY","M")[idx],
                 main=paste(test,"- filtered"), cex.main=1.5)	
