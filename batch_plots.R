@@ -1,6 +1,6 @@
 ##########
 # Plots to check genotyping bach
-# Usage: R --args config.file < batch_plots.R
+# Usage: R --args config.file test.type < batch_plots.R
 ##########
 
 library(GWASTools)
@@ -13,11 +13,21 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 print(config)
 
+# check for test
+if (length(args) < 2) stop("missing test type (chisq or fisher)")
+type <- args[2]
+  
 (scanAnnot <- getobj(config["annot_scan_file"]))
 
-batch.chisq <- getobj(paste(config["out_chisq_file"], "RData", sep="."))
+if (type == "chisq") {
+  batch.res <- getobj(paste(config["out_chisq_file"], "RData", sep="."))
+} else if (type == "fisher") {
+  batch.res <- getobj(paste(config["out_fisher_file"], "RData", sep="."))
+} else {
+  stop("test type must be chisq or fisher")
+}
 
-batches <- names(batch.chisq$mean.chisq)
+batches <- names(batch.res$lambda)
 n <- length(batches)
 batch <- getVariable(scanAnnot, config["annot_scan_batchCol"])
 race <- getVariable(scanAnnot, config["annot_scan_raceCol"])
@@ -30,22 +40,30 @@ for (i in 1:n) {
   racefrac[i] <- nmaj / nsamp
 }
 
-pch <- rep(1, length(batch.chisq$mean.chisq))
+pch <- rep(1, length(batches))
 redo <- getVariable(scanAnnot, config["annot_scan_redoCol"])
 if (!is.null(redo)) {
   redobatches <- unique(batch[redo])
-  pch[names(batch.chisq$mean.chisq) %in% redobatches] <- 2
+  pch[batches %in% redobatches] <- 2
 }
 
 
-pdf(config["out_meanchisq_race_plot"], width=6, height=6)
-plot(racefrac, batch.chisq$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
-abline(v=mean(racefrac), lty=2) # mean over all plates
-legend("bottomright", "redo", pch=2)
-dev.off()
+if (type == "chisq") {
+  pdf(config["out_meanchisq_race_plot"], width=6, height=6)
+  plot(racefrac, batch.res$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
+  abline(v=mean(racefrac), lty=2) # mean over all plates
+  legend("bottomright", "redo", pch=2)
+  dev.off()
+} else if (type == "fisher") {
+  pdf(config["out_meanor_race_plot"], width=6, height=6)
+  plot(racefrac, batch.res$mean.or, ylab="mean Fisher's OR", xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
+  abline(v=mean(racefrac), lty=2) # mean over all plates
+  legend("bottomright", "redo", pch=2)
+  dev.off()
+}
 
 pdf(config["out_lambda_race_plot"], width=6, height=6)
-plot(racefrac, batch.chisq$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
+plot(racefrac, batch.res$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
 abline(v=mean(racefrac), lty=2) # mean over all plates
 legend("bottomright", "redo", pch=2)
 dev.off()
@@ -74,11 +92,19 @@ anova(y)
 legend("topright", "redo", pch=2)
 dev.off()
 
-pdf(config["out_meanmcr_meanchisq_plot"], width=6, height=6)
-tmp <- batch.chisq$mean.chisq[match(names(bmiss), names(batch.chisq$mean.chisq))]
-plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", pch=pch)
-legend("topright", "redo", pch=2)
-dev.off()
+if (type == "chisq") {
+  pdf(config["out_meanmcr_meanchisq_plot"], width=6, height=6)
+  tmp <- batch.res$mean.chisq[match(names(bmiss), names(batch.res$mean.chisq))]
+  plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", pch=pch)
+  legend("topright", "redo", pch=2)
+  dev.off()
+} else if (type == "fisher") {
+  pdf(config["out_meanmcr_meanor_plot"], width=6, height=6)
+  tmp <- batch.res$mean.or[match(names(bmiss), names(batch.res$mean.or))]
+  plot(tmp, bmiss, xlab="mean Fisher's OR", ylab="mean autosomal missing call rate", pch=pch)
+  legend("topright", "redo", pch=2)
+  dev.off()
+}
 
 
 # study only

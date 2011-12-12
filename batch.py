@@ -14,6 +14,8 @@ parser.add_option("-p", "--pipeline", dest="pipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
+parser.add_option("-t", "--type", dest="type", default="chisq",
+                  help="test type (chisq or fisher)")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -22,6 +24,7 @@ if len(args) != 1:
 config = args[0]
 pipeline = options.pipeline
 email = options.email
+type = options.type
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -29,10 +32,16 @@ import QCpipeline
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-job = "batch_chisq"
+if (type == "chisq"):
+    job = "batch_chisq"
+elif (type == "fisher"):
+    job = "batch_fisher"
+else:
+    sys.exit("test type must be chisq or fisher")
+
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+jobid["batch_test"] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
 
 job = "batch_plots"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['batch_chisq']], email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=[jobid['batch_test']], email=email)

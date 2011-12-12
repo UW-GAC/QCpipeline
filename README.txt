@@ -40,6 +40,9 @@ this was already done in the test run)
 
 20) Batch quality checks (allele frequency test and plots)
 python batch.py --email user@uw.edu batch.config
+Default is chisq test (--type chisq).  
+For Fisher test:
+python batch.py --type fisher --email user@uw.edu batch.config
 
 24-26) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
