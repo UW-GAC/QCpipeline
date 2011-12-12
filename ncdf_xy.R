@@ -1,6 +1,6 @@
 ##########
-# Quality/XY netCDF file
-# Usage: R --args config.file <test> < ncdf_qxy.R
+# XY netCDF file
+# Usage: R --args config.file <test> < ncdf_xy.R
 ##########
 
 library(GWASTools)
@@ -30,11 +30,11 @@ nsamp <- nrow(scanAnnot)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpdf <- getVariable(snpAnnot, c("snpID", "chromosome", "position"))
 
-ncfile <- config["nc_qxy_file"]
+ncfile <- config["nc_xy_file"]
 system.time({
   ncdfCreate(snp.annotation = snpdf,
              ncdf.filename = ncfile,
-             variables = c("quality","X","Y"),
+             variables = c("X","Y"),
              n.samples = nsamp,
              precision = "single",
              array.name = config["array_name"],
@@ -62,8 +62,8 @@ names(snpdf) <- c("snpID", "snpName")
 scandf <- getVariable(scanAnnot, c("scanID", config["annot_scan_nameCol"], config["annot_scan_fileCol"]))
 names(scandf) <- c("scanID", "scanName", "file")
 
-col.nums <- as.integer(c(config["raw_snpCol"], config["raw_qsCol"], config["raw_xCol"], config["raw_yCol"]))
-names(col.nums) <- c("snp", "qs", "x", "y")
+col.nums <- as.integer(c(config["raw_snpCol"], config["raw_xCol"], config["raw_yCol"]))
+names(col.nums) <- c("snp", "x", "y")
 if (config["raw_scanNameInFile"] == 1) {
   col.nums <- append(col.nums, as.integer(config["raw_sampleCol"]), after=1)
   names(col.nums)[2] <- "sample"
@@ -78,7 +78,7 @@ system.time({
                      sep.type=config["raw_sepType"], skip.num=skip.num,
                      col.total=col.total,
                      col.nums=col.nums, scan.name.in.file=scan.name.in.file,
-                     diagnostics.filename=config["nc_qxy_diagFile"])
+                     diagnostics.filename=config["nc_xy_diagFile"])
 })
 
 ########################################
@@ -112,12 +112,6 @@ scanID <- getScanID(data)
 range(scanID)
 
 n <- nsamp-4   # number of samples minus 4 to get last 5 samples
-q <- getQuality(data, snp=c(1,-1), scan=c(n,5))
-dim(q)
-nsnp <- nrow(snpAnnot)
-stopifnot(dim(q) == c(nsnp, 5))
-q[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
-q[(nsnp-4):nsnp,] # last 5 snps
 
 x <- getX(data, snp=c(1,-1), scan=c(n,5))
 dim(x)
@@ -145,7 +139,7 @@ system.time({
                             col.total=col.total,
                             col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                             check.scan.index=1:nsamp, n.scans.loaded=nsamp,
-                            diagnostics.filename=config["nc_qxy_checkFile"])
+                            diagnostics.filename=config["nc_xy_checkFile"])
 })
 
 ########################################
@@ -168,9 +162,6 @@ stopifnot(all(res$chk == 1))
 
 table(res$snp.order, exclude=NULL)
 stopifnot(all(res$snp.order == 1))
-
-table(res$qs.chk, exclude=NULL)
-stopifnot(all(res$qs.chk == 1))
 
 table(res$inten.chk$x, exclude=NULL)
 stopifnot(all(res$inten.chk$x == 1))

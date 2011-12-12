@@ -40,7 +40,7 @@ else:
 
 if not overwrite:
     configdict = QCpipeline.readConfig(config)
-    for file in (configdict['nc_geno_file'], configdict['nc_qxy_file'],
+    for file in (configdict['nc_geno_file'], configdict['nc_xy_file'],
                  configdict['nc_bl_file'], configdict['gds_geno_file']):
         if os.path.exists(file):
             sys.exit(file + "already exists; use -o flag to overwrite")
@@ -48,7 +48,7 @@ if not overwrite:
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-for job in ["ncdf_geno", "ncdf_qxy", "ncdf_bl"]:
+for job in ["ncdf_geno", "ncdf_xy", "ncdf_bl"]:
     rscript = os.path.join(pipeline, job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], email=email)
     

@@ -13,7 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 print(config)
 
-ncfile <- config["nc_qxy_file"]
+ncfile <- config["nc_xy_file"]
 nc <- NcdfIntensityReader(ncfile)
 intenData <- IntensityData(nc)
 

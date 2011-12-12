@@ -75,7 +75,7 @@ sum(bins) #  - covers all snps in alog
 sum(unlist(lapply(ids,length)))
 bins
 
-xyNC <- NcdfIntensityReader(config["nc_qxy_file"])
+xyNC <- NcdfIntensityReader(config["nc_xy_file"])
 xyData <- IntensityData(xyNC, snpAnnot=snpAnnot)
 genoNC <- NcdfGenotypeReader(config["nc_geno_file"])
 genoData <- GenotypeData(genoNC, snpAnnot=snpAnnot)
