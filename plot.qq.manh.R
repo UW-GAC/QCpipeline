@@ -63,7 +63,7 @@ for (i in 1:length(actions))
   print(lambda)
   qqPlot(pvaln, trunc=F, main=paste(test, ",\nfiltered", sep=""), cex.main = 0.9, sub=paste("lambda =",format(lambda,digits=4)))
 
-  pvaln <- pval[combined$maf.qual.filter]
+  pvaln <- pval[combined$qual.maf.filter]
   lambda <- median(-2*log(pvaln[!is.na(pvaln)]))/ 1.39 # change to new way to calculating lambda
   print(lambda)
   qqPlot(pvaln, trunc=F, main=paste(test, ",\nMAF filtered", sep=""), cex.main = 0.9, sub=paste("lambda =",format(lambda,digits=4)))
@@ -80,7 +80,7 @@ for (i in 1:length(actions))
 
     # Manhattan plots - maf filtered
   png(paste(qqfname,".model.", i, ".",actions[i],".manh.maf.filt.png",sep=""), width=1200, height=600)
-  chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$maf.qual.filter]
+  chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$qual.maf.filter]
   idx <- 1:26 %in% unique(chromosome)
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=c(1:22,"X","Y","XY","M")[idx],
                 main=paste(test,"- MAF filtered"), cex.main=1.5)
