@@ -49,7 +49,7 @@ for (i in 1:length(actions))
   pvaln <- pval[!is.na(pval)]
   lambda <- median(-2*log(pval[!is.na(pval)]))/ 1.39 # change to new way to calculating lambda
   print(lambda)
-  qqPlot(pvaln, trunc=F, main=paste(test, ",unfiltered", sep=""), cex.main = 0.7, sub=paste("lambda =",format(lambda,digits=4)))
+  qqPlot(pvaln, trunc=F, main=paste(test, ",unfiltered", sep=""), cex.main = 0.9, sub=paste("lambda =",format(lambda,digits=4)))
 
   # add filters
   stopifnot(all(combined$snpID %in% snpAnnot$snpID))
@@ -61,8 +61,13 @@ for (i in 1:length(actions))
   pvaln <- pval[combined$quality.filter]
   lambda <- median(-2*log(pvaln[!is.na(pvaln)]))/ 1.39 # change to new way to calculating lambda
   print(lambda)
-  qqPlot(pvaln, trunc=F, main=paste(test, ", filtered", sep=""), cex.main = 0.7, sub=paste("lambda =",format(lambda,digits=4)))
+  qqPlot(pvaln, trunc=F, main=paste(test, ",\nfiltered", sep=""), cex.main = 0.9, sub=paste("lambda =",format(lambda,digits=4)))
 
+  pvaln <- pval[combined$maf.qual.filter]
+  lambda <- median(-2*log(pvaln[!is.na(pvaln)]))/ 1.39 # change to new way to calculating lambda
+  print(lambda)
+  qqPlot(pvaln, trunc=F, main=paste(test, ",\nMAF filtered", sep=""), cex.main = 0.9, sub=paste("lambda =",format(lambda,digits=4)))
+  
   dev.off()
 
   # Manhattan plots - filtered
@@ -70,7 +75,15 @@ for (i in 1:length(actions))
   chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
   idx <- 1:26 %in% unique(chromosome)
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=c(1:22,"X","Y","XY","M")[idx],
-                main=paste(test,"- filtered"), cex.main=1.5)	
+                main=paste(test,"- filtered"), cex.main=1.5)
+  dev.off() 
+
+    # Manhattan plots - maf filtered
+  png(paste(qqfname,".model.", i, ".",actions[i],".manh.maf.filt.png",sep=""), width=1200, height=600)
+  chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$maf.qual.filter]
+  idx <- 1:26 %in% unique(chromosome)
+  manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=c(1:22,"X","Y","XY","M")[idx],
+                main=paste(test,"- MAF filtered"), cex.main=1.5)
   dev.off()
 }
 
