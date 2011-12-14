@@ -37,7 +37,7 @@ for (i in 1:length(actions))
   combined <- getobj(fname)
   
   png(paste(qqfname,".model.", i, ".",actions[i],".png",sep=""), width=1200, height=600)
-  par(mfrow=c(1,2))
+  par(mfrow=c(1,3))
 
   test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "\n", model.type[i])
   print(test)
