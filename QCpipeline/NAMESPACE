@@ -1,6 +1,8 @@
+import(GWASTools)
 import(gplots)
 import(grid)
 import(gridBase)
 import(hexbin)
 
-export(readConfig, boxplotMeanSD, plot2DwithHist)
+export(readConfig, boxplotMeanSD, plot2DwithHist,
+       dbgapScanAnnotation, dbgapSnpAnnotation)

@@ -1,11 +1,11 @@
 Package: QCpipeline
-Version: 0.1.0
+Version: 0.2.0
 Type: Package
 Title: Utilities for the QC pipeline
 Description: Configuration and plotting code
 Author: Stephanie Gogarten, Jess Shen, Leila Zelnick
 Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
-Depends:
+Depends: GWASTools
 Imports: gplots, grid, gridBase, hexbin
 Suggests: MSBVAR
 License: Artistic-2.0
