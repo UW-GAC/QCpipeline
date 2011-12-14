@@ -49,7 +49,7 @@ for (i in 1:length(actions))
   pvaln <- pval[!is.na(pval)]
   lambda <- median(-2*log(pval[!is.na(pval)]))/ 1.39 # change to new way to calculating lambda
   print(lambda)
-  qqPlot(pvaln, trunc=F, main=paste(test, ",unfiltered", sep=""), cex.main = 1, cex.sub = 1, cex.lab = 1, sub=paste("lambda =",format(lambda,digits=4)))
+  qqPlot(pvaln, trunc=F, main=paste(test, ",unfiltered", sep=""), cex.main = 1.2, cex.sub = 1.2, cex.lab = 1.2, sub=paste("lambda =",format(lambda,digits=4)))
 
   # add filters
   stopifnot(all(combined$snpID %in% snpAnnot$snpID))
@@ -61,7 +61,7 @@ for (i in 1:length(actions))
   pvaln <- pval[combined$quality.filter]
   lambda <- median(-2*log(pvaln[!is.na(pvaln)]))/ 1.39 # change to new way to calculating lambda
   print(lambda)
-  qqPlot(pvaln, trunc=F, main=paste(test, ",filtered", sep=""), cex.main = 1, cex.sub = 1, cex.lab = 1, sub=paste("lambda =",format(lambda,digits=4)))
+  qqPlot(pvaln, trunc=F, main=paste(test, ",filtered", sep=""), cex.main = 1.2, cex.sub = 1.2, cex.lab = 1.2, sub=paste("lambda =",format(lambda,digits=4)))
 
   
   # Manhattan plots - filtered
@@ -75,7 +75,7 @@ for (i in 1:length(actions))
   pvaln <- pval[combined$qual.maf.filter]
   lambda <- median(-2*log(pvaln[!is.na(pvaln)]))/ 1.39 # change to new way to calculating lambda
   print(lambda)
-  qqPlot(pvaln, trunc=F, main=paste(test, ",MAF filtered", sep=""), cex.main = 1, cex.sub = 1, cex.lab = 1, sub=paste("lambda =",format(lambda,digits=4)))
+  qqPlot(pvaln, trunc=F, main=paste(test, ",MAF filtered", sep=""), cex.main = 1.2, cex.sub = 1.2, cex.lab = 1.2, sub=paste("lambda =",format(lambda,digits=4)))
   
   dev.off()
 
