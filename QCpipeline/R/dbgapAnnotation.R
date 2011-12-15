@@ -26,8 +26,8 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
 
     # variables to include in sample annotation file
     if (type == "annotation") thistype <- annotationCol else thistype <- analysisCol
-    sann <- unique(varLabels(scanAnnot)[varMetadata(scanAnnot)[[thistype]]],
-                   c(consentVar, subjVar, dupVar, omitVar))
+    sann <- unique(c(varLabels(scanAnnot)[varMetadata(scanAnnot)[[thistype]]],
+                     consentVar, subjVar, dupVar, omitVar))
 
     # remove any samples that will not be posted on dbGaP
     annot2 <- scanAnnot[!scanAnnot[[omitVar]], sann]
