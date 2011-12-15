@@ -43,7 +43,7 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
     dups <- dups[,!(varLabels(dups) %in% c(subjVar, dupVar, omitVar))]
 
     # prepare data dictionary
-    meta <- varMetadata(subj)[varMetadata(subj)[[thistype]],]
+    meta <- varMetadata(subj)
     meta$type <- unlist(lapply(pData(subj), class))
     meta$variable <- row.names(meta)
     dd <- meta[,c("variable", "labelDescription", "type")]
