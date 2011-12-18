@@ -8,7 +8,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 print(config)
 
-# merge output for chroms 1-26
+# merge output 
 # output file name example: study.model.1.additive.chr.24_24.RData
 pathprefix <- config["assoc_output"]
 actions <-  config["gene_action"]

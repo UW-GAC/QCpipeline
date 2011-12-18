@@ -66,8 +66,8 @@ qname = options.qname
 
 # require 3 arguments all the time (config, start chrom, and end chrom)
 if (len(args) == 3):
-    cStart = max(1,int(args[1])) # lower bound = 1 
-    cEnd = min(26,int(args[2])) # upper bound = 26
+    cStart = int(args[1]) 
+    cEnd = int(args[2]) 
 
     
 sys.path.append(pipeline)
@@ -90,18 +90,15 @@ if assoc:
     else:
         sys.exit("cEnd is smaller than cStart")
 
-    if (cStart == 26 & cEnd == 26):
-       jobid[job+".26"] = QCpipeline.submitJob(job+".chrom26", driver, [rscript, config, "26"], queue=qname, email=email)
-    elif (cEnd < 25 | (cEnd >= 25 & (not covarsex))): # no need to single out y if cEnd is lt 25 or covarsex = False
-        for ichrom in chroms:
-            jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email)
-    else: # run y without sex 
+    if (cStart <= 25 and cEnd >= 25 and covarsex):
         jobid[job+".25"] = QCpipeline.submitJob(job+".chrom25", driver, [rscript, config, "25", sex], queue=qname, email=email)
         del chroms[chroms.index(25)]
-        for ichrom in chroms:
+        if (len(chroms) > 0):
+            for ichrom in chroms:
+                jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email)
+    else:
+       for ichrom in chroms:
             jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email)
-    #print jobid
-
 
 if merge:
     job = "merge.chroms"
