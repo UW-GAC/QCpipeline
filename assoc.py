@@ -55,21 +55,13 @@ plotc = options.plotcl
 qname = options.qname
 
 # 3 arguments (config file, starting chrom,and end chrom) when assoc = True
-#if assoc:
-#    if (len(args) != 3):
-#        parser.error("incorrect number of arguments")
-#    else:
-#        cStart = max(1,int(args[1])) # lower bound = 1 
-#        cEnd = min(26,int(args[2])) # upper bound = 26
-# 1 argument when assoc = False
-#if ((not assoc) & (merge | plotq | plotc) & (len(args) != 1)):
-
 # require 3 arguments all the time (config, start chrom, and end chrom)
 if (len(args) == 3):
     cStart = int(args[1]) 
     cEnd = int(args[2]) 
 
-    
+print cStart, cEnd
+
 sys.path.append(pipeline)
 import QCpipeline
 
