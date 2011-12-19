@@ -28,6 +28,9 @@ stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
 model.type
 qf <- config["quality.filter"]
 qf
+plotchroms <- getobj(config["plot_chroms"])
+plotchroms
+sub <- NULL
 
 # make genotypedata and intensityData
 scanAnnot <- getobj(config["annot_scan_file"])
@@ -45,7 +48,7 @@ for (i in 1:length(actions))
       fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
       print(fname)
       combined <- getobj(fname)
-      combined <- combined[combined$quality.filter,]
+      combined <- combined[combined$quality.filter & (combined$snpID %in% snpAnnot$snpID[snpAnnot$chromosome %in% plotchroms]),]
       
       varp <- paste("model.",i,".", actions[i], ".pvalue.G", sep="")
       combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
