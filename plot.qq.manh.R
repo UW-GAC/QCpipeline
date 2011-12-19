@@ -72,9 +72,18 @@ for (i in 1:length(actions))
   print(lambda)
   qqPlot(pvaln, trunc=F, main=paste(test, ",filtered", sep=""), cex.main = 1.2, cex.sub = 1.2, cex.lab = 1.2, sub=paste("lambda =",format(lambda,digits=4)))
 
+  # QQ plots - maf filtered, subsetted with plotchroms
+  pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
+  lambda <- median(-2*log(pvaln[!is.na(pvaln)]))/ 1.39 # change to new way to calculating lambda
+  print(lambda)
+  qqPlot(pvaln, trunc=F, main=paste(test, ",MAF filtered", sep=""), cex.main = 1.2, cex.sub = 1.2, cex.lab = 1.2, sub=paste("lambda =",format(lambda,digits=4)))
+  dev.off()
+
+  
   # Manhattan plots - filtered, subsetted with plotchroms
   png(paste(qqfname,".model.", i, ".",actions[i],".manh.filt.png",sep=""), width=1200, height=600)
   # chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
+  pvaln <- pval[combined$quality.filter & (!is.na(pval)) & sub]
   chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$quality.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
   chroms <- 23:26
   names(chroms) <- c("X","Y","XY","M")
@@ -85,22 +94,11 @@ for (i in 1:length(actions))
                 main=paste(test,"- filtered"), cex.main=1.5)
   dev.off() 
 
-  # QQ plots - maf filtered, subsetted with plotchroms
-  pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
-  lambda <- median(-2*log(pvaln[!is.na(pvaln)]))/ 1.39 # change to new way to calculating lambda
-  print(lambda)
-  qqPlot(pvaln, trunc=F, main=paste(test, ",MAF filtered", sep=""), cex.main = 1.2, cex.sub = 1.2, cex.lab = 1.2, sub=paste("lambda =",format(lambda,digits=4)))
-  
-  dev.off()
 
   # Manhattan plots - maf filtered, subsetted with plotchroms
   png(paste(qqfname,".model.", i, ".",actions[i],".manh.maf.filt.png",sep=""), width=1200, height=600)
-  #chromosome <- plotchroms
-  #chroms <- 23:26
-  #names(chroms) <- c("X","Y","XY","M")
-  #idx <- match(chroms, chromosome)
-  #chrom.labels <- chromosome
-  #chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
+  chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$qual.maf.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
+  pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
                 main=paste(test,"- MAF filtered"), cex.main=1.5)
   dev.off()
