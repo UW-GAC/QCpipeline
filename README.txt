@@ -74,21 +74,22 @@ Association tests:
 
 # To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config start_chrom end_chrom --assoc --merge --plotQQManh --plotClust --email netID@uw.edu
+/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config \
+start_chrom end_chrom --assoc --merge --plotQQManh --plotClust --queue gcc.q --email netID@uw.edu
 
 # To run step by step:
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config
-start_chrom end_chrom --assoc (or --merge) --email netID@uw.edu
+start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netID@uw.edu
 
 --merge generates a combined file for each model
 
---plotQQManh and --plotClust can be run similarly, but they just use
-  the combined file(s) created by merge in the assoc_output directory (see
-  config), so start_chrom end_chrom will not be useful (can be left
-  out of the command).  That is, you
-  cannot specify which chromosomes to plot. The code plots the
-  chromosomes in the combined file(s). 
+--plotQQManh and --plotClust plot QQ, Manhattan, and cluster plots of
+  SNPs on the chromosomes specified with plot_chroms in the  config file 
+
+--queue gcc.q (or other queues) specifies the queue to use. The
+  default is gcc.q. Check qstat first to decide which queue to use for
+  --assoc
 
 # If there,F"(Bs a sex covariate in the model(s),  add two parameters (--covarsex and --sex) after --assoc:
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
