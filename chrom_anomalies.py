@@ -14,9 +14,8 @@ parser.add_option("-p", "--pipeline", dest="pipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
-parser.add_option("-s", "--skipSD", dest="skipSD", 
-                  action="store_true", default=False,
-                  help="skip BAF variance calculations (use only if median BAF SD output file already exists)")
+parser.add_option("-m", "--maf", dest="maf", default=None,
+                  help="do not use SNPs with MAF below this threshold")
 (options, args) = parser.parse_args()
 
 if len(args) != 4:
@@ -28,25 +27,39 @@ end = int(args[2])
 by = int(args[3])
 pipeline = options.pipeline
 email = options.email
-skipSD = options.skipSD
+maf = options.maf
 
 sys.path.append(pipeline)
 import QCpipeline
+
+configdict = QCpipeline.readConfig(config)
 
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 
-# make this optional in case we run script repeatedly for testing
-if skipSD:
-    configdict = QCpipeline.readConfig(config)
-    if not os.path.exists(configdict['out_baf_med_file']):
-        sys.exit("file " + configdict['out_disc_file'] + " missing; cannot use skipSD option")
+# skip BAF if file already exists
+waitSD = False
+if os.path.exists(configdict['out_baf_med_file']):
+    print "using BAF SD file " + configdict['out_baf_med_file']
 else:
     job = "baf_variance"
     rscript = os.path.join(pipeline, job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+    waitSD = True
 
+# if MAF threshold is needed, calculate allele freq
+useMAF = False
+waitAfreq = False
+if maf is not None:
+    useMAF = True
+    if os.path.exists(configdict['out_afreq_file']):
+        print "using allele freq file " + configdict['out_afreq_file']
+    else:
+        job = "allele_freq"
+        rscript = os.path.join(pipeline, job + ".R")
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+        waitAfreq = True
 
 job = "anom_baf"
 rscript = os.path.join(pipeline, job + ".R")
@@ -54,11 +67,21 @@ jobid[job] = []
 istart = start
 iend = start + by - 1
 while end >= istart:
-    if not skipSD:
+    if useMAF:
+        rargs = [rscript, config, str(istart), str(iend), maf]
+    else:
+        rargs = [rscript, config, str(istart), str(iend)]
+
+    if waitSD and waitAfreq:
+        holdid = [jobid["baf_variance"], jobid["allele_freq"]]
+    elif waitSD:
         holdid = [jobid["baf_variance"]]
+    elif waitAfreq:
+        holdid = [jobid["allele_freq"]]
     else:
         holdid = None
-    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, [rscript, config, str(istart), str(iend)], holdid=holdid, email=email))
+
+    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=holdid, email=email))
 
     istart = istart + by
     iend = istart + by - 1
@@ -76,7 +99,12 @@ jobid[job] = []
 istart = start
 iend = start + by - 1
 while end >= istart:
-    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, [rscript, config, str(istart), str(iend)], holdid=[jobid["anom_combine_baf"]], email=email))
+    if useMAF:
+        rargs = [rscript, config, str(istart), str(iend), maf]
+    else:
+        rargs = [rscript, config, str(istart), str(iend)]
+
+    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=[jobid["anom_combine_baf"]], email=email))
 
     istart = istart + by
     iend = istart + by - 1
@@ -90,4 +118,8 @@ jobid[job + "_loh"] = QCpipeline.submitJob(job+"_loh", driver, [rscript, config,
 
 job = "anom_stats"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["anom_combine_loh"]], email=email)
+if useMAF:
+    rargs = [rscript, config, maf]
+else:
+    rargs = [rscript, config]
+jobid[job] = QCpipeline.submitJob(job, driver, rargs, holdid=[jobid["anom_combine_loh"]], email=email)

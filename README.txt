@@ -23,42 +23,47 @@ Pay attention to sections marked "MANUAL REVIEW"
 13-15) Gender check (heterozygosity and mean intensity)
 python gender_check.py --email user@uw.edu gender.config
 
-17-18) Missing call rate
+17-19) Missing call rate
 "round2" in config file should be FALSE
 python missing.py --email user@uw.edu missing.config
 
-19) Chromosome anomalies (need missing call rate first)
+20) Chromosome anomalies (need missing call rate first)
 test first:
 python chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5
 (first 10 scans in 2 batches of 5 scans each)
 
-python chrom_anomalies.py --email user@uw.edu --skipSD chrom_anom.config start end by
+python chrom_anomalies.py --email user@uw.edu chrom_anom.config start end by
 (where "start end by" indicates how many scans to run at a time,
  e.g. "1 2000 500" means run scans 1-2000 in batches of 500)
-("skipSD" means skip calculating the BAF standard deviation, since
-this was already done in the test run)
 
-20) Batch quality checks (allele frequency test and plots)
+Use the --maf option to exclude SNPs below a given MAF (e.g. 0.05):
+python chrom_anomalies.py --email user@uw.edu --maf 0.05 chrom_anom.config 1 10 5
+This will run the allele frequency calculation first.
+
+Note that if allele frequency and/or BAF variance files specified in
+the config file already exist, they will not be recalculated.
+
+21) Batch quality checks (allele frequency test and plots)
 python batch.py --email user@uw.edu batch.config
 Default is chisq test (--type chisq).  
 For Fisher test:
 python batch.py --type fisher --email user@uw.edu batch.config
 
-24-26) IBD (allele frequency, SNP selection, run IBD, plots,
+25-27) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
 python ibd.py --email user@uw.edu ibd.config
 
-27) Sample quality check
+28) Sample quality check
 python sample_qualty.py --email user@uw.edu sample_quality.config
 
-32) Recalculate missing call rates
+33) Recalculate missing call rates
 "round2" in config file should be TRUE
 python missing.py --email user@uw.edu missing.config
 
-36) Create subject-level NetCDF genotype file
+37) Create subject-level NetCDF genotype file
 python netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
-38) PCA
+39) PCA
 First, run 2 rounds of PCA: 1) with external HapMaps and
 2) unrelated study samples
 python pca.py --email user@uw.edu pca.config --combined

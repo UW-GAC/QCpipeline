@@ -1,6 +1,6 @@
 ##########
 # Anomaly stats and plots
-# Usage: R --args config.file < anom_stats.R
+# Usage: R --args config.file maf < anom_stats.R
 ##########
 
 library(GWASTools)
@@ -12,6 +12,14 @@ args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 print(config)
+
+# read MAF threshold
+if (length(args) > 1) {
+  maf <- as.numeric(args[2])
+} else {
+  maf <- NULL
+}
+print(maf)
 
 # create GenotypeData and IntensityData objects
 (scanAnnot <- getobj(config["annot_scan_file"]))
@@ -52,7 +60,17 @@ if (config["build"] == 36) {
 #ignore includes intensity-only and failed snps
 ignore <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1 
 snp.exclude <- ignore | hla | xtr
+
+# maf threshold
+if (!is.null(maf)) {
+  afreq <- getobj(config["out_afreq_file"])
+  stopifnot(allequal(rownames(afreq), snpID))
+  maf.filt <- is.na(afreq[,"all"]) | afreq[,"all"] <= maf | afreq[,"all"] >= (1-maf)
+  snp.exclude <- snp.exclude | maf.filt
+}
+
 snp.ok <- snpID[!snp.exclude]
+length(snp.ok)
 
 file <- file.path(config["out_anom_dir"], paste(config["project"], "BAF.filtered.all.RData", sep="."))
 BAF <- getobj(file); nrow(BAF)

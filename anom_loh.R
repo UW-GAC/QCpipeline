@@ -1,6 +1,6 @@
 ##########
 # LOH anomaly detection
-# Usage: R --args config.file start end < anom_loh.R
+# Usage: R --args config.file start end maf < anom_loh.R
 ##########
 
 library(GWASTools)
@@ -18,6 +18,14 @@ if (length(args) < 3) stop("missing start and end")
 st <- as.integer(args[2])
 ed <- as.integer(args[3])
 if (st > ed) stop("Start is larger than End")
+
+# read MAF threshold
+if (length(args) > 3) {
+  maf <- as.numeric(args[4])
+} else {
+  maf <- NULL
+}
+print(maf)
 
 # create GenotypeData and IntensityData objects
 (scanAnnot <- getobj(config["annot_scan_file"]))
@@ -58,7 +66,17 @@ if (config["build"] == 36) {
 #ignore includes intensity-only and failed snps
 ignore <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1 
 snp.exclude <- ignore | hla | xtr
+
+# maf threshold
+if (!is.null(maf)) {
+  afreq <- getobj(config["out_afreq_file"])
+  stopifnot(allequal(rownames(afreq), snpID))
+  maf.filt <- is.na(afreq[,"all"]) | afreq[,"all"] <= maf | afreq[,"all"] >= (1-maf)
+  snp.exclude <- snp.exclude | maf.filt
+}
+
 snp.ok <- snpID[!snp.exclude]
+length(snp.ok)
 
 # are there any scans to exclude?
 if (!is.na(config["scan_exclude_file"])) {
@@ -67,6 +85,7 @@ if (!is.na(config["scan_exclude_file"])) {
 } else {
   scan.exclude <- NULL
 }
+length(scan.exclude)
 
 # select scans and chromosomes
 scan.ids <- scanID[st:ed]
