@@ -86,9 +86,9 @@ for (i in 1:length(actions))
   pvaln <- pval[combined$quality.filter & (!is.na(pval)) & sub]
   chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$quality.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
   chroms <- 23:26
-  names(chroms) <- c("X","Y","XY","M")
-  idx <- match(chroms, plotchroms)
-  chrom.labels <- plotchroms
+  names(chroms) <- c("X","XY","Y","M")
+  idx <- match(chroms, unique(chromosome))
+  chrom.labels <- unique(chromosome)
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
                 main=paste(test,"- filtered"), cex.main=1.5)
