@@ -28,7 +28,7 @@ stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
 model.type
 qf <- config["quality.filter"]
 qf
-plotchroms <- config["plot_chroms"]
+plotchroms <- getobj(config["plot_chroms"])
 plotchroms
 sub <- NULL
 
@@ -38,7 +38,7 @@ for (i in 1:length(actions))
   print(fname)
   combined <- getobj(fname)
   # only keep chroms in plotchroms
-  if (!is.na(plotchroms))
+  if (!is.na(config["plot_chroms"]))
   {
     sub <- combined$snpID %in% snpAnnot$snpID[snpAnnot$chromosome %in% plotchroms]
   } else {
@@ -55,7 +55,7 @@ for (i in 1:length(actions))
 
   # unfiltered plot, subsetted with plotchroms
   pvaln <- pval[!is.na(pval) & sub]
-  lambda <- median(-2*log(pval[!is.na(pval)]))/ 1.39 # change to new way to calculating lambda
+  lambda <- median(-2*log(pval[!is.na(pval) & sub]))/ 1.39 # change to new way to calculating lambda
   print(lambda)
   qqPlot(pvaln, trunc=F, main=paste(test, ",unfiltered", sep=""), cex.main = 1.2, cex.sub = 1.2, cex.lab = 1.2, sub=paste("lambda =",format(lambda,digits=4)))
 
@@ -75,11 +75,11 @@ for (i in 1:length(actions))
   # Manhattan plots - filtered, subsetted with plotchroms
   png(paste(qqfname,".model.", i, ".",actions[i],".manh.filt.png",sep=""), width=1200, height=600)
   # chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
-  chromosome <- plotchroms
+  chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$quality.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
   chroms <- 23:26
   names(chroms) <- c("X","Y","XY","M")
-  idx <- match(chroms, chromosome)
-  chrom.labels <- chromosome
+  idx <- match(chroms, plotchroms)
+  chrom.labels <- plotchroms
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
                 main=paste(test,"- filtered"), cex.main=1.5)
@@ -95,12 +95,12 @@ for (i in 1:length(actions))
 
   # Manhattan plots - maf filtered, subsetted with plotchroms
   png(paste(qqfname,".model.", i, ".",actions[i],".manh.maf.filt.png",sep=""), width=1200, height=600)
-  chromosome <- plotchroms
-  chroms <- 23:26
-  names(chroms) <- c("X","Y","XY","M")
-  idx <- match(chroms, chromosome)
-  chrom.labels <- chromosome
-  chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
+  #chromosome <- plotchroms
+  #chroms <- 23:26
+  #names(chroms) <- c("X","Y","XY","M")
+  #idx <- match(chroms, chromosome)
+  #chrom.labels <- chromosome
+  #chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
                 main=paste(test,"- MAF filtered"), cex.main=1.5)
   dev.off()
