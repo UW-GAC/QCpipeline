@@ -45,10 +45,17 @@ xync <- NcdfIntensityReader(config["nc_xy_file_samp"])
 
 for (i in 1:length(actions))
 {
+      if (!is.na(config["plot_chroms"]))
+      {
+         sub <- combined$snpID %in% snpAnnot$snpID[snpAnnot$chromosome %in% plotchroms]
+      } else {
+         sub <- rep(TRUE, nrow(combined))
+      }
+  
       fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
       print(fname)
       combined <- getobj(fname)
-      combined <- combined[combined$quality.filter & (combined$snpID %in% snpAnnot$snpID[snpAnnot$chromosome %in% plotchroms]),]
+      combined <- combined[combined$quality.filter & sub,]
       
       varp <- paste("model.",i,".", actions[i], ".pvalue.G", sep="")
       combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
