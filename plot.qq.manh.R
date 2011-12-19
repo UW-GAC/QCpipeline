@@ -80,7 +80,7 @@ for (i in 1:length(actions))
   dev.off()
 
   # Manhattan plots - no filter, subsetted with plotchroms
-  png(paste(qqfname,".model.", i, ".",actions[i],".no.filt.png",sep=""), width=1200, height=600)
+  png(paste(qqfname,".model.", i, ".",actions[i],".manh.no.filt.png",sep=""), width=1200, height=600)
   # chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
   pvaln <- pval[(!is.na(pval)) & sub]
   chromosome <- snpAnnot$chromosome[match(combined$snpID[(!is.na(pval)) & sub],snpAnnot$snpID)]
