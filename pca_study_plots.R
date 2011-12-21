@@ -46,7 +46,7 @@ lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 
 # plot the first four PCs
 png(config["out_pairs_plot"], width=720, height=720)
-par(cex=1.5, lwd=1.5, cex.lab=1.5, cex.axis=1.2)
+par(lwd=1.5, cex.axis=1.5)
 pairs(pca$eigenvect[,1:4], labels=lbls, col=samp$plotcol, pch=samp$plotsym)
 dev.off()
 
@@ -79,7 +79,7 @@ snp <- snpAnnot[match(corr$snp.id, snpAnnot$snpID),]
 chrom.labels <- unique(getChromosome(snp, char=TRUE))
 
 png(paste(config["out_corr_plot_prefix"], "_%03d.png", sep=""), height=720, width=720)
-par(cex=1.5, lwd=1.5, cex.lab=1.5, cex.axis=1.2, cex.main=1.5)
+par(mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
 par(mfrow=c(4,1))
 for(i in 1:8){
   snpCorrelationPlot(abs(corr$snpcorr[i,]), snp$chromosome,

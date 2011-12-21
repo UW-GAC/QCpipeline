@@ -17,7 +17,8 @@ hwe <- getobj(paste(config["out_hwe_prefix"], "RData", sep="."))
 
 # qq plots
 png(config["out_qq_plot"], width=720, height=720)
-par(mfrow=c(2,2))
+par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
+    cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
 qqPlot(hwe$p.value[hwe$chromosome < 23],  trunc=FALSE, main="Autosomes, all")
 qqPlot(hwe$p.value[hwe$chromosome < 23], trunc=TRUE, main="Autosomes, truncated")
 qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=FALSE, main="X chromosome, all")
@@ -32,8 +33,9 @@ summary(hwe$f[aut])
 
 png(config["out_inbrd_plot"], width=600, height=600)
 hist(hwe$f[aut], xlab="Inbreeding coefficient estimate", ylab="number of SNPs",
-     main="Autosomes, all")
+     main="Autosomes, all", breaks=40)
 abline(v=mean(hwe$f, na.rm=TRUE), lty=2, col="gray")
+abline(v=0, col="red")
 dev.off()
 
 
@@ -93,7 +95,8 @@ for(j in 1:3){  # independent sets of samples, each in a different png file
   mtxt <- paste("Chr",dat$chromosome,dat$rsID, "\np-value", format(dat$p.value,digits=3))
   png(paste(config["out_clust_prefix"], "_",
             j,"%03d.png",sep=""),width=720,height=720)
-  par(mfrow=c(3,3))
+  par(mfrow=c(3,3), mar=c(5,5,4,2)+0.1, lwd=1.5,
+      cex.axis=1.5, cex.lab=1.5, cex.main=1.5)
   genoClusterPlot(xyData, genoData, snpID=dat$snpID, main.txt=mtxt)
   dev.off()
 }
@@ -120,7 +123,8 @@ for (i in 4:5) {
     mtxt <- paste("Chr",dat$chromosome,dat$rsID, "\np-value", format(dat$p.value,digits=3))
     png(paste(config["out_clust_prefix"], "_",
             pbin[i-3],"%03d.png",sep=""),width=720,height=720)
-    par(mfrow=c(3,3))
+    par(mfrow=c(3,3), mar=c(5,5,4,2)+0.1, lwd=1.5,
+        cex.axis=1.5, cex.lab=1.5, cex.main=1.5)
     genoClusterPlot(xyData, genoData, snpID=dat$snpID, main.txt=mtxt)
     dev.off()
   }
