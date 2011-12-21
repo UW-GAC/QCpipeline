@@ -79,8 +79,7 @@ snp <- snpAnnot[match(corr$snp.id, snpAnnot$snpID),]
 chrom.labels <- unique(getChromosome(snp, char=TRUE))
 
 png(paste(config["out_corr_plot_prefix"], "_%03d.png", sep=""), height=720, width=720)
-par(mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
-par(mfrow=c(4,1))
+par(mfrow=c(4,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
 for(i in 1:8){
   snpCorrelationPlot(abs(corr$snpcorr[i,]), snp$chromosome,
                      chrom.labels=chrom.labels,

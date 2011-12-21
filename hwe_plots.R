@@ -19,10 +19,10 @@ hwe <- getobj(paste(config["out_hwe_prefix"], "RData", sep="."))
 png(config["out_qq_plot"], width=720, height=720)
 par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
     cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
-qqPlot(hwe$p.value[hwe$chromosome < 23],  trunc=FALSE, main="Autosomes, all")
-qqPlot(hwe$p.value[hwe$chromosome < 23], trunc=TRUE, main="Autosomes, truncated")
-qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=FALSE, main="X chromosome, all")
-qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=TRUE, main="X chromosome, truncated")
+qqPlot(hwe$p.value[hwe$chromosome < 23],  trunc=FALSE, main="Autosomes, all", sub="")
+qqPlot(hwe$p.value[hwe$chromosome < 23], trunc=TRUE, main="Autosomes, truncated", sub="")
+qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=FALSE, main="X chromosome, all", sub="")
+qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=TRUE, main="X chromosome, truncated", sub="")
 dev.off()
 
 
