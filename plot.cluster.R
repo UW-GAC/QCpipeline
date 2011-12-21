@@ -28,8 +28,10 @@ stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
 model.type
 qf <- config["quality.filter"]
 qf
-plotchroms <- getobj(config["plot_chroms"])
-plotchroms
+if (!is.na(config["plot_chroms"])) {
+  plotchroms <- getobj(config["plot_chroms"])
+  plotchroms
+}
 sub <- NULL
 
 # make genotypedata and intensityData
