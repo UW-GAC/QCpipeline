@@ -64,7 +64,7 @@ for (i in 1:length(actions))
       
       pdf(paste(qqfname,".model.", i, ".",actions[i],".lowP.hits.pdf",sep="")) 
       par(mfrow=c(3,3))        
-      text <- paste(pData(snpAnnot)[match(snp.intid$snpID, snpAnnot$snpID), "rsID"],
+      text <- paste(pData(snpAnnot)[match(snp.intid$snpID, snpAnnot$snpID), config["annot_snp_rsIDCol"]],
                     "Chr",snpAnnot$chromosome[match(snp.intid$snpID, snpAnnot$snpID)])
       mtxt <- paste(text,"\np-value",sprintf("%.2e",
                     snp.intid[,paste("model.",i, ".", actions[i], ".pvalue.G", sep="")]))

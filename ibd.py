@@ -26,16 +26,27 @@ email = options.email
 sys.path.append(pipeline)
 import QCpipeline
 
+configdict = QCpipeline.readConfig(config)
+
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-job = "allele_freq"
-rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+waitAfreq = False
+if os.path.exists(configdict['out_afreq_file']):
+    print "using allele freq file " + configdict['out_afreq_file']
+else:
+    job = "allele_freq"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+    waitAfreq = True
 
 job = "ibd_snp_sel"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['allele_freq']], email=email)
+if waitAfreq:
+    holdid = [jobid["allele_freq"]]
+else:
+    holdid = None
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
 
 job = "ibd"
 rscript = os.path.join(pipeline, job + ".R")
