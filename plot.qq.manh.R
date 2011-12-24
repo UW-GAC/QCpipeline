@@ -47,7 +47,7 @@ for (i in 1:length(actions))
     sub <- rep(TRUE, nrow(combined))
   }
   
-  png(paste(qqfname,".model.", i, ".",actions[i],".png",sep=""), width=720, height=720)
+  png(paste(qqfname,"_model_", i, "_",actions[i],".png",sep=""), width=720, height=720)
   par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
       cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
   test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "\n", model.type[i])
@@ -77,7 +77,7 @@ for (i in 1:length(actions))
   dev.off()
 
   # Manhattan plots - no filter, subsetted with plotchroms
-  png(paste(qqfname,".model.", i, ".",actions[i],".manh.png",sep=""), width=720, height=720)
+  png(paste(qqfname,"_model_", i, "_",actions[i],"_manh.png",sep=""), width=720, height=720)
   par(mfrow=c(3,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
   #png(paste(qqfname,".model.", i, ".",actions[i],".manh.no.filt.png",sep=""), width=1200, height=600)
   # chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
@@ -90,6 +90,7 @@ for (i in 1:length(actions))
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
                 main=paste(test,"- not filtered"))
+  abline(h=as.numeric(config["signif_line"]), lty=2, col="gray")
   #dev.off() 
 
   # Manhattan plots - filtered, subsetted with plotchroms
@@ -102,6 +103,7 @@ for (i in 1:length(actions))
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
                 main=paste(test,"- filtered"))
+  abline(h=as.numeric(config["signif_line"]), lty=2, col="gray")
   #dev.off() 
 
 
@@ -111,6 +113,7 @@ for (i in 1:length(actions))
   pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
                 main=paste(test,"- MAF filtered"))
+  abline(h=as.numeric(config["signif_line"]), lty=2, col="gray")
   dev.off()
 }
 

@@ -95,6 +95,10 @@ stopifnot(allequal(names(missx), scanID))
 miss.by.scan$missing.fraction.xchr <- missx
 save(miss.by.scan, file=config["out_e1_file"])
 
+# plot
+pdf(config["out_e1_hist"], width=6, height=6)
+hist(missing.e1, xlab="Missing call rate by sample", main="")
+dev.off()
 
 # do round 2?
 if (as.logical(config["round2"])) {
@@ -134,6 +138,11 @@ if (as.logical(config["round2"])) {
   stopifnot(allequal(names(missx), scanID))
   miss.by.scan$missing.fraction.xchr <- missx
   save(miss.by.scan, file=config["out_e2_file"])
+
+  # plot
+  pdf(config["out_e2_hist"], width=6, height=6)
+  hist(missing.e2, xlab="Missing call rate by sample", main="")
+  dev.off()
 
 }
 

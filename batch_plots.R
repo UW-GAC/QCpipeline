@@ -87,7 +87,7 @@ for(i in 1:n) {
 pdf(config["out_meanmcr_nscan_plot"], width=6, height=6)
 plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing call rate", pch=pch)
 y <- lm(bmiss ~ bn)
-abline(y$coefficients)
+#abline(y$coefficients)
 anova(y)
 legend("topright", "redo", pch=2)
 dev.off()
