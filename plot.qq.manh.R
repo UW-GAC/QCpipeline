@@ -52,8 +52,7 @@ for (i in 1:length(actions))
       cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
   test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "\n", model.type[i])
   print(test)
-  varp <- paste("model.",i,".", actions[i], ".pvalue.G", sep="")
-  varl <- paste("model.",i,".", actions[i], ".chisq.G", sep="")
+  varp <- paste("model.",i,".", actions[i], ".LR.pval.G", sep="")
   pval <- combined[,varp]
 
   # unfiltered plot, subsetted with plotchroms

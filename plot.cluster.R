@@ -58,7 +58,7 @@ for (i in 1:length(actions))
       }
       combined <- combined[combined$quality.filter & sub,]
       
-      varp <- paste("model.",i,".", actions[i], ".pvalue.G", sep="")
+      varp <- paste("model.",i,".", actions[i], ".LR.pval.G", sep="")
       combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
       snp.intid <- combined.intid[1:27,]
       
@@ -67,7 +67,7 @@ for (i in 1:length(actions))
       text <- paste(pData(snpAnnot)[match(snp.intid$snpID, snpAnnot$snpID), config["annot_snp_rsIDCol"]],
                     "Chr",snpAnnot$chromosome[match(snp.intid$snpID, snpAnnot$snpID)])
       mtxt <- paste(text,"\np-value",sprintf("%.2e",
-                    snp.intid[,paste("model.",i, ".", actions[i], ".pvalue.G", sep="")]))
+                    snp.intid[,paste("model.",i, ".", actions[i], ".LR.pval.G", sep="")]))
 
       # plot
       test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "\n", model.type[i])
