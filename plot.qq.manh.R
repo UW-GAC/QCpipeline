@@ -89,8 +89,8 @@ for (i in 1:length(actions))
   chrom.labels <- unique(chromosome)
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
-                main=paste(test,"- not filtered"))
-  abline(h=as.numeric(config["signif_line"]), lty=2, col="gray")
+                main=paste(test,"- not filtered"),
+                signif=as.numeric(config["signif_line"]))
   #dev.off() 
 
   # Manhattan plots - filtered, subsetted with plotchroms
@@ -102,8 +102,8 @@ for (i in 1:length(actions))
   chrom.labels <- unique(chromosome)
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
-                main=paste(test,"- filtered"))
-  abline(h=as.numeric(config["signif_line"]), lty=2, col="gray")
+                main=paste(test,"- filtered"),
+                signif=as.numeric(config["signif_line"]))
   #dev.off() 
 
 
@@ -112,8 +112,8 @@ for (i in 1:length(actions))
   chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$qual.maf.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
   pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
-                main=paste(test,"- MAF filtered"))
-  abline(h=as.numeric(config["signif_line"]), lty=2, col="gray")
+                main=paste(test,"- MAF filtered"),
+                signif=as.numeric(config["signif_line"]))
   dev.off()
 }
 
