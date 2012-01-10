@@ -20,6 +20,12 @@ dim(ibd)
 scanID <- getScanID(scanAnnot)
 samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"]))
 names(samp) <- c("scanID", "subjectID")
+# keep only scans used in IBD
+if (!is.na(config["scan_ibd_include_file"])) {
+  scan.ids <- getobj(config["scan_ibd_include_file"])
+  samp <- samp[samp$scanID %in% scan.ids,]
+}
+dim(samp)
 
 # add subjectID so that we can bring in expected relation
 ibd <- merge(ibd, samp, by.x="sample1", by.y="scanID")
@@ -72,15 +78,19 @@ if (sum(unobs.sel) > 0) {
   message("all expected relatives observed")
 }
 # check for expected duplicates not observed
-dupsubj <- samp$subjectID[duplicated(samp$subjectID)]
-exp.dups <- data.frame("subjectID"=dupsubj, "sample1"=NA, "sample2"=NA)
-for (i in 1:nrow(exp.dups)) {
-  exp.dups[i, c("sample1","sample2")] <- samp$scanID[samp$subjectID == dupsubj[i]]
+dupsubj <- unique(samp$subjectID[duplicated(samp$subjectID)])
+unobs.dup <- list()
+for (d in dupsubj) {
+  exp.scans <- samp$scanID[samp$subjectID == d]
+  this.subj <- ibd$Individ1 == d & ibd$exp.rel == "Dup"
+  obs.set <- c(ibd$sample1[this.subj], ibd$sample2[this.subj])
+  unobs.scans <- setdiff(exp.scans, obs.set)
+  if (length(unobs.scans) > 0) {
+    unobs.dup[[as.character(d)]] <- unobs.scans
+  }
 }
-unobs.dup.sel <- !(exp.dups$subjectID %in% ibd$Individ1[ibd$exp.rel == "Dup"])
-if (sum(unobs.dup.sel) > 0) {
-  message(paste(sum(unobs.dup.sel), "duplicate pairs not observed"))
-  unobs.dup <- exp.dups[unobs.dup.sel,]
+if (length(unobs.dup) > 0) {
+  message(paste(length(unobs.dup), "duplicate pairs not observed"))
   save(unobs.dup, file=config["out_ibd_unobs_dup_file"])
 } else {
   message("all expected duplicates observed")
