@@ -67,9 +67,9 @@ if combined:
         holdid.append(jobid['ld_pruning'])
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
 
-    job = "pca_combined_plots"
+    job = "pca_plots"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['pca_combined']], email=email)
+    jobid[job+"_combined"] = QCpipeline.submitJob(job+"_combined", driver, [rscript, config, "combined"], holdid=[jobid['pca_combined']], email=email)
 
 
 job = "pca_study"
@@ -80,6 +80,6 @@ else:
     holdid = None
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
 
-job = "pca_study_plots"
+job = "pca_plots"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['pca_study']], email=email)
+jobid[job+"_study"] = QCpipeline.submitJob(job+"_study", driver, [rscript, config, "study"], holdid=[jobid['pca_study']], email=email)
