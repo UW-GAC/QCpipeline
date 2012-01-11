@@ -66,7 +66,7 @@ plotcol[names(disc.subj) %in% hapmap.ids] <- "red"
 pdf(config["out_disc_plot"], width=6, height=6)
 plot(disc.subj, rank, xlab="discordance rate", ylab="rank", col=plotcol,
      main=paste("Discordance in", npair, "duplicate sample pairs"))
-legend("bottomright", c("study", "HapMap"), col=c("black", "red"), pch=c(1,1))
+legend(bestLegendPos(disc.subj, rank), c("study", "HapMap"), col=c("black", "red"), pch=c(1,1))
 dev.off()
 
 

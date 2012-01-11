@@ -65,9 +65,9 @@ for (r in colOrd) {
   points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
 }
 if (sum(is.na(samp$race)) > 0) {
-  legend("top", legend=c(race, "NA"), col=c(config[race], "black"), pch=c(rep(1, length(race)), 4))
+  legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, "NA"), col=c(config[race], "black"), pch=c(rep(1, length(race)), 4))
 } else {
-  legend("top", legend=race, col=config[race], pch=rep(1, length(race)))
+  legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=race, col=config[race], pch=rep(1, length(race)))
 }
 dev.off()
 

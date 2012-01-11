@@ -25,11 +25,16 @@ length(scan.sel)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
-discord <- getobj(config["out_disc_file"])
-disc <- discord$discordance.by.snp
-snp.conc.rsid <- row.names(disc[disc$discordant == 0,])
-rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"])
-snp.sel <- snpID[rsID %in% snp.conc.rsid]
+if (file.exists(config["out_disc_file"])) {
+  discord <- getobj(config["out_disc_file"])
+  disc <- discord$discordance.by.snp
+  snp.conc.rsid <- row.names(disc[disc$discordant == 0,])
+  rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"])
+  snp.sel <- snpID[rsID %in% snp.conc.rsid]
+} else {
+  message("discordance file not found; using all SNPs")
+  snp.sel <- snpID
+}
 length(snp.sel)
 
 gdsobj <- openfn.gds(config["gds_geno_file"])

@@ -56,7 +56,7 @@ par(mfrow=c(2,2))
 # X vs Y intensity
 plot(mninten[,"X"], mninten[,"Y"], col=plotcol, xlab=xlab, ylab=ylab)
 points(mninten[anom,"X"], mninten[anom,"Y"], col=plotcol[anom])
-legend("topright", c("M","F"), col=c("blue","red"), pch=c(1,1))
+legend(bestLegendPos(mninten[,"X"], mninten[,"Y"]), c("M","F"), col=c("blue","red"), pch=c(1,1))
 
 # Het on X vs X intensity
 plot(mninten[,"X"], het[,"X"], col=plotcol, xlab=xlab, ylab="X heterozygosity")
