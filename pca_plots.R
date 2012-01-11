@@ -22,10 +22,16 @@ if (type == "study") {
   scanAnnot <- getobj(config["annot_scan_file"])
   samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_raceCol"]))
   names(samp) <- c("scanID", "race")
+  if (!is.na(config["annot_scan_ethnCol"])) {
+    samp$ethnicity <- getVariable(scanAnnot, config["annot_scan_ethnCol"])
+  } else samp$ethnicity <- NA
 } else if (type == "combined") {
   scanAnnot <- getobj(config["annot_scan_file"])
   scan1 <- getVariable(scanAnnot, c("scanID", config["annot_scan_raceCol"]))
   names(scan1) <- c("scanID", "race")
+  if (!is.na(config["annot_scan_ethnCol"])) {
+    scan1$ethnicity <- getVariable(scanAnnot, config["annot_scan_ethnCol"])
+  } else scan1$ethnicity <- NA
   if (sum(is.na(scan1$race)) > 0 & hasVariable(scanAnnot, config["ext_annot_scan_raceCol"])) {
     scan1$race2 <- getVariable(scanAnnot, config["ext_annot_scan_raceCol"])
     scan1$race[is.na(scan1$race)] <- scan1$race2[is.na(scan1$race)]
@@ -34,6 +40,7 @@ if (type == "study") {
   ext.scanAnnot <- getobj(config["ext_annot_scan_file"])
   scan2 <- getVariable(ext.scanAnnot, c("scanID", config["ext_annot_scan_raceCol"]))
   names(scan2) <- c("scanID", "race")
+  scan2$ethnicity <- NA
   samp <- rbind(scan1, scan2)
 } else {
   stop("pca type must be study or combined")
@@ -45,22 +52,33 @@ if (type == "combined") { pcafile <- config["out_comb_pca_file"]
 pca <- getobj(pcafile)
 samp <- samp[match(pca$sample.id, samp$scanID),]
 stopifnot(allequal(pca$sample.id, samp$scanID))
-table(samp$race, exclude=NULL)
+table(samp$race, samp$ethnicity, exclude=NULL)
 
 # color by race
+table(samp$race, exclude=NULL)
 Sys.setlocale("LC_COLLATE", "C")
-race <- as.character(sort(unique(samp$race)))
-stopifnot(all(race %in% names(config)))
 samp$plotcol <- "black"
-for (r in race) {
-  sel <- samp$race %in% r
-  samp$plotcol[sel] <- config[r]
+race <- as.character(sort(unique(samp$race)))
+if (length(race) > 0) {
+  stopifnot(all(race %in% names(config)))
+  for (r in race) {
+    sel <- samp$race %in% r
+    samp$plotcol[sel] <- config[r]
+  }
 }
 table(samp$plotcol, exclude=NULL)
 
-# plot race==NA with different character
+# plot symbol by ethnicity
+table(samp$ethnicity, exclude=NULL)
 samp$plotsym <- 1
-samp$plotsym[is.na(samp$race)] <- 4
+ethn <- as.character(sort(unique(samp$ethnicity)))
+if (length(ethn) > 0) {
+  stopifnot(all(ethn %in% names(config)))
+  for (e in ethn) {
+    sel <- samp$ethn %in% e
+    samp$plotsym[sel] <- as.integer(config[e])
+  }
+}
 table(samp$plotsym, exclude=NULL)
 
 # labels
@@ -87,11 +105,9 @@ for (r in colOrd) {
   sel <- samp$plotcol == r
   points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
 }
-if (sum(is.na(samp$race)) > 0) {
-  legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, "NA"), col=c(config[race], "black"), pch=c(rep(1, length(race)), 4))
-} else {
-  legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=race, col=config[race], pch=rep(1, length(race)))
-}
+legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn),
+       col=c(config[race], rep("black", length(ethn))),
+       pch=c(rep(1, length(race)), as.integer(config[ethn])))
 dev.off()
 
 # plot density on sides
