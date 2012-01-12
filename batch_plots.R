@@ -107,23 +107,11 @@ if (type == "chisq") {
 }
 
 
-# are there any scans to exclude?
-scanID <- getScanID(scanAnnot)
-if (!is.na(config["scan_exclude_file"])) {
-  scan.exclude <- getobj(config["scan_exclude_file"])
-  stopifnot(all(scan.exclude %in% scanID))
-} else {
-  scan.exclude <- NULL
-}
-length(scan.exclude)
-incl.sel <- !(scanID %in% scan.exclude)
-study <- scanAnnot[incl.sel,]
-
 # batch effect on missing call rate
 # make plate names shorter for plotting
-batch <- getVariable(study, config["annot_scan_batchCol"])
+batch <- getVariable(scanAnnot, config["annot_scan_batchCol"])
 batchLabel <- vapply(strsplit(as.character(batch), "-"), function(x) x[[1]][1], "a")
-missing <- getVariable(study, config["annot_scan_missAutoCol"])
+missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"])
 model <- log10(missing) ~ as.factor(batchLabel)
 lm.result <- lm(model)
 anova(lm.result)
@@ -138,5 +126,5 @@ mninten <- getobj(config["inten_file"])
 mninten <- mninten[[1]]
 pdf(config["out_inten_plot"], width=6, height=6)
 par(mar=c(6, 4, 4, 2) + 0.1)
-boxplot(mninten[incl.sel,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"])
+boxplot(mninten[,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"])
 dev.off()
