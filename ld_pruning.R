@@ -37,6 +37,17 @@ if (file.exists(config["out_disc_file"])) {
 }
 length(snp.sel)
 
+# remove SNPs in spike regions
+filt <- get(data(list=paste("pcaSnpFilters", config["build"], sep=".")))
+chrom <- getChromosome(snpAnnot)
+pos <- getPosition(snpAnnot)
+snp.filt <- rep(TRUE, length(snpID))
+for (f in 1:nrow(filt)) {
+  snp.filt[chrom == filt$chrom[f] & filt$start.base[f] < pos & pos < filt$end.base[f]] <- FALSE
+}
+snp.sel <- intersect(snp.sel, snpID[snp.filt])
+length(snp.sel)
+
 gdsobj <- openfn.gds(config["gds_geno_file"])
 snpset <- snpgdsLDpruning(gdsobj, sample.id=scan.sel, snp.id=snp.sel,
                           autosome.only=TRUE, maf=0.05, missing.rate=0.05,
