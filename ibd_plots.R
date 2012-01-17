@@ -34,20 +34,24 @@ ibd <- merge(ibd, samp, by.x="sample2", by.y="scanID")
 names(ibd)[names(ibd) == "subjectID"] <- "Individ2"
 ibd$ii <- paste(ibd$Individ1, ibd$Individ2)
 
-relprs <- getobj(config["exp_rel_file"])
-table(relprs$relation)
-relprs$i12 <- paste(relprs$Individ1, relprs$Individ2)
-relprs$i21 <- paste(relprs$Individ2, relprs$Individ1)
+if (!is.na(config["exp_rel_file"])) {
+  relprs <- getobj(config["exp_rel_file"])
+  print(table(relprs$relation))
+  relprs$i12 <- paste(relprs$Individ1, relprs$Individ2)
+  relprs$i21 <- paste(relprs$Individ2, relprs$Individ1)
 
-ibd <- merge(ibd, relprs[,c("i12","relation")], by.x="ii", by.y="i12", all.x=TRUE)
-names(ibd)[names(ibd) == "relation"] <- "rel"
-ibd <- merge(ibd, relprs[,c("i21","relation")], by.x="ii", by.y="i21", all.x=TRUE)
-names(ibd)[names(ibd) == "relation"] <- "rel2"
-ibd$exp.rel <- ibd$rel
-ibd$exp.rel[is.na(ibd$exp.rel)] <- ibd$rel2[is.na(ibd$exp.rel)]
-table(ibd$exp.rel, exclude=NULL)
-ibd$rel <- NULL
-ibd$rel2 <- NULL
+  ibd <- merge(ibd, relprs[,c("i12","relation")], by.x="ii", by.y="i12", all.x=TRUE)
+  names(ibd)[names(ibd) == "relation"] <- "rel"
+  ibd <- merge(ibd, relprs[,c("i21","relation")], by.x="ii", by.y="i21", all.x=TRUE)
+  names(ibd)[names(ibd) == "relation"] <- "rel2"
+  ibd$exp.rel <- ibd$rel
+  ibd$exp.rel[is.na(ibd$exp.rel)] <- ibd$rel2[is.na(ibd$exp.rel)]
+  print(table(ibd$exp.rel, exclude=NULL))
+  ibd$rel <- NULL
+  ibd$rel2 <- NULL
+} else {
+  ibd$exp.rel <- NA
+}
 
 ibd$exp.rel[ibd$Individ1 == ibd$Individ2] <- "Dup"
 ibd$exp.rel[is.na(ibd$exp.rel)] <- "U"
@@ -66,16 +70,18 @@ dev.off()
 
 
 # check for expected relationships not observed
-relprs <- relprs[relprs$relation != "U",]
-unobs.sel <- !(relprs$i12 %in% ibd$ii | relprs$i21 %in% ibd$ii)
-if (sum(unobs.sel) > 0) {
-  message(paste(sum(unobs.sel), "relative pairs not observed"))
-  unobs.rel <- relprs[unobs.sel,]
-  unobs.rel$i12 <- NULL
-  unobs.rel$i21 <- NULL
-  save(unobs.rel, file=config["out_ibd_unobs_rel_file"])
-} else {
-  message("all expected relatives observed")
+if (!is.na(config["exp_rel_file"])) {
+  relprs <- relprs[relprs$relation != "U",]
+  unobs.sel <- !(relprs$i12 %in% ibd$ii | relprs$i21 %in% ibd$ii)
+  if (sum(unobs.sel) > 0) {
+    message(paste(sum(unobs.sel), "relative pairs not observed"))
+    unobs.rel <- relprs[unobs.sel,]
+    unobs.rel$i12 <- NULL
+    unobs.rel$i21 <- NULL
+    save(unobs.rel, file=config["out_ibd_unobs_rel_file"])
+  } else {
+    message("all expected relatives observed")
+  }
 }
 # check for expected duplicates not observed
 dupsubj <- unique(samp$subjectID[duplicated(samp$subjectID)])
