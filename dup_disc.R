@@ -43,7 +43,7 @@ disc <- duplicateDiscordance(genoData, subjName.col=config["annot_scan_subjectCo
 # by subject
 # each entry is a 2x2 matrix, but only one value of each
 # is important for pairs
-# we are assuming no more than 2 samples per subject
+# if there are >2 samples per subject, the first pair is chosen
 npair <- length(disc$discordance.by.subject)
 disc.subj <- rep(NA, npair); names(disc.subj) <- names(disc$discordance.by.subject)
 corr.subj <- rep(NA, npair); names(corr.subj) <- names(disc$correlation.by.subject)
