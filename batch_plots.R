@@ -58,14 +58,22 @@ if (type == "chisq") {
   pdf(config["out_meanor_race_plot"], width=6, height=6)
   plot(racefrac, batch.res$mean.or, ylab="mean Fisher's OR", xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
   abline(v=mean(racefrac), lty=2) # mean over all plates
-  legend(bestLegendPos(racefrac, batch.res$mean.or), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+  if (!is.null(redo)) {
+    legend(bestLegendPos(racefrac, batch.res$mean.or), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+  } else {
+    legend(bestLegendPos(racefrac, batch.res$mean.or), c("mean"), pch=c(-1), lty=c(2))
+  }
   dev.off()
 }
 
 pdf(config["out_lambda_race_plot"], width=6, height=6)
 plot(racefrac, batch.res$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
 abline(v=mean(racefrac), lty=2) # mean over all plates
-legend(bestLegendPos(racefrac, batch.res$lambda), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+if (!is.null(redo)) {
+  legend(bestLegendPos(racefrac, batch.res$lambda), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+} else {
+  legend(bestLegendPos(racefrac, batch.res$lambda), c("mean"), pch=c(-1), lty=c(2))
+}
 dev.off()
 
 
@@ -89,20 +97,20 @@ plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing
 y <- lm(bmiss ~ bn)
 #abline(y$coefficients)
 anova(y)
-legend(bestLegendPos(bn, bmiss), "redo", pch=2)
+if (!is.null(redo)) legend(bestLegendPos(bn, bmiss), "redo", pch=2)
 dev.off()
 
 if (type == "chisq") {
   pdf(config["out_meanmcr_meanchisq_plot"], width=6, height=6)
   tmp <- batch.res$mean.chisq[match(names(bmiss), names(batch.res$mean.chisq))]
   plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", pch=pch)
-  legend(bestLegendPos(tmp, bmiss), "redo", pch=2)
+  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", pch=2)
   dev.off()
 } else if (type == "fisher") {
   pdf(config["out_meanmcr_meanor_plot"], width=6, height=6)
   tmp <- batch.res$mean.or[match(names(bmiss), names(batch.res$mean.or))]
   plot(tmp, bmiss, xlab="mean Fisher's OR", ylab="mean autosomal missing call rate", pch=pch)
-  legend(bestLegendPos(tmp, bmiss), "redo", pch=2)
+  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", pch=2)
   dev.off()
 }
 
