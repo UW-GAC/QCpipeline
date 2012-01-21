@@ -52,7 +52,11 @@ if (type == "chisq") {
   pdf(config["out_meanchisq_race_plot"], width=6, height=6)
   plot(racefrac, batch.res$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
   abline(v=mean(racefrac), lty=2) # mean over all plates
-  legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+  if (!is.null(redo)) {
+    legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+  } else {
+    legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("mean"), pch=c(-1), lty=c(2))
+  }
   dev.off()
 } else if (type == "fisher") {
   pdf(config["out_meanor_race_plot"], width=6, height=6)
