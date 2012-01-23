@@ -29,6 +29,10 @@ blData <- IntensityData(blnc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 # SD of BAF
 baf.sd <- getobj(config["baf_sd_file"])
 
+# definition of outliers - range.sd*i(nterquartile range)
+range.sd <- as.numeric(config["range_sd"])
+if (is.na(range.sd)) range.sd <- 1.5
+
 # create a matrix
 bsd <- matrix(nrow=nrow(baf.sd[[1]]), ncol=length(baf.sd),
               dimnames=list(rownames(baf.sd[[1]]), names(baf.sd)))
@@ -36,7 +40,8 @@ for (i in 1:ncol(bsd)) {
   bsd[,i] <- baf.sd[[i]][,1]
 }
 pdf(config["out_baf_sd_boxplot"], width=6, height=6)
-bp <- boxplot(bsd[,colnames(bsd) %in% 1:22], xlab="chromosome", ylab="SD of BAF")
+bp <- boxplot(bsd[,colnames(bsd) %in% 1:22], xlab="chromosome", ylab="SD of BAF",
+              las=2, range=range.sd)
 dev.off()
 
 # get boxplot hi sd outliers by chromosome
@@ -44,7 +49,7 @@ out <- list()
 for (i in names(baf.sd)[names(baf.sd) %in% 1:22]) {
   x <- baf.sd[[i]]
   med <- median(x)
-  tmp <- boxplot(x, plot=FALSE)$out
+  tmp <- boxplot(x, plot=FALSE, range=range.sd)$out
   tmp <- tmp[tmp > med]
   mino <- min(tmp)
   out[[i]] <- as.integer(row.names(x)[x >= mino])
@@ -118,9 +123,26 @@ samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_raceCol"], config[
 names(samp) <- c("scanID", "race", "het.A")
 samp <- samp[!is.na(samp$race),]
 
+# include unknowns?
+if (!is.na(config["race_unknown"]) & as.logical(config["plot_all_unknown"])) {
+  unknown.ids <- samp$scanID[samp$race %in% config["race_unknown"]]
+  samp <- samp[!(samp$race %in% config["race_unknown"]),]
+  (nunk <- length(unknown.ids)) 
+  if (nunk > 0) {   
+    png(paste(config["out_het_plot_prefix"], "_raceunknown_%03d.png", sep=""), width=720, height=720)
+    chromIntensityPlot(blData, scan.ids=unknown.ids, chrom.ids=rep(chr.sel, nunk),
+                       code=rep("race unknown", nunk), snp.exclude=snp.exclude, cex=0.25)
+    dev.off()
+  }
+}
+
+# definition of outliers 
+range.het <- as.numeric(config["range_het"])
+if (is.na(range.het)) range.het <- 1.5
+
 pdf(config["out_het_boxplot"], width=6, height=6)
-bp <- boxplot(samp$het.A ~ as.factor(samp$race),
-              xlab="race", ylab="Autosomal heterozygosity")
+bp <- boxplot(samp$het.A ~ as.factor(samp$race), range=range.het, varwidth=TRUE, las=2,
+              main=config["annot_scan_raceCol"], ylab="Autosomal heterozygosity")
 dev.off()
 
 outliers <- samp[samp$het.A %in% bp$out,]
