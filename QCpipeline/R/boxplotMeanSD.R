@@ -13,7 +13,7 @@ boxplotMeanSD <- function(x, y, data=NULL, xlab=NULL, ylab=NULL, nSD=1, ...)
   }
 
   # parameters for plotting
-  nlev <- length(unique(x))
+  nlev <- length(unique(na.omit(x)))
   means <- tapply(y, x, function(x) mean(x, na.rm=T))
   stdev <- nSD * tapply(y, x, function(x) sd(x, na.rm=T))
   miny <- min(c(y, means-stdev), na.rm=T)
