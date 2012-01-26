@@ -7,8 +7,10 @@ see QCpipeline-manual.pdf for R function help
 create_project_dir.sh ProjectName user
 (where "user" is the first analyst working on the project)
 
+
 2-8) Create scan and snp annotation files
 (save as ScanAnnotationDataFrame and SnpAnnotationDataFrame)
+
 
 9-10) Create NetCDF and GDS files
 test 5 samples first:
@@ -20,12 +22,15 @@ run all:
 Check output to make sure creation was successful and all checks were passed
 Pay attention to sections marked "MANUAL REVIEW"
 
+
 13-15) Gender check (heterozygosity and mean intensity)
 > python gender_check.py --email user@uw.edu gender.config
+
 
 17-19) Missing call rate
 "round2" in config file should be FALSE
 > python missing.py --email user@uw.edu missing.config
+
 
 20) Chromosome anomalies (need missing call rate first)
 test first:
@@ -43,27 +48,36 @@ This will run the allele frequency calculation first.
 Note that if allele frequency and/or BAF variance files specified in
 the config file already exist, they will not be recalculated.
 
+
 21) Batch quality checks (allele frequency test and plots)
 > python batch.py --email user@uw.edu batch.config
 Default is chisq test (--type chisq).  
 For Fisher test:
 > python batch.py --type fisher --email user@uw.edu batch.config
 
+
 25-27) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
 > python ibd.py --email user@uw.edu ibd.config
 
+The allele frequency file will be used if it already exists, otherwise
+it will be created.
+
+
 28) Sample quality check
 > python sample_qualty.py --email user@uw.edu sample_quality.config
+
 
 33) Recalculate missing call rates
 "round2" in config file should be TRUE
 > python missing.py --email user@uw.edu missing.config
 
-37) Create subject-level NetCDF genotype file
+
+37) Create subject-level NetCDF genotype file with anomalies filtered
 > python netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
-39) PCA
+
+38) PCA
 > python pca.py --email user@uw.edu pca.config --combined
 where the "--combined" option will result in running two rounds of PCA:
 once with unduplicated study samples and external HapMaps,
@@ -77,7 +91,11 @@ For subsequent runs with individual ethnic groups, make a new
 > python pca.py --email user@uw.edu pca.config
 No "--combined" flag means run one round of PCA with unrelated study samples only.
 
-42d-e)
+The LD pruning file will be used if it already exists, otherwise it
+will be created.
+
+
+41d-e)
 Association tests:
 
 # To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
@@ -107,7 +125,7 @@ so the code will treat chromosome Y differently.
 # If there are categorical covariates in the model(s), specify them in the config file so they will be converted into factors automatically.
 
 
-43a)
+42a)
 iii) HWE
 > python hwe.py --email user@uw.edu hwe.config
 (repeat with different config files for mutiple ethnic groups)

@@ -27,10 +27,14 @@ for (i in idx)
 }
   
 # sample/subject chromosome.filter sorted by scanID
-filt <- getobj(config["chrom_filter"])
-stopifnot(all(rownames(filt) == scanAnnot$scanID))
-chk <- apply(filt, 1, function(x) !all(x==F))
-table(chk) # TRUE: to be kept for association
+if (!is.na(config["chrom_filter"])) {
+  filt <- getobj(config["chrom_filter"])
+  stopifnot(all(rownames(filt) == scanAnnot$scanID))
+  chk <- apply(filt, 1, function(x) !all(x==F))
+  print(table(chk)) # TRUE: to be kept for association
+} else {
+  filt <- NULL
+}
 
 # chromosomes to run analysis on
 chromosome.set <- as.numeric(args[2])  # this sets chromosome numbers given in args on the command line

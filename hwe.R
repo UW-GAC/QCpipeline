@@ -27,7 +27,11 @@ scan.exclude <- setdiff(scanID, scan.include)
 length(scan.exclude)
 
 # scan-chromosome filter
-scan.filt <- getobj(config["scan_chrom_filter"])
+if (!is.na(config["scan_chrom_filter"])) {
+  scan.filt <- getobj(config["scan_chrom_filter"])
+} else {
+  scan.filt <- NULL
+}
 
 gwasExactHW(genoData, scan.chromosome.filter=scan.filt,
             scan.exclude = scan.exclude, outfile=config["out_hwe_prefix"])
