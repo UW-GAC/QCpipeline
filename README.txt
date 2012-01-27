@@ -78,10 +78,11 @@ it will be created.
 
 
 38) PCA
+First round, unduplicated study samples + external hapmaps:
 > python pca.py --email user@uw.edu pca.config --combined
-where the "--combined" option will result in running two rounds of PCA:
-once with unduplicated study samples and external HapMaps,
-once with unrelated study samples
+Second round, unrelated study samples:
+> python pca.py --email user@uw.edu pca.config
+
 Selecting which samples should be included is left to the user: make
 vectors of scanID and save as RData files, then give the path to
 these files in the config file.
@@ -89,7 +90,6 @@ these files in the config file.
 For subsequent runs with individual ethnic groups, make a new
 "study_unrelated.RData" file and update this parameter in the configuration
 > python pca.py --email user@uw.edu pca.config
-No "--combined" flag means run one round of PCA with unrelated study samples only.
 
 The LD pruning file will be used if it already exists, otherwise it
 will be created.

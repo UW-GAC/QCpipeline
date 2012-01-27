@@ -28,7 +28,11 @@ import QCpipeline
 
 driver = os.path.join(pipeline, "runRscript.sh")
 
+jobid = dict()
 job = "ncdf_subset"
 rscript = os.path.join(pipeline, job + ".R")
-jobid = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
 
+job = "gds_geno"
+rscript = os.path.join(pipeline, job + ".R")
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ncdf_subset']], email=email)

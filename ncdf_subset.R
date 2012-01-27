@@ -56,7 +56,7 @@ dim(anom)
 
 # create a new netCDF with samples in 'scan.include' and anomalies set to missing
 parent.ncdf <- config["nc_file"]
-sub.ncdf <- config["nc_subset_file"]
+sub.ncdf <- config["nc_geno_file"]
 ncdfSetMissingGenotypes(parent.ncdf, sub.ncdf, anom, sample.include=scan.include)
 
 # check it against the source
@@ -80,14 +80,15 @@ for (ind.new in 1:length(scanID2)) {
   nadiff <- which(is.na(geno1) != is.na(geno2))
   anom.sub <- anom[anom$scanID %in% scanID2[ind.new],]
   if (nrow(anom.sub) > 0) {
+    na.exp <- vector()
     for (a in 1:nrow(anom.sub)) {
       if (anom.sub$whole.chrom[a]) {
-        na.exp <- which(chrom == anom.sub$chromosome[a] & !is.na(geno1))
+        na.exp <- c(na.exp, which(chrom == anom.sub$chromosome[a] & !is.na(geno1)))
       } else {
-        na.exp <- which(chrom == anom.sub$chromosome[a] & anom.sub$left.base[a] <= pos & pos <= anom.sub$right.base[a] & !is.na(geno1))
+        na.exp <- c(na.exp, which(chrom == anom.sub$chromosome[a] & anom.sub$left.base[a] <= pos & pos <= anom.sub$right.base[a] & !is.na(geno1)))
       }
-      if (!setequal(nadiff, na.exp)) stop(paste("missing genotypes not as expected for sample",ind.new))
     }
+    if (!setequal(nadiff, na.exp)) stop(paste("missing genotypes not as expected for sample",ind.new))
   } else {
     if (length(nadiff) > 0) stop(paste("missing genotypes not as expected for sample",ind.new))
   }

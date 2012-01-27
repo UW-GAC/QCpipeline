@@ -19,15 +19,18 @@ gdsfile <- config["gds_geno_file"]
 snpAnnot <- getobj(config["annot_snp_file"])
 scanAnnot <- getobj(config["annot_scan_file"])
 
-if (!hasVariable(snpAnnot, config["annot_snp_rsIDCol"])) {
+if (!is.na(config["annot_snp_rsIDCol"]) &
+    !hasVariable(snpAnnot, config["annot_snp_rsIDCol"])) {
   warning(paste(config["annot_snp_rsIDCol"], "not found in",
                 config["annot_snp_file"]))
 }
-if (!hasVariable(snpAnnot, config["annot_snp_alleleACol"])) {
+if (!is.na(config["annot_snp_alleleACol"]) &
+    !hasVariable(snpAnnot, config["annot_snp_alleleACol"])) {
   warning(paste(config["annot_snp_alleleACol"], "not found in",
                 config["annot_snp_file"]))
 }
-if (!hasVariable(snpAnnot, config["annot_snp_alleleBCol"])) {
+if (!is.na(config["annot_snp_alleleBCol"]) &
+    !hasVariable(snpAnnot, config["annot_snp_alleleBCol"])) {
   warning(paste(config["annot_snp_alleleBCol"], "not found in",
                 config["annot_snp_file"]))
 }
