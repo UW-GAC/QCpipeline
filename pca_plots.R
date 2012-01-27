@@ -1,5 +1,5 @@
 ##########
-# PCA plots - combined with external data
+# PCA plots
 # Usage: R --args config.file pca.type < pca_plots.R
 ##########
 

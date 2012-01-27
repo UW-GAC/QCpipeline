@@ -73,7 +73,7 @@ it will be created.
 > python missing.py --email user@uw.edu missing.config
 
 
-37) Create subject-level NetCDF genotype file with anomalies filtered
+37) Create subject-level NetCDF and GDS genotype files with anomalies filtered
 > python netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
 

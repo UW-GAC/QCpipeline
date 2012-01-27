@@ -13,9 +13,11 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 print(config)
 
-scanAnnot <- getobj(config["annot_scan_file"])
+scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)
 snpAnnot <- getobj(config["annot_snp_file"])
 nc <- NcdfGenotypeReader(config["nc_geno_file"])
+# this might be a subject-level netCDF file, so subset annotation
+scanAnnot <- scanAnnot[scanAnnot$scanID %in% getScanID(nc),]; dim(scanAnnot)
 (genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot))
 
 # external netcdf
@@ -58,3 +60,6 @@ rank <- 1:length(disc)
 pdf(config["out_disc_plot"], width=6, height=6)
 plot(disc, rank, xlab="discordance rate", ylab="rank", main=subjsum)
 dev.off()
+
+close(nc)
+close(ext.nc)

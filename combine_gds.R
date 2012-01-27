@@ -1,5 +1,5 @@
 ##########
-# Combine GDS files
+# Combine two netCDF files into a single GDS file
 # Usage: R --args config.file < combine_gds.R
 ##########
 
@@ -14,7 +14,12 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 print(config)
 
-scanAnnot <- getobj(config["annot_scan_file"])
+scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)
+# this might be a subject-level netCDF file, so subset annotation
+nc <- NcdfGenotypeReader(config["nc_geno_file"])
+scanAnnot <- scanAnnot[scanAnnot$scanID %in% getScanID(nc),]; dim(scanAnnot)
+close(nc)
+
 ext.scanAnnot <- getobj(config["ext_annot_scan_file"])
 dupids <- intersect(scanAnnot$scanID, ext.scanAnnot$scanID)
 if (length(dupids) > 0) {
