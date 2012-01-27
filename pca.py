@@ -69,17 +69,17 @@ if combined:
 
     job = "pca_plots"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job+"_combined"] = QCpipeline.submitJob(job+"_combined", driver, [rscript, config, "combined"], holdid=[jobid['pca_combined']], email=email)
+    jobid[job] = QCpipeline.submitJob(job+"_combined", driver, [rscript, config, "combined"], holdid=[jobid['pca_combined']], email=email)
 
-
-job = "pca_study"
-rscript = os.path.join(pipeline, job + ".R")
-if waitLD:
-    holdid = [jobid['ld_pruning']]
 else:
-    holdid = None
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
+    job = "pca_study"
+    rscript = os.path.join(pipeline, job + ".R")
+    if waitLD:
+        holdid = [jobid['ld_pruning']]
+    else:
+        holdid = None
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
 
-job = "pca_plots"
-rscript = os.path.join(pipeline, job + ".R")
-jobid[job+"_study"] = QCpipeline.submitJob(job+"_study", driver, [rscript, config, "study"], holdid=[jobid['pca_study']], email=email)
+    job = "pca_plots"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job] = QCpipeline.submitJob(job+"_study", driver, [rscript, config, "study"], holdid=[jobid['pca_study']], email=email)

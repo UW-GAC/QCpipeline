@@ -25,6 +25,7 @@ length(scan.sel)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
+# remove discordant SNPs if duplicate discordance has been run
 if (file.exists(config["out_disc_file"])) {
   discord <- getobj(config["out_disc_file"])
   disc <- discord$discordance.by.snp

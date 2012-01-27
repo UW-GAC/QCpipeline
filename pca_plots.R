@@ -47,8 +47,7 @@ if (type == "study") {
 }
 
 # get PCA results
-if (type == "combined") { pcafile <- config["out_comb_pca_file"]  
-} else pcafile <- config["out_pca_file"]
+pcafile <- config["out_pca_file"]
 pca <- getobj(pcafile)
 samp <- samp[match(pca$sample.id, samp$scanID),]
 stopifnot(allequal(pca$sample.id, samp$scanID))
@@ -86,8 +85,7 @@ table(samp$plotsym, exclude=NULL)
 lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 
 # plot the first four PCs
-if (type == "combined") { plotfile <- config["out_comb_pairs_plot"]
-} else plotfile <- config["out_pairs_plot"]
+plotfile <- config["out_pairs_plot"]
 png(plotfile, width=720, height=720)
 par(lwd=1.5, cex.axis=1.5)
 pairs(pca$eigenvect[,1:4], labels=lbls, col=samp$plotcol, pch=samp$plotsym)
@@ -95,8 +93,7 @@ dev.off()
 
 # plot EV1 vs EV2
 # one group at a time so we don't cover up smaller sample sets
-if (type == "combined") { plotfile <- config["out_comb_ev12_plot"]
-} else plotfile <- config["out_ev12_plot"]
+plotfile <- config["out_ev12_plot"]
 pdf(plotfile, width=6, height=6)
 plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
 tbl <- table(samp$plotcol)
@@ -111,21 +108,16 @@ legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn)
 dev.off()
 
 # plot density on sides
-if (type == "study")  {
-  pdf(config["out_dens_plot"], width=7, height=7)
-  plot2DwithHist(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], col=samp$plotcol, pch=samp$plotsym)
-  dev.off()
-}
+pdf(config["out_dens_plot"], width=7, height=7)
+plot2DwithHist(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], col=samp$plotcol, pch=samp$plotsym)
+dev.off()
 
 #plot SNP-PC correlation
+corrfile <- config["out_corr_file"]
+plotfile <- config["out_corr_plot_prefix"]
 if (type == "combined")  {
-  corrfile <- config["out_comb_corr_file"]
-  plotfile <- config["out_comb_corr_plot_prefix"]
   idCol <- config["annot_snp_rsIDCol"]
-  
 } else {
-  corrfile <- config["out_corr_file"]
-  plotfile <- config["out_corr_plot_prefix"]
   idCol <- "snpID"
 }
 corr <- getobj(corrfile)

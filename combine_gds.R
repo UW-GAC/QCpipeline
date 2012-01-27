@@ -58,7 +58,7 @@ names(FileList) <- proj
 #
 #
 # prepare variables
-gfile1 <- createfn.gds(config["comb_gds_geno_file"])
+gfile1 <- createfn.gds(config["out_comb_gds_geno_file"])
 
 # add "sample.id"
 sample1.id <- NULL

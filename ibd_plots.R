@@ -63,6 +63,7 @@ dev.off()
 
 # assign observed relationships
 ibd$obs.rel <- ibdAssignRelatedness(ibd$k0, ibd$k1)
+table(ibd$obs.rel)
 
 pdf(config["out_ibd_obs_plot"], width=6, height=6)
 ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")

@@ -50,11 +50,11 @@ dups <- as.integer(dups)
 undup.scans <- setdiff(comb.scan.ids, dups)
 length(undup.scans)
 
-gdsobj <- openfn.gds(config["comb_gds_geno_file"])
+gdsobj <- openfn.gds(config["out_comb_gds_geno_file"])
 pca <- snpgdsPCA(gdsobj, sample.id=undup.scans, snp.id=snp.ids)
-save(pca, file=config["out_comb_pca_file"])
+save(pca, file=config["out_pca_file"])
 
 pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:8)
-save(pca.corr, file=config["out_comb_corr_file"])
+save(pca.corr, file=config["out_corr_file"])
 
 closefn.gds(gdsobj)
