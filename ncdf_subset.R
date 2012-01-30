@@ -22,6 +22,7 @@ scan.include <- getobj(config["scan_include_file"])
 # get chrom anomalies to filter
 if (!is.na(config["chrom_anom_file"])) {
   anom <- getobj(config["chrom_anom_file"])
+  anom <- anom[,c("scanID", "chromosome", "left.base", "right.base", "whole.chrom")]
 } else {
   # dummy anomaly data frame
   anom <- data.frame("scanID"=0, "chromosome"=0, "left.base"=0,
