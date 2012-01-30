@@ -42,8 +42,9 @@ snp.info.list <- list(snp.info1, snp.info2)
 names(snp.info.list) <- proj
 
 # match SNPs
-snp.include <- intersect(snp.info1$rsID, snp.info2$rsID)
-snp.info <- snp.info1[snp.info1$rsID %in% snp.include,]
+snp.include <- merge(snp.info1[,c("rsID", "chromosome", "position")],
+                     snp.info2[,c("rsID", "chromosome", "position")])
+snp.info <- snp.info1[snp.info1$rsID %in% snp.include$rsID,]
 nrow(snp.info)
 
 # sample information
