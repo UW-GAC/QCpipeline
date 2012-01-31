@@ -26,9 +26,6 @@ if (length(dupids) > 0) {
   stop("scan IDs are not unique - files cannot be combined")
 }
 
-#snpgdsCombineGeno(c(config["gds_geno_file"], config["ext_gds_geno_file"]),
-#                  config["out_gds_geno_file"])
-
 proj <- c("study", "ext")
 
 # SNP information

@@ -32,6 +32,7 @@ ibd <- merge(ibd, samp, by.x="sample1", by.y="scanID")
 names(ibd)[names(ibd) == "subjectID"] <- "Individ1"
 ibd <- merge(ibd, samp, by.x="sample2", by.y="scanID")
 names(ibd)[names(ibd) == "subjectID"] <- "Individ2"
+ibd <- ibd[,c("sample1", "sample2", "Individ1", "Individ2", "k0", "k1", "KC")]
 ibd$ii <- paste(ibd$Individ1, ibd$Individ2)
 
 if (!is.na(config["exp_rel_file"])) {

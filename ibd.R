@@ -49,8 +49,8 @@ cutoff <- 1/32
 flag <- lower.tri(ibd$k0) & (KC >= cutoff)
 
 rv <- data.frame(
-  sample1 = matrix(ibd$sample.id, nrow=n, ncol=n)[flag],
-  sample2 = matrix(ibd$sample.id, nrow=n, ncol=n, byrow=TRUE)[flag],
+  sample1 = matrix(ibd$sample.id, nrow=n, ncol=n, byrow=TRUE)[flag],
+  sample2 = matrix(ibd$sample.id, nrow=n, ncol=n)[flag],
   k0 = ibd$k0[flag],
   k1 = ibd$k1[flag],
   KC = KC[flag] )
