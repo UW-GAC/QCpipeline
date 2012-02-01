@@ -47,8 +47,7 @@ if (type == "study") {
 }
 
 # get PCA results
-pcafile <- config["out_pca_file"]
-pca <- getobj(pcafile)
+pca <- getobj(config["out_pca_file"])
 samp <- samp[match(pca$sample.id, samp$scanID),]
 stopifnot(allequal(pca$sample.id, samp$scanID))
 table(samp$race, samp$ethnicity, exclude=NULL)
@@ -85,16 +84,14 @@ table(samp$plotsym, exclude=NULL)
 lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 
 # plot the first four PCs
-plotfile <- config["out_pairs_plot"]
-png(plotfile, width=720, height=720)
+png(config["out_pairs_plot"], width=720, height=720)
 par(lwd=1.5, cex.axis=1.5)
 pairs(pca$eigenvect[,1:4], labels=lbls, col=samp$plotcol, pch=samp$plotsym)
 dev.off()
 
 # plot EV1 vs EV2
 # one group at a time so we don't cover up smaller sample sets
-plotfile <- config["out_ev12_plot"]
-pdf(plotfile, width=6, height=6)
+pdf(config["out_ev12_plot"], width=6, height=6)
 plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
 tbl <- table(samp$plotcol)
 colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
@@ -113,19 +110,17 @@ plot2DwithHist(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2],
 dev.off()
 
 #plot SNP-PC correlation
-corrfile <- config["out_corr_file"]
-plotfile <- config["out_corr_plot_prefix"]
 if (type == "combined")  {
   idCol <- config["annot_snp_rsIDCol"]
 } else {
   idCol <- "snpID"
 }
-corr <- getobj(corrfile)
+corr <- getobj(config["out_corr_file"])
 snpAnnot <- getobj(config["annot_snp_file"])
 snp <- snpAnnot[match(corr$snp.id, getVariable(snpAnnot, idCol)),]
 chrom.labels <- unique(getChromosome(snp, char=TRUE))
 
-png(paste(plotfile, "_%03d.png", sep=""), height=720, width=720)
+png(paste(config["out_corr_plot_prefix"], "_%03d.png", sep=""), height=720, width=720)
 par(mfrow=c(4,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
 for(i in 1:8){
   snpCorrelationPlot(abs(corr$snpcorr[i,]), snp$chromosome,
@@ -134,3 +129,8 @@ for(i in 1:8){
 }
 dev.off()
 
+# scree plot
+x <- pca$eigenval/sum(pca$eigenval)
+pdf(config["out_scree_plot"], width=6, height=6)
+plot(1:8,100*x[1:8], xlab="Eigenvalue", ylab="Percent of variance accounted for")
+dev.off()
