@@ -16,13 +16,18 @@ print(config)
 hwe <- getobj(paste(config["out_hwe_prefix"], "RData", sep="."))
 
 # qq plots
-png(config["out_qq_plot"], width=720, height=720)
-par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
+# check if any X chrom p-values are valid (in case of all-male study)
+plotX <- sum(!is.na(hwe$p.value[hwe$chromosome == 23])) > 0
+if (plotX) nrow <- 2 else nrow <- 1
+png(config["out_qq_plot"], width=720, height=(360*nrow))
+par(mfrow=c(nrow,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
     cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
 qqPlot(hwe$p.value[hwe$chromosome < 23],  trunc=FALSE, main="Autosomes, all", sub="")
 qqPlot(hwe$p.value[hwe$chromosome < 23], trunc=TRUE, main="Autosomes, truncated", sub="")
-qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=FALSE, main="X chromosome, all", sub="")
-qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=TRUE, main="X chromosome, truncated", sub="")
+if (plotX) {
+  qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=FALSE, main="X chromosome, all", sub="")
+  qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=TRUE, main="X chromosome, truncated", sub="")
+}
 dev.off()
 
 
