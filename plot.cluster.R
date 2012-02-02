@@ -75,7 +75,7 @@ for (i in 1:length(actions))
       dev.off()
 
       # single page png for QC report
-      png(paste(qqfname,"_model_", i, "_",actions[i],"_lowP_hits.png",sep="")) 
+      png(paste(qqfname,"_model_", i, "_",actions[i],"_lowP_hits.png",sep=""), width=720, height=720) 
       par(mfrow=c(3,3), mar=c(5,5,4,2)+0.1, lwd=1.5,
           cex.axis=1.5, cex.lab=1.5, cex.main=1.5)
       genoClusterPlot(xyData,genoData, plot.type="RTheta", snp.intid$snpID[1:9], mtxt[1:9])

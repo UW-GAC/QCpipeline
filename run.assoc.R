@@ -48,12 +48,13 @@ outcome
 # covariates for each model
 covar.list <- getobj(config["covar.list"])
 # for Y when sex needs to be taken out of model
-if (chromosome.set == 25 & !is.na(args[3]))
+if (chromosome.set == 25)
 {
-  idx <- sapply(covar.list, function(x) which(x %in% args[3]))
+  idx <- sapply(covar.list, function(x) which(x %in% "sex"))
   for (i in 1:length(idx))
   {
     covar.list[[i]] <- covar.list[[i]][-idx[i]]
+    if (length(covar.list[[i]]) == 0) covar.list[[i]] <- ""
   }
 }
 covar.list

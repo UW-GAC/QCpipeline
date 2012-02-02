@@ -2,7 +2,7 @@
 
 """Association tests"""
 # Example:
-# python assoc.py /projects/geneva/gcc-fs2/MitchellPak/j7shen/results/analysis/assoc/assoc.config 1 26 --covarsex --sex sex --assoc --merge --plotQQManh --plotClust
+# python assoc.py /projects/geneva/gcc-fs2/MitchellPak/j7shen/results/analysis/assoc/assoc.config 1 26 --covarsex --assoc --merge --plotQQManh --plotClust
 
 import sys
 import os
@@ -14,18 +14,12 @@ parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
-# this is temporary 
-# parser.add_option("-l", "--localpipe", dest="localPipe",
-#                  default="/projects/geneva/gcc-fs2/MitchellPak/j7shen/R_MitchellPak",
-#                  help="local pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 # to run Y separately without sex in the model
 parser.add_option("-c", "--covarsex", dest="covarsex",
                   action="store_true", default=False,
                   help="to run chrom Y without sex in the model if sex is a covariate")
-parser.add_option("-x", "--sex", dest="sex", default="sex",
-                  help="variable name for sex")
 parser.add_option("-a", "--assoc", dest="assoc",
                   action="store_true", default=False,
                   help="run association tests for chroms btw chromStart and chromEnd")
@@ -39,15 +33,13 @@ parser.add_option("--plotClust", dest="plotcl",
                   action="store_true", default=False,
                   help="cluster plots")
 parser.add_option("--queue", dest="qname",
-                  default="gcc.q", help="cluster plots")
+                  default="gcc.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 
 config = args[0]
 pipeline = options.pipeline
-#localpipe = options.localPipe
 email = options.email
 covarsex = options.covarsex
-sex = options.sex
 assoc = options.assoc
 merge = options.merge
 plotq = options.plotqq
@@ -83,7 +75,7 @@ if assoc:
         sys.exit("cEnd is smaller than cStart")
 
     if (cStart <= 25 and cEnd >= 25 and covarsex):
-        jobid[job+".25"] = QCpipeline.submitJob(job+".chrom25", driver, [rscript, config, "25", sex], queue=qname, email=email)
+        jobid[job+".25"] = QCpipeline.submitJob(job+".chrom25", driver, [rscript, config, "25"], queue=qname, email=email)
         del chroms[chroms.index(25)]
         if (len(chroms) > 0):
             for ichrom in chroms:

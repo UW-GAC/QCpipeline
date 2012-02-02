@@ -47,7 +47,7 @@ for (i in 1:length(actions))
     sub <- rep(TRUE, nrow(combined))
   }
   
-  png(paste(qqfname,"_model_", i, "_",actions[i],".png",sep=""), width=720, height=720)
+  png(paste(qqfname,"_model_", i, "_",actions[i],"_qq.png",sep=""), width=720, height=720)
   par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
       cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
   test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "\n", model.type[i])
@@ -57,29 +57,39 @@ for (i in 1:length(actions))
 
   # unfiltered plot, subsetted with plotchroms
   pvaln <- pval[!is.na(pval) & sub]
-  qqPlot(pvaln, trunc=F, main=paste(test, ", unfiltered", sep=""))
+  title <- paste("no filter\nN =", length(pvaln))
+  qqPlot(pvaln, trunc=F, main=title)
 
   # add filters, NOT subsetted with plotchroms
   stopifnot(all(combined$snpID %in% snpAnnot$snpID))
   combined$quality.filter <- snpAnnot[match(combined$snpID,snpAnnot$snpID), qf]
-  combined$qual.maf.filter <- combined$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>0.05 & combined$MAF<0.95
+  combined$qual.maf.filter <- combined$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>as.numeric(config["maf.filter"])
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
   save(combined, file=fname)
 
   # QQ plots - filtered, subsetted with plotchroms
   pvaln <- pval[combined$quality.filter & (!is.na(pval)) & sub]
-  qqPlot(pvaln, trunc=F, main=paste(test, ", filtered", sep=""))
+  title <- paste("quality filter\nN =", length(pvaln))
+  qqPlot(pvaln, trunc=F, main=title)
 
   # QQ plots - maf filtered, subsetted with plotchroms
   pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
-  qqPlot(pvaln, trunc=F, main=paste(test, ", MAF filtered", sep=""))
+  title <- paste("quality filter + MAF >",config["maf.filter"],"\nN =", length(pvaln))
+  qqPlot(pvaln, trunc=F, main=title)
+
+  # obs-exp plot
+  pvalx <- -log10(sort(pvaln)) # sort() removes NAs
+  n <- length(pvalx)
+  x <- -log10((1:n)/n)
+  plot(x, pvalx-x, xlab=substitute(paste(-log[10], "(expected P)")),
+       ylab="observed P - expected P", main=title)
+  abline(h=0,col="red")
   dev.off()
 
+  
   # Manhattan plots - no filter, subsetted with plotchroms
   png(paste(qqfname,"_model_", i, "_",actions[i],"_manh.png",sep=""), width=720, height=720)
   par(mfrow=c(3,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
-  #png(paste(qqfname,".model.", i, ".",actions[i],".manh.no.filt.png",sep=""), width=1200, height=600)
-  # chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
   pvaln <- pval[(!is.na(pval)) & sub]
   chromosome <- snpAnnot$chromosome[match(combined$snpID[(!is.na(pval)) & sub],snpAnnot$snpID)]
   chroms <- 23:26
@@ -87,31 +97,28 @@ for (i in 1:length(actions))
   idx <- match(chroms, unique(chromosome))
   chrom.labels <- unique(chromosome)
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
+  title <- paste("no filter\nN =", length(pvaln))
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
-                main=paste(test,"- not filtered"),
+                main=title,
                 signif=as.numeric(config["signif_line"]))
-  #dev.off() 
 
   # Manhattan plots - filtered, subsetted with plotchroms
-  #png(paste(qqfname,".model.", i, ".",actions[i],".manh.filt.png",sep=""), width=1200, height=600)
-  # chromosome <- snpAnnot$chromosome[match(combined$snpID,snpAnnot$snpID)][combined$quality.filter]
   pvaln <- pval[combined$quality.filter & (!is.na(pval)) & sub]
   chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$quality.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
   idx <- match(chroms, unique(chromosome))
   chrom.labels <- unique(chromosome)
   chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
+  title <- paste("quality filter\nN =", length(pvaln))
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
-                main=paste(test,"- filtered"),
+                main=title,
                 signif=as.numeric(config["signif_line"]))
-  #dev.off() 
-
 
   # Manhattan plots - maf filtered, subsetted with plotchroms
-  #png(paste(qqfname,".model.", i, ".",actions[i],".manh.maf.filt.png",sep=""), width=1200, height=600)
   chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$qual.maf.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
   pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
+  title <- paste("quality filter + MAF >",config["maf.filter"],"\nN =", length(pvaln))
   manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
-                main=paste(test,"- MAF filtered"),
+                main=title,
                 signif=as.numeric(config["signif_line"]))
   dev.off()
 }
