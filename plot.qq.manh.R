@@ -84,7 +84,8 @@ for (i in 1:length(actions))
     n <- length(pvalx)
     x <- -log10((1:n)/n)
     plot(x, pvalx-x, xlab=substitute(paste(-log[10], "(expected P)")),
-         ylab="observed - expected", main=title)
+         ylab=substitute(paste(log[10], "(expected P)", -log[10], "(observed P)")),
+         main=title)
     abline(h=0,col="red")
     dev.off()
     
