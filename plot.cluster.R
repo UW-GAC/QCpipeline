@@ -38,15 +38,15 @@ sub <- NULL
 scanAnnot <- getobj(config["annot_scan_file"])
 snpAnnot <- getobj(config["annot_snp_file"])
 nc <- NcdfGenotypeReader(config["nc_geno_file_samp"])
-sid <- getScanID(nc)
-stopifnot(all(scanAnnot$scanID==sid))
 (genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)) 
 xync <- NcdfIntensityReader(config["nc_xy_file_samp"])
-(xyData <- IntensityData(xync,snpAnnot=snpAnnot))
+(xyData <- IntensityData(xync, scanAnnot=scanAnnot, snpAnnot=snpAnnot))
 
 
 for (i in 1:length(actions))
 {
+      test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "-", model.type[i])
+      print(test)
       fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
       print(fname)
       combined <- getobj(fname)
@@ -70,7 +70,6 @@ for (i in 1:length(actions))
                     snp.intid[,paste("model.",i, ".", actions[i], ".LR.pval.G", sep="")]))
 
       # plot
-      test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "\n", model.type[i])
       genoClusterPlot(xyData,genoData, plot.type="RTheta", snp.intid$snpID, mtxt)
       dev.off()
 
