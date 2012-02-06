@@ -16,10 +16,6 @@ parser.add_option("-p", "--pipeline", dest="pipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
-# to run Y separately without sex in the model
-parser.add_option("-c", "--covarsex", dest="covarsex",
-                  action="store_true", default=False,
-                  help="to run chrom Y without sex in the model if sex is a covariate")
 parser.add_option("-a", "--assoc", dest="assoc",
                   action="store_true", default=False,
                   help="run association tests for chroms btw chromStart and chromEnd")
@@ -39,7 +35,6 @@ parser.add_option("-q", "--queue", dest="qname",
 config = args[0]
 pipeline = options.pipeline
 email = options.email
-covarsex = options.covarsex
 assoc = options.assoc
 merge = options.merge
 plotq = options.plotqq
@@ -74,15 +69,8 @@ if assoc:
     else:
         sys.exit("cEnd is smaller than cStart")
 
-    if (cStart <= 25 and cEnd >= 25 and covarsex):
-        jobid[job+".25"] = QCpipeline.submitJob(job+".chrom25", driver, [rscript, config, "25"], queue=qname, email=email)
-        del chroms[chroms.index(25)]
-        if (len(chroms) > 0):
-            for ichrom in chroms:
-                jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email)
-    else:
-       for ichrom in chroms:
-            jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email)
+    for ichrom in chroms:
+        jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email)
 
 if merge:
     job = "merge.chroms"

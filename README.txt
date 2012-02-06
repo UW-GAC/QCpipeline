@@ -129,10 +129,5 @@ start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netI
 --queue gcc.q (or other queues) specifies the queue to use. The
   default is gcc.q. Check qstat first to decide which queue to use for
   --assoc
-
-# If there,F"(Bs a sex covariate in the model(s), use the option --covarsex:
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config 1 26 --assoc --covarsex, 
-so the code will treat chromosome Y differently.
-            
+        
 # If there are categorical covariates in the model(s), specify them in the config file so they will be converted into factors automatically.
