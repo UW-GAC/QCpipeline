@@ -36,7 +36,7 @@ def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None):
     """Sumbit a pipeline job.
 
     Usage: 
-    jobid = submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, )
+    jobid = submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None)
 
     Arguments:
     job - name of job

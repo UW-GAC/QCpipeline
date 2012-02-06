@@ -32,7 +32,7 @@ parser.add_option("--plotQQManh", dest="plotqq",
 parser.add_option("--plotClust", dest="plotcl",
                   action="store_true", default=False,
                   help="cluster plots")
-parser.add_option("--queue", dest="qname",
+parser.add_option("-q", "--queue", dest="qname",
                   default="gcc.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 

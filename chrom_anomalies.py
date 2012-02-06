@@ -16,6 +16,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-m", "--maf", dest="maf", default=None,
                   help="do not use SNPs with MAF below this threshold")
+parser.add_option("-q", "--queue", dest="qname",
+                  default="gcc.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 
 if len(args) != 4:
@@ -28,6 +30,7 @@ by = int(args[3])
 pipeline = options.pipeline
 email = options.email
 maf = options.maf
+qname = options.qname
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -45,7 +48,7 @@ if os.path.exists(configdict['out_baf_med_file']):
 else:
     job = "baf_variance"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
     waitSD = True
 
 # if MAF threshold is needed, calculate allele freq
@@ -58,7 +61,7 @@ if maf is not None:
     else:
         job = "allele_freq"
         rscript = os.path.join(pipeline, job + ".R")
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
         waitAfreq = True
 
 job = "anom_baf"
@@ -81,7 +84,7 @@ while end >= istart:
     else:
         holdid = None
 
-    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=holdid, email=email))
+    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=holdid, queue=qname, email=email))
 
     istart = istart + by
     iend = istart + by - 1
@@ -90,7 +93,7 @@ while end >= istart:
 
 job = "anom_combine"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job + "_baf"] = QCpipeline.submitJob(job+"_baf", driver, [rscript, config, "BAF", str(end), str(by)], holdid=jobid['anom_baf'], email=email)
+jobid[job + "_baf"] = QCpipeline.submitJob(job+"_baf", driver, [rscript, config, "BAF", str(end), str(by)], holdid=jobid['anom_baf'], queue=qname, email=email)
 
 
 job = "anom_loh"
@@ -104,7 +107,7 @@ while end >= istart:
     else:
         rargs = [rscript, config, str(istart), str(iend)]
 
-    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=[jobid["anom_combine_baf"]], email=email))
+    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=[jobid["anom_combine_baf"]], queue=qname, email=email))
 
     istart = istart + by
     iend = istart + by - 1
@@ -113,7 +116,7 @@ while end >= istart:
 
 job = "anom_combine"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job + "_loh"] = QCpipeline.submitJob(job+"_loh", driver, [rscript, config, "LOH", str(end), str(by)], holdid=jobid['anom_loh'], email=email)
+jobid[job + "_loh"] = QCpipeline.submitJob(job+"_loh", driver, [rscript, config, "LOH", str(end), str(by)], holdid=jobid['anom_loh'], queue=qname, email=email)
 
 
 job = "anom_stats"
@@ -122,4 +125,4 @@ if useMAF:
     rargs = [rscript, config, maf]
 else:
     rargs = [rscript, config]
-jobid[job] = QCpipeline.submitJob(job, driver, rargs, holdid=[jobid["anom_combine_loh"]], email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, rargs, holdid=[jobid["anom_combine_loh"]], queue=qname, email=email)

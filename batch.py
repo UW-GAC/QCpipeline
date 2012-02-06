@@ -16,6 +16,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-t", "--type", dest="type", default="chisq",
                   help="test type (chisq or fisher)")
+parser.add_option("-q", "--queue", dest="qname",
+                  default="gcc.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -25,6 +27,7 @@ config = args[0]
 pipeline = options.pipeline
 email = options.email
 type = options.type
+qname = options.qname
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -40,8 +43,8 @@ else:
     sys.exit("test type must be chisq or fisher")
 
 rscript = os.path.join(pipeline, job + ".R")
-jobid["batch_test"] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+jobid["batch_test"] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "batch_plots"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=[jobid['batch_test']], email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=[jobid['batch_test']], queue=qname, email=email)

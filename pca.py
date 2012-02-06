@@ -17,6 +17,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
 parser.add_option("-c", "--combined", dest="combined",
                   action="store_true", default=False,
                   help="make combined dataset")
+parser.add_option("-q", "--queue", dest="qname",
+                  default="gcc.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -26,6 +28,7 @@ config = args[0]
 pipeline = options.pipeline
 email = options.email
 combined = options.combined
+qname = options.qname
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -39,11 +42,11 @@ jobid = dict()
 if combined:
     job = "dup_disc_ext"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
     job = "combine_gds"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 # skip LD if file already exists
 waitLD = False
@@ -56,7 +59,7 @@ else:
     else:
         holdid = None
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
     waitLD = True
 
 if combined:
@@ -65,11 +68,11 @@ if combined:
     holdid = [jobid['dup_disc_ext'], jobid['combine_gds']]
     if waitLD:
         holdid.append(jobid['ld_pruning'])
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 
     job = "pca_plots"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job+"_combined", driver, [rscript, config, "combined"], holdid=[jobid['pca_combined']], email=email)
+    jobid[job] = QCpipeline.submitJob(job+"_combined", driver, [rscript, config, "combined"], holdid=[jobid['pca_combined']], queue=qname, email=email)
 
 else:
     job = "pca_study"
@@ -78,8 +81,8 @@ else:
         holdid = [jobid['ld_pruning']]
     else:
         holdid = None
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 
     job = "pca_plots"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job+"_study", driver, [rscript, config, "study"], holdid=[jobid['pca_study']], email=email)
+    jobid[job] = QCpipeline.submitJob(job+"_study", driver, [rscript, config, "study"], holdid=[jobid['pca_study']], queue=qname, email=email)

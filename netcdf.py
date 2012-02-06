@@ -19,6 +19,8 @@ parser.add_option("-t", "--test", dest="test",
 parser.add_option("-o", "--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
+parser.add_option("-q", "--queue", dest="qname",
+                  default="gcc.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -29,6 +31,7 @@ pipeline = options.pipeline
 email = options.email
 test = options.test
 overwrite = options.overwrite
+qname = options.qname
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -50,10 +53,10 @@ driver = os.path.join(pipeline, "runRscript.sh")
 jobid = dict()
 for job in ["ncdf_geno", "ncdf_xy", "ncdf_bl"]:
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
     
 if not test:
     job = "gds_geno"
     rscript = os.path.join(pipeline, job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ncdf_geno']], email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ncdf_geno']], queue=qname, email=email)
     
