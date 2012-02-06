@@ -1,6 +1,6 @@
 ##########
 # HWE
-# Usage: R --args config.file < hwe.R
+# Usage: R --args config.file chr.start chr.end < hwe.R
 ##########
 
 library(GWASTools)
@@ -19,6 +19,16 @@ scanAnnot <- getobj(config["annot_scan_file"])
 scanAnnot <- scanAnnot[match(getScanID(nc), getScanID(scanAnnot)),]
 genoData <- GenotypeData(nc, scanAnnot=scanAnnot)
 scanID <- getScanID(genoData)
+chrom <- getChromosome(genoData)
+
+if (length(args) == 3) {
+  chr.start <- as.integer(args[2])
+  chr.end <- as.integer(args[3])
+  chromosome.set <- intersect(seq(chr.start, chr.end), unique(chrom))
+} else {
+  chromosome.set <- NULL
+}
+chromosome.set
 
 # are there any scans to exclude?
 scan.include <- getobj(config["scan_include_file"])
@@ -34,4 +44,5 @@ if (!is.na(config["scan_chrom_filter"])) {
 }
 
 gwasExactHW(genoData, scan.chromosome.filter=scan.filt,
-            scan.exclude = scan.exclude, outfile=config["out_hwe_prefix"])
+            scan.exclude = scan.exclude, outfile=config["out_hwe_prefix"],
+            chromosome.set=chromosome.set)

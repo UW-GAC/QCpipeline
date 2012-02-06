@@ -100,6 +100,12 @@ iii) HWE
 > python hwe.py --email user@uw.edu hwe.config
 (repeat with different config files for mutiple ethnic groups)
 
+To run chromosomes in parallel:
+> python hwe.py --email user@uw.edu hwe.config start end by
+where start, end, by are chromosome numbers.  'by' is optional, if
+omitted chromosomes will be run individually.  Values of 'end' > 23 are
+ignored (in this case 'end' will be set to 23).
+
 iv-vi) Allele frequency, duplicate discordance and Mendelian errors
 > python snp_filt.py --email user@uw.edu snp_filt.config
 
