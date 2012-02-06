@@ -37,7 +37,8 @@ snp.exclude <- snpID[getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1]
 length(snp.exclude)
 
 disc <- duplicateDiscordance(genoData, subjName.col=config["annot_scan_subjectCol"],
-                             scan.exclude=scan.exclude, snp.exclude=snp.exclude)
+                             scan.exclude=scan.exclude, snp.exclude=snp.exclude,
+                             corr.by.snp=as.logical(config["corr.by.snp"]))
 
 
 # by subject
@@ -83,3 +84,40 @@ prob.tbl <- cbind(prob.disc, num)
 disc$probability <- prob.tbl
 
 save(disc, file=config["out_disc_file"])
+
+# snp plots
+snp.conc <- 1 - disc$discordance.by.snp$discord.rate
+
+# MAF bins
+afreq <- getobj(config["out_afreq_file"])
+maf <- pmin(afreq[,"all"], 1-afreq[,"all"])
+maf <- maf[snpID %in% disc$discordance.by.snp$snpID]
+bins <- seq(0, 0.5, 0.05)
+refmaf <- bins[2:length(bins)] - 0.025
+mafbin <- rep(NA, length(maf))
+meanconc <- rep(NA, length(refmaf))
+if (as.logical(config["corr.by.snp"])) meancorr <- rep(NA, length(refmaf))
+for (i  in 1:length(bins)-1) {
+  thisbin <- bins[i] < maf & maf <= bins[i+1]
+  mafbin[thisbin] <- paste(bins[i], "-", bins[i+1])
+  meanconc[i] <- mean(snp.conc[thisbin], na.rm=TRUE)
+}
+table(mafbin)
+
+# concordance
+pdf(config["out_snp_conc_plot"], width=6, height=6)
+plot(refmaf, meanconc, xlab="MAF", ylab="concordance", xlim=c(0,0.5))
+dev.off()
+
+# correlation
+if (as.logical(config["corr.by.snp"])) {
+  snp.corr <- disc$discordance.by.snp$correlation
+  meancorr <- rep(NA, length(refmaf))
+  for (i  in 1:length(bins)-1) {
+    thisbin <- bins[i] < maf & maf <= bins[i+1]
+    meancorr[i] <- mean(snp.corr[thisbin], na.rm=TRUE)
+  }
+  pdf(config["out_snp_corr_plot"], width=6, height=6)
+  plot(refmaf, meancorr, xlab="MAF", ylab="correlation of allelic dosage", xlim=c(0,0.5))
+  dev.off()
+}

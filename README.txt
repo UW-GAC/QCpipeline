@@ -95,7 +95,20 @@ The LD pruning file will be used if it already exists, otherwise it
 will be created.
 
 
-41d-e)
+41a)
+iii) HWE
+> python hwe.py --email user@uw.edu hwe.config
+(repeat with different config files for mutiple ethnic groups)
+
+iv-vi) Allele frequency, duplicate discordance and Mendelian errors
+> python snp_filt.py --email user@uw.edu snp_filt.config
+
+vii-viii) Allele frequency and heterozygosity by ethnic group and sex
+> python snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
+(repeat with different config files for mutiple ethnic groups)
+
+
+42d-e)
 Association tests:
 
 # To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
@@ -123,16 +136,3 @@ start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netI
 so the code will treat chromosome Y differently.
             
 # If there are categorical covariates in the model(s), specify them in the config file so they will be converted into factors automatically.
-
-
-42a)
-iii) HWE
-> python hwe.py --email user@uw.edu hwe.config
-(repeat with different config files for mutiple ethnic groups)
-
-iv-vi) Allele frequency, duplicate discordance and Mendelian errors
-> python snp_filt.py --email user@uw.edu snp_filt.config
-
-vii-viii) Allele frequency and heterozygosity by ethnic group and sex
-> python snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
-(repeat with different config files for mutiple ethnic groups)

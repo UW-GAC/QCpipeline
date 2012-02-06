@@ -35,7 +35,11 @@ jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
 
 job = "dup_disc"
 rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], email=email)
+
+job = "dup_disc_maf"
+rscript = os.path.join(pipeline, job + ".R")
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], email=email)
 
 job = "mendel_err"
 rscript = os.path.join(pipeline, job + ".R")
