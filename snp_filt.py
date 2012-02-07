@@ -16,6 +16,12 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname",
                   default="gcc.q", help="cluster queue name")
+parser.add_option("--MAconc", dest="mac",
+                  action="store_true", default=False,
+                  help="minor allele concordance")
+parser.add_option("--dupSNP", dest="dupsnp",
+                  action="store_true", default=False,
+                  help="duplicate SNP discordance")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -25,6 +31,8 @@ config = args[0]
 pipeline = options.pipeline
 email = options.email
 qname = options.qname
+mac = options.mac
+dupsnp = options.dupsnp
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -40,11 +48,16 @@ job = "dup_disc"
 rscript = os.path.join(pipeline, job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
 
-job = "dup_disc_maf"
-rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
+if mac:
+    job = "dup_disc_maf"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
 
 job = "mendel_err"
 rscript = os.path.join(pipeline, job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
+if dupsnp:
+    job = "dup_snps"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
