@@ -53,8 +53,10 @@ if (chromosome.set == 25)
   idx <- sapply(covar.list, function(x) which(x %in% "sex"))
   for (i in 1:length(idx))
   {
-    covar.list[[i]] <- covar.list[[i]][-idx[i]]
-    if (length(covar.list[[i]]) == 0) covar.list[[i]] <- ""
+    if (length(idx[[i]]) > 0) {
+      covar.list[[i]] <- covar.list[[i]][-idx[[i]]]
+      if (length(covar.list[[i]]) == 0) covar.list[[i]] <- ""
+    }
   }
 }
 covar.list
