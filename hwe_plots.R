@@ -36,18 +36,20 @@ aut <- hwe$chromosome < 23
 summary(hwe$f)
 summary(hwe$f[aut])
 
-png(config["out_inbrd_plot"], width=600, height=600)
-hist(hwe$f[aut], xlab="Inbreeding coefficient estimate", ylab="number of SNPs",
-     main="Autosomes, all", breaks=40)
+pdf(config["out_inbrd_plot"], width=6, height=6)
+hist(hwe$f[aut], xlab="Inbreeding coefficient estimate",
+     main="Autosomal SNPs", breaks=40)
 abline(v=mean(hwe$f, na.rm=TRUE), lty=2, col="gray")
 abline(v=0, col="red")
 dev.off()
 
 
 # MAF vs Pvalue
-png(config["out_maf_plot"], width=720, height=720)
+png(config["out_maf_plot"], width=600, height=600)
+par(mar=c(5,5,4,2)+0.1, lwd=1.5,
+    cex.axis=1.5, cex.lab=1.5, cex.main=1.5)
 plot(hwe$MAF[aut], -log10(hwe$p.value[aut]), xlab="MAF", ylab="-log10(p-value)",
-     main="MAF vs P-value - autosomal")
+     main="Autosomal SNPs")
 dev.off()
 
 
