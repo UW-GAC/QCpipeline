@@ -106,8 +106,18 @@ where start, end, by are chromosome numbers.  'by' is optional, if
 omitted chromosomes will be run individually.  Values of 'end' > 23 are
 ignored (in this case 'end' will be set to 23).
 
+
 iv-vi) Allele frequency, duplicate discordance and Mendelian errors
 > python snp_filt.py --email user@uw.edu snp_filt.config
+use option --MAconc for minor allele concordance 
+
+use option --dupSNP for duplicate SNP discordance - snp annotation
+needs a column with integer ids for duplicate SNPs (and NA for
+singletons)
+
+set corr.by.snp=TRUE in the config file to calculate correlation by
+SNP (this is slow)
+
 
 vii-viii) Allele frequency and heterozygosity by ethnic group and sex
 > python snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
