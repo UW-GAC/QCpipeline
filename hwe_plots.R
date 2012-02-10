@@ -39,7 +39,7 @@ summary(hwe$f[aut])
 pdf(config["out_inbrd_plot"], width=6, height=6)
 hist(hwe$f[aut], xlab="Inbreeding coefficient estimate",
      main="Autosomal SNPs", breaks=40)
-abline(v=mean(hwe$f, na.rm=TRUE), lty=2, col="gray")
+abline(v=mean(hwe$f[aut], na.rm=TRUE), lty=2, col="gray")
 abline(v=0, col="red")
 dev.off()
 
