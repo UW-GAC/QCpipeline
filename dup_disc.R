@@ -73,7 +73,7 @@ dev.off()
 
 # by snp
 # probability of discordance for various error rates
-N <- max(disc$discordance.by.snp$npair)
+(N <- max(disc$discordance.by.snp$npair))
 prob.disc <- duplicateDiscordanceProbability(N)
 
 # find out how  many snps fall into each category of discordance

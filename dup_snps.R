@@ -24,7 +24,7 @@ if (!is.na(config["dupsnp_scan_exclude_file"])) {
   scan.exclude <- NULL
 }
 length(scan.exclude)
-scan.sel <- setdiff(scanID, scan.exclude)
+scan.sel <- which(!(scanID %in% scan.exclude))
 
 # select snps
 (snpAnnot <- getobj(config["annot_snp_file"]))
