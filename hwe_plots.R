@@ -129,7 +129,7 @@ for (i in 4:5) {
 
     mtxt <- paste("Chr",dat$chromosome,dat$rsID, "\np-value", format(dat$p.value,digits=3))
     png(paste(config["out_clust_prefix"], "_",
-            pbin[i-3],"%03d.png",sep=""),width=720,height=720)
+            pbin[i-3],"_%03d.png",sep=""),width=720,height=720)
     par(mfrow=c(3,3), mar=c(5,5,4,2)+0.1, lwd=1.5,
         cex.axis=1.5, cex.lab=1.5, cex.main=1.5)
     genoClusterPlot(xyData, genoData, snpID=dat$snpID, main.txt=mtxt)
