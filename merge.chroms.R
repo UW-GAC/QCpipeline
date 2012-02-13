@@ -18,7 +18,7 @@ actions <- unlist(strsplit(actions," "))
 for (i in 1:length(actions))
 {
   cnt <- NULL
-  combined <- NULL
+  tmp <- list()
   for (j in (args[2]:args[3]))
   {
     fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".chr.",j,"_",j,".RData", sep="")
@@ -28,8 +28,10 @@ for (i in 1:length(actions))
       cnt <- c(cnt, j)
       dat <- getobj(fname)
     }
-    combined <- rbind(combined, dat)
+    tmp[[as.character(j)]] <- dat
   }
+  combined <- do.call("rbind", tmp)
+  print(dim(combined))
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.RData", sep="")
 
   cat(paste("Saving", fname, "...\n"))
