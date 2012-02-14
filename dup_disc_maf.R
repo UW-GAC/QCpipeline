@@ -48,8 +48,9 @@ snp.conc <- 1 - disc$discordance.by.snp$discord.rate
 # MAF bins
 maf <- pmin(afreq[,"all"], 1-afreq[,"all"])
 maf <- maf[snpID %in% disc$discordance.by.snp$snpID]
-bins <- seq(0, 0.5, 0.05)
-refmaf <- bins[2:length(bins)] - 0.025
+maf.bin <- as.numeric(config["maf.bin"])
+bins <- seq(0, 0.5, maf.bin)
+refmaf <- bins[2:length(bins)] - maf.bin/2
 mafbin <- rep(NA, length(maf))
 meanconc <- rep(NA, length(refmaf))
 for (i  in 1:length(bins)-1) {

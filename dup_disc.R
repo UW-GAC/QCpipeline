@@ -73,12 +73,11 @@ dev.off()
 
 # by snp
 # probability of discordance for various error rates
-(N <- max(disc$discordance.by.snp$npair))
-prob.disc <- duplicateDiscordanceProbability(N)
+prob.disc <- duplicateDiscordanceProbability(npair)
 
 # find out how  many snps fall into each category of discordance
 num <- rep(NA, 8)
-discordant <- disc$discordance.by.snp$discordant
+discordant <- disc$discordance.by.snp$n.disc.subj
 for(i in 1:8) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
 prob.tbl <- cbind(prob.disc, num)
 disc$probability <- prob.tbl
@@ -92,8 +91,9 @@ snp.conc <- 1 - disc$discordance.by.snp$discord.rate
 afreq <- getobj(config["out_afreq_file"])
 maf <- pmin(afreq[,"all"], 1-afreq[,"all"])
 maf <- maf[snpID %in% disc$discordance.by.snp$snpID]
-bins <- seq(0, 0.5, 0.05)
-refmaf <- bins[2:length(bins)] - 0.025
+maf.bin <- as.numeric(config["maf.bin"])
+bins <- seq(0, 0.5, maf.bin)
+refmaf <- bins[2:length(bins)] - maf.bin/2
 mafbin <- rep(NA, length(maf))
 meanconc <- rep(NA, length(refmaf))
 if (as.logical(config["corr.by.snp"])) meancorr <- rep(NA, length(refmaf))
@@ -103,6 +103,9 @@ for (i  in 1:length(bins)-1) {
   meanconc[i] <- mean(snp.conc[thisbin], na.rm=TRUE)
 }
 table(mafbin)
+pdf(config["out_maf_plot"], width=6, height=6)
+hist(maf, breaks=bins, xlab="MAF", main="")
+dev.off()
 
 # concordance
 pdf(config["out_snp_conc_plot"], width=6, height=6)
