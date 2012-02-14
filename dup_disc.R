@@ -76,11 +76,12 @@ summary(disc.subj[!(names(disc.subj) %in% hapmap.ids)])
 
 # by snp
 # probability of discordance for various error rates
-prob.disc <- duplicateDiscordanceProbability(npair)
+(N <- max(disc$discordance.by.snp$npair))
+prob.disc <- duplicateDiscordanceProbability(N)
 
 # find out how  many snps fall into each category of discordance
 num <- rep(NA, 8)
-discordant <- disc$discordance.by.snp$n.disc.subj
+discordant <- disc$discordance.by.snp$discordant
 for(i in 1:8) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
 prob.tbl <- cbind(prob.disc, num)
 disc$probability <- prob.tbl
