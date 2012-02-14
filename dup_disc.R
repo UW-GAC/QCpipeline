@@ -61,7 +61,7 @@ rank <- 1:npair
 # color-code by hapmap
 hapmap <- getVariable(scanAnnot, config["annot_scan_hapmapCol"])
 subj <- getVariable(scanAnnot, config["annot_scan_subjectCol"])
-hapmap.ids <- subj[hapmap %in% 1]
+hapmap.ids <- unique(subj[hapmap %in% 1])
 plotcol <- rep("black", length(disc.subj))
 plotcol[names(disc.subj) %in% hapmap.ids] <- "red"
 pdf(config["out_disc_plot"], width=6, height=6)
@@ -69,6 +69,9 @@ plot(disc.subj, rank, xlab="discordance rate", ylab="rank", col=plotcol,
      main=paste("Discordance in", npair, "duplicate sample pairs"))
 legend(bestLegendPos(disc.subj, rank), c("study", "HapMap"), col=c("black", "red"), pch=c(1,1))
 dev.off()
+
+# summary of study data only
+summary(disc.subj[!(names(disc.subj) %in% hapmap.ids)])
 
 
 # by snp
