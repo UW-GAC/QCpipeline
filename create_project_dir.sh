@@ -17,9 +17,9 @@ mkdir netCDF
 mkdir netCDF/samples
 mkdir netCDF/subjects
 
-mkdir plink_ncbi
-mkdir plink_ncbi/samples
-mkdir plink_ncbi/subjects
+mkdir plink
+mkdir plink/samples
+mkdir plink/subjects
 
 mkdir sample_snp_annot
 
