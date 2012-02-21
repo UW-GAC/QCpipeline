@@ -122,6 +122,8 @@ if (as.logical(config["chromXY"])) {
 
 # select long anomalies
 mb <- 1000000
+if (is.na(config["thresh.sum"])) config["thresh.sum"] <- 10
+if (is.na(config["thresh.indiv"])) config["thresh.indiv"] <- 5
 # all anomalies for sample-chromosomes with sum > thresh.sum
 long.thresh <- as.numeric(config["thresh.sum"]) * mb
 psan <- paste(stats$scanID,stats$chromosome)
