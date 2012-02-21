@@ -33,6 +33,7 @@ if (!is.na(config["plot_chroms"])) {
   plotchroms
 }
 sub <- NULL
+if (is.na(config["signif_line"])) config["signif_line"] <- 5e-8
 
 for (i in 1:length(actions))
 {

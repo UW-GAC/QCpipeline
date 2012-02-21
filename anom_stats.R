@@ -122,18 +122,24 @@ if (as.logical(config["chromXY"])) {
 
 # select long anomalies
 mb <- 1000000
-long.thresh <- 10*mb
+# all anomalies for sample-chromosomes with sum > thresh.sum
+long.thresh <- as.numeric(config["thresh.sum"]) * mb
 psan <- paste(stats$scanID,stats$chromosome)
 usc <- unique(psan)
 sc.chk <- NULL
 for(sc in usc){
-  an <- stats[psan==sc,]
-  lens <- sum(an$nbase)
+  an <- stats$nbase[psan==sc]
+  lens <- sum(an)
   if(lens >= long.thresh) sc.chk <- c(sc.chk,sc)
 }
+# any individual anomalies > thresh.indiv
+indiv.chk <- stats$nbase >= as.numeric(config["thresh.indiv"]) * mb
+sum.chk <- is.element(psan,sc.chk)
+table(sum.chk, indiv.chk)
+any.chk <- sum.chk | indiv.chk
 
-if (!is.null(sc.chk)) {
-  long.chk <- stats[is.element(psan,sc.chk),]
+if (sum(any.chk) > 0) {
+  long.chk <- stats[any.chk,]
   long.chk <- long.chk[order(long.chk$scanID, long.chk$chromosome, long.chk$left.base),]
 
   # put one anomaly per chromosome first
