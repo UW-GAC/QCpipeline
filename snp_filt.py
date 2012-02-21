@@ -53,6 +53,13 @@ if mac:
     rscript = os.path.join(pipeline, job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
 
+job = "snp_filt_plots"
+rscript = os.path.join(pipeline, job + ".R")
+holdid = [jobid["dup_disc"]]
+if mac:
+    holdid.append(jobid["dup_disc_maf"])
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+
 job = "mendel_err"
 rscript = os.path.join(pipeline, job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)

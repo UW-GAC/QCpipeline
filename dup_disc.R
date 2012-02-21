@@ -55,25 +55,6 @@ for (i in 1:npair) {
 disc$discordance.by.pair <- disc.subj
 disc$correlation.by.pair <- corr.subj
 
-# plot
-disc.subj <- disc.subj[order(disc.subj)]
-rank <- 1:npair
-# color-code by hapmap
-hapmap <- getVariable(scanAnnot, config["annot_scan_hapmapCol"])
-subj <- getVariable(scanAnnot, config["annot_scan_subjectCol"])
-hapmap.ids <- unique(subj[hapmap %in% 1])
-plotcol <- rep("black", length(disc.subj))
-plotcol[names(disc.subj) %in% hapmap.ids] <- "red"
-pdf(config["out_disc_plot"], width=6, height=6)
-plot(disc.subj, rank, xlab="discordance rate", ylab="rank", col=plotcol,
-     main=paste("Discordance in", npair, "duplicate sample pairs"))
-legend(bestLegendPos(disc.subj, rank), c("study", "HapMap"), col=c("black", "red"), pch=c(1,1))
-dev.off()
-
-# summary of study data only
-summary(disc.subj[!(names(disc.subj) %in% hapmap.ids)])
-
-
 # by snp
 # probability of discordance for various error rates
 (N <- max(disc$discordance.by.snp$npair))
@@ -87,44 +68,3 @@ prob.tbl <- cbind(prob.disc, num)
 disc$probability <- prob.tbl
 
 save(disc, file=config["out_disc_file"])
-
-# snp plots
-snp.conc <- 1 - disc$discordance.by.snp$discord.rate
-
-# MAF bins
-afreq <- getobj(config["out_afreq_file"])
-maf <- pmin(afreq[,"all"], 1-afreq[,"all"])
-maf <- maf[snpID %in% disc$discordance.by.snp$snpID]
-maf.bin <- as.numeric(config["maf.bin"])
-bins <- seq(0, 0.5, maf.bin)
-refmaf <- bins[2:length(bins)] - maf.bin/2
-mafbin <- rep(NA, length(maf))
-meanconc <- rep(NA, length(refmaf))
-if (as.logical(config["corr.by.snp"])) meancorr <- rep(NA, length(refmaf))
-for (i  in 1:length(bins)-1) {
-  thisbin <- bins[i] < maf & maf <= bins[i+1]
-  mafbin[thisbin] <- paste(bins[i], "-", bins[i+1])
-  meanconc[i] <- mean(snp.conc[thisbin], na.rm=TRUE)
-}
-table(mafbin)
-pdf(config["out_maf_plot"], width=6, height=6)
-hist(maf, breaks=bins, xlab="MAF", main="")
-dev.off()
-
-# concordance
-pdf(config["out_snp_conc_plot"], width=6, height=6)
-plot(refmaf, meanconc, xlab="MAF", ylab="concordance", xlim=c(0,0.5))
-dev.off()
-
-# correlation
-if (as.logical(config["corr.by.snp"])) {
-  snp.corr <- disc$discordance.by.snp$correlation
-  meancorr <- rep(NA, length(refmaf))
-  for (i  in 1:length(bins)-1) {
-    thisbin <- bins[i] < maf & maf <= bins[i+1]
-    meancorr[i] <- mean(snp.corr[thisbin], na.rm=TRUE)
-  }
-  pdf(config["out_snp_corr_plot"], width=6, height=6)
-  plot(refmaf, meancorr, xlab="MAF", ylab="correlation of allelic dosage", xlim=c(0,0.5))
-  dev.off()
-}
