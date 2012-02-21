@@ -29,7 +29,7 @@ parser.add_option("--plotClust", dest="plotcl",
                   action="store_true", default=False,
                   help="cluster plots")
 parser.add_option("-q", "--queue", dest="qname",
-                  default="gcc.q", help="cluster queue name")
+                  default="all.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 
 config = args[0]
