@@ -23,16 +23,16 @@ Check output to make sure creation was successful and all checks were passed
 Pay attention to sections marked "MANUAL REVIEW"
 
 
-13-15) Gender check (heterozygosity and mean intensity)
+14-16) Gender check (heterozygosity and mean intensity)
 > python gender_check.py --email user@uw.edu gender.config
 
 
-17-19) Missing call rate
+18-20) Missing call rate
 "round2" in config file should be FALSE
 > python missing.py --email user@uw.edu missing.config
 
 
-20) Chromosome anomalies (need missing call rate first)
+21) Chromosome anomalies (need missing call rate first)
 test first:
 > python chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5
 (first 10 scans in 2 batches of 5 scans each)
@@ -49,14 +49,14 @@ Note that if allele frequency and/or BAF variance files specified in
 the config file already exist, they will not be recalculated.
 
 
-21) Batch quality checks (allele frequency test and plots)
+22) Batch quality checks (allele frequency test and plots)
 > python batch.py --email user@uw.edu batch.config
 Default is chisq test (--type chisq).  
 For Fisher test:
 > python batch.py --type fisher --email user@uw.edu batch.config
 
 
-25-27) IBD (allele frequency, SNP selection, run IBD, plots,
+26-28) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
 > python ibd.py --email user@uw.edu ibd.config
 
@@ -64,20 +64,20 @@ The allele frequency file will be used if it already exists, otherwise
 it will be created.
 
 
-28) Sample quality check
+29) Sample quality check
 > python sample_qualty.py --email user@uw.edu sample_quality.config
 
 
-33) Recalculate missing call rates
+34) Recalculate missing call rates
 "round2" in config file should be TRUE
 > python missing.py --email user@uw.edu missing.config
 
 
-37) Create subject-level NetCDF and GDS genotype files with anomalies filtered
+38) Create subject-level NetCDF and GDS genotype files with anomalies filtered
 > python netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
 
-38) PCA
+39) PCA
 First round, unduplicated study samples + external hapmaps:
 > python pca.py --email user@uw.edu pca.config --combined
 Second round, unrelated study samples:
@@ -95,7 +95,7 @@ The LD pruning file will be used if it already exists, otherwise it
 will be created.
 
 
-41a)
+42a)
 iii) HWE
 > python hwe.py --email user@uw.edu hwe.config
 (repeat with different config files for mutiple ethnic groups)
@@ -124,7 +124,7 @@ vii-viii) Allele frequency and heterozygosity by ethnic group and sex
 (repeat with different config files for mutiple ethnic groups)
 
 
-42d-e)
+43d-e)
 Association tests:
 
 # To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
@@ -147,3 +147,12 @@ start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netI
   --assoc
         
 # If there are categorical covariates in the model(s), specify them in the config file so they will be converted into factors automatically.
+
+
+dbGaP files:
+3) make PLINK files
+> python plink.py  --email user@uw.edu --filtered plink.config
+The unfiltered plink file will be made from the sample-level netCDF
+using only subj.plink samples.
+If "--filtered" argument is given, the script will ALSO create a
+filtered plink file from the subject-level netCDF.
