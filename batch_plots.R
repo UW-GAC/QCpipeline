@@ -121,13 +121,13 @@ if (type == "chisq") {
 if (type == "chisq") {
   pdf(config["out_meanchisq_ncsan_plot"], width=6, height=6)
   tmp <- batch.res$mean.chisq[match(names(bn), names(batch.res$mean.chisq))]
-  plot(bn, tmp, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", pch=pch)
+  plot(bn, tmp, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab="number of samples per batch", pch=pch)
   if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", pch=2)
   dev.off()
 } else if (type == "fisher") {
   pdf(config["out_meanor_ncsan_plot"], width=6, height=6)
   tmp <- batch.res$mean.or[match(names(bn), names(batch.res$mean.or))]
-  plot(bn, tmp, xlab="mean Fisher's OR", ylab="mean autosomal missing call rate", pch=pch)
+  plot(bn, tmp, ylab="mean Fisher's OR", xlab="number of samples per batch", pch=pch)
   if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", pch=2)
   dev.off()
 }
