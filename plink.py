@@ -50,7 +50,10 @@ jobid[job] = QCpipeline.submitJob(job, "plink", arglist, options="-b y -j y -cwd
                                   holdid=[jobid["plink_unfiltered"]], queue=qname, email=email)
 
 job = "plink_unfiltered_tar"
-arglist = ["-cvzf", plinkfile+".tar.gz", plinkfile+".bed", plinkfile+".bim", plinkfile+".fam"]
+(path, file) = os.path.split(plinkfile)
+if path == "":
+    path = "."
+arglist = ["-cvz", "--directory", path, "-f", plinkfile+".tar.gz", file+".bed", file+".bim", file+".fam"]
 jobid[job] = QCpipeline.submitJob(job, "tar", arglist, options="-b y -j y -cwd",
                                   holdid=[jobid["plink_unfiltered_bed"]], queue=qname, email=email)
 
@@ -66,6 +69,9 @@ if filt:
                                       holdid=[jobid["plink_filtered"]], queue=qname, email=email)
 
     job = "plink_filtered_tar"
-    arglist = ["-cvzf", plinkfile+".tar.gz", plinkfile+".bed", plinkfile+".bim", plinkfile+".fam"]
+    (path, file) = os.path.split(plinkfile)
+    if path == "":
+        path = "."
+    arglist = ["-cvz", "--directory", path, "-f", plinkfile+".tar.gz", file+".bed", file+".bim", file+".fam"]
     jobid[job] = QCpipeline.submitJob(job, "tar", arglist, options="-b y -j y -cwd",
                                       holdid=[jobid["plink_filtered_bed"]], queue=qname, email=email)
