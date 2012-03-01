@@ -5,7 +5,7 @@
 
 dbgapScanAnnotation <- function(scanAnnot, dir=".",
    consentVar="consent", subjVar="subj.plink", dupVar="dup.post", omitVar="no.post",
-   annotationCol="dbGaP.annot", analysisCol="dbGaP.anal") {
+   annotationCol="annotation", analysisCol="analysis") {
 
   stopifnot(is(scanAnnot, "ScanAnnotationDataFrame"))
   stopifnot(all(hasVariable(scanAnnot, c(consentVar, subjVar, dupVar, omitVar))))
@@ -78,7 +78,7 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
 #  dir - directory for output (default current)
 
 dbgapSnpAnnotation <- function(snpAnnot, dir=".",
-   annotationCol="dbGaP.annot", analysisCol="dbGaP.anal") {
+   annotationCol="annotation", analysisCol="analysis") {
 
   stopifnot(is(snpAnnot, "SnpAnnotationDataFrame"))
   stopifnot(all(c(annotationCol, analysisCol) %in% names(varMetadata(snpAnnot))))

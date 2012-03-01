@@ -7,10 +7,10 @@
 \usage{
 dbgapScanAnnotation(scanAnnot, dir=".",
    consentVar="consent", subjVar="subj.plink", dupVar="dup.post", omitVar="no.post",
-   annotationCol="dbGaP.annot", analysisCol="dbGaP.anal")
+   annotationCol="annotation", analysisCol="analysis")
 
 dbgapSnpAnnotation(snpAnnot, dir=".",
-   annotationCol="dbGaP.annot", analysisCol="dbGaP.anal")
+   annotationCol="annotation", analysisCol="analysis")
 }
 \arguments{
   \item{scanAnnot}{A \code{\link{ScanAnnotationDataFrame}}.}
