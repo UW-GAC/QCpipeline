@@ -29,6 +29,14 @@ if (!is.na(config["scan_exclude_file"])) {
 }
 length(scan.exclude)
 
+# exclude hapmaps from allele frequency test
+if (!is.na(config["annot_scan_hapmapCol"])) {
+  hapmap <- getVariable(scanAnnot, config["annot_scan_hapmapCol"])
+  hm.ids <- scanID[hapmap == 1]
+  scan.exclude <- union(scan.exclude, hm.ids)
+}
+length(scan.exclude)
+
 batchFisherTest(genoData, batchVar=config["annot_scan_batchCol"],
                scan.exclude=scan.exclude, return.by.snp=TRUE,
                outfile=config["out_fisher_file"])

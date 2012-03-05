@@ -26,6 +26,22 @@ length(snp.ids)
 study.scan.ids <- getobj(config["study_unduplicated_file"])
 length(study.scan.ids)
 
+# check
+scanAnnot <- getobj(config["annot_scan_file"])
+scanID <- getScanID(scanAnnot)
+stopifnot(all(study.scan.ids %in% scanID))
+subjID <- getVariable(scanAnnot, config["annot_scan_subjectCol"])
+if (any(duplicated(subjID[scanID %in% study.scan.ids]))) {
+  stop("study_unduplicated_file contains some duplicate scans")
+}
+
+# select unrelated hapmaps
+unrel <- getVariable(scanAnnot, config["annot_scan_unrelCol"])
+stopifnot(is.logical(unrel))
+hapmap <- getVariable(scanAnnot, config["annot_scan_hapmapCol"])
+hm.unrel.ids <- scanID[hapmap == 1 & unrel]
+length(hm.unrel.ids)
+
 # select unrelated scans from external
 ext.scanAnnot <- getobj(config["ext_annot_scan_file"])
 ext.unrel <- getVariable(ext.scanAnnot, config["ext_annot_scan_unrelCol"])
@@ -33,7 +49,8 @@ stopifnot(is.logical(ext.unrel))
 ext.scan.ids <- getScanID(ext.scanAnnot)[ext.unrel]
 length(ext.scan.ids)
 
-comb.scan.ids <- c(study.scan.ids, ext.scan.ids)
+comb.scan.ids <- unique(c(study.scan.ids, hm.unrel.ids, ext.scan.ids))
+length(comb.scan.ids)
 
 # remove duplicate scans between study and external
 discord <- getobj(config["out_disc_file"])
