@@ -41,10 +41,10 @@ if (nf > 0) {
 }
 dim(anom)
 
-# filter XY if entire X is filtered, or if Y is filtered for males
-allx <- anom$chromosome == 23 & anom$whole.chrom
+# filter XY if X is filtered, or if Y is filtered for males
+allx <- anom$chromosome == 23
 table(allx)
-ally <- anom$chromosome == 25 & anom$whole.chrom & anom$scanID %in% scanID[sex %in% "M"]
+ally <- anom$chromosome == 25 & anom$scanID %in% scanID[sex %in% "M"]
 table(ally)
 filtxy <- allx | ally
 if (sum(filtxy) > 0) {
@@ -53,7 +53,6 @@ if (sum(filtxy) > 0) {
   anom <- rbind(anom, anom.xy)
 }
 dim(anom)
-  
 
 # create a new netCDF with samples in 'scan.include' and anomalies set to missing
 parent.ncdf <- config["nc_file"]

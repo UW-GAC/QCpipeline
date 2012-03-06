@@ -45,23 +45,10 @@ genoData <-  GenotypeData(genonc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 # select SNPs
 chrom <- getChromosome(snpAnnot, char=TRUE)
 pos <- getPosition(snpAnnot)
-if (config["build"] == 36) {
-  data(HLA.hg18)
-  hla <- chrom == "6" & pos >= HLA.hg18$start.base & pos <= HLA.hg18$end.base
-  data(pseudoautosomal.hg18)
-  xtr <- chrom == "X" & pos >= pseudoautosomal.hg18["X.XTR", "start.base"] & 
-    pos <= pseudoautosomal.hg18["X.XTR", "end.base"]
-  data(centromeres.hg18)
-  centromeres <- centromeres.hg18
-} else if (config["build"] == 37) {
-  data(HLA.hg19)
-  hla <- chrom == "6" & pos >= HLA.hg19$start.base & pos <= HLA.hg19$end.base
-  data(pseudoautosomal.hg19)
-  xtr <- chrom == "X" & pos >= pseudoautosomal.hg19["X.XTR", "start.base"] & 
-    pos <= pseudoautosomal.hg19["X.XTR", "end.base"]
-  data(centromeres.hg19)
-  centromeres <- centromeres.hg19
-}
+hla.df <- get(data(list=paste("HLA", config["build"], sep=".")))
+hla <- chrom == "6" & pos >= hla.df$start.base & pos <= hla.df$end.base
+xtr.df <- get(data(list=paste("pseudoautosomal", config["build"], sep=".")))
+xtr <- chrom == "X" & pos >= xtr.df["X.XTR", "start.base"] & pos <= xtr.df["X.XTR", "end.base"]
 
 #ignore includes intensity-only and failed snps
 ignore <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1 
