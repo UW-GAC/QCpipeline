@@ -101,7 +101,7 @@ baf.seg <- anomSegmentBAF(blData, genoData, scan.ids=scan.ids,
 
 if (as.logical(config["chromXY"])) {
   baf.seg.XY <- anomSegmentBAF(blData, genoData, scan.ids=scan.ids,
-                               chrom.ids=24, snp.ids=sel.XY)
+                               chrom.ids=XYchromCode(blData), snp.ids=sel.XY)
   baf.seg <- rbind(baf.seg, baf.seg.XY)
 }
 

@@ -80,9 +80,9 @@ anoms$anom.id <- 1:nrow(anoms)
 
 # do XY separately
 if (as.logical(config["chromXY"])) {
-  anoms.XY <- anoms[anoms$chromosome==24,]
+  anoms.XY <- anoms[anoms$chromosome == XYchromCode(blData),]
   if (nrow(anoms.XY) > 0) { 
-    anoms <- anoms[anoms$chromosome!=24,]
+    anoms <- anoms[anoms$chromosome != XYchromCode(blData),]
   }
 }
 
