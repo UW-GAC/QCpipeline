@@ -115,6 +115,9 @@ use option --dupSNP for duplicate SNP discordance - snp annotation
 needs a column with integer ids for duplicate SNPs (and NA for
 singletons)
 
+use option --mendClust to make cluster plots binned by number of
+Mendelian errors (for family studies)
+
 set corr.by.snp=TRUE in the config file to calculate correlation by
 SNP (this is slow)
 

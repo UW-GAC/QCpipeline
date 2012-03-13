@@ -22,6 +22,9 @@ parser.add_option("--MAconc", dest="mac",
 parser.add_option("--dupSNP", dest="dupsnp",
                   action="store_true", default=False,
                   help="duplicate SNP discordance")
+parser.add_option("--mendClust", dest="mendclust",
+                  action="store_true", default=False,
+                  help="make cluster plots for Mendelian errors")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -33,6 +36,7 @@ email = options.email
 qname = options.qname
 mac = options.mac
 dupsnp = options.dupsnp
+mendclust = options.mendclust
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -63,6 +67,11 @@ jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid,
 job = "mendel_err"
 rscript = os.path.join(pipeline, job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+
+if mendclust:
+    job = "mendel_plots"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["mendel_err"]], queue=qname, email=email)
 
 if dupsnp:
     job = "dup_snps"
