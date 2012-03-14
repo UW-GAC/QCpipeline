@@ -87,6 +87,7 @@ if (as.logical(config["chromXY"])) {
 }
 
 centromeres <- get(data(list=paste("centromeres", config["build"], sep=".")))
+centromeres <- centromeres[centromeres$chrom != "Y",]
 stats <- anomSegStats(blData, genoData, snp.ids=snp.ok, anom=anoms, centromere=centromeres)
 saveas(stats, paste(config["project"],".anom.stats",sep=""), config["out_anom_dir"])
 
