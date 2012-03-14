@@ -82,9 +82,9 @@ if merge:
             holdid = holdid + [jobid["run.assoc." + str(i)]]
         #print "hold id for merge: "
         #print holdid
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], holdid=holdid, queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], holdid=holdid, queue=qname, email=email)
     else: # assoc == False means association tests were run in a previous run and will not carry over holdids
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], queue=qname, email=email)
     #print jobid
         
 if plotq:
@@ -95,9 +95,9 @@ if plotq:
         holdid = [jobid["merge.chroms"]]
         #print "hold id for plotq: "
         #print holdid
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
     else:
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 if plotc:
     job = "plot.cluster"
@@ -113,7 +113,7 @@ if plotc:
         #print "hold id for plotc: "
         #print holdid
     if len(holdid)> 0:    
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
     else:
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue="gcc.q", email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
