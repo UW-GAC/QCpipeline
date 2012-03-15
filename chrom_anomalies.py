@@ -18,6 +18,15 @@ parser.add_option("-m", "--maf", dest="maf", default=None,
                   help="do not use SNPs with MAF below this threshold")
 parser.add_option("-q", "--queue", dest="qname",
                   default="gcc.q", help="cluster queue name")
+parser.add_option("--baf", dest="baf",
+                  action="store_true", default=False,
+                  help="Run BAF detection")
+parser.add_option("--loh", dest="loh",
+                  action="store_true", default=False,
+                  help="Run LOH detection")
+parser.add_option("--stats", dest="stats",
+                  action="store_true", default=False,
+                  help="Run anom stats")
 (options, args) = parser.parse_args()
 
 if len(args) != 4:
@@ -31,6 +40,9 @@ pipeline = options.pipeline
 email = options.email
 maf = options.maf
 qname = options.qname
+runbaf = options.baf
+runloh = options.loh
+runstats = options.stats
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -41,7 +53,7 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 
-# skip BAF if file already exists
+# skip SD if file already exists
 waitSD = False
 if os.path.exists(configdict['out_baf_med_file']):
     print "using BAF SD file " + configdict['out_baf_med_file']
@@ -64,16 +76,10 @@ if maf is not None:
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
         waitAfreq = True
 
-job = "anom_baf"
-rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = []
-istart = start
-iend = start + by - 1
-while end >= istart:
-    if useMAF:
-        rargs = [rscript, config, str(istart), str(iend), maf]
-    else:
-        rargs = [rscript, config, str(istart), str(iend)]
+if runbaf:
+    job = "anom_baf"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job] = []
 
     if waitSD and waitAfreq:
         holdid = [jobid["baf_variance"], jobid["allele_freq"]]
@@ -84,45 +90,67 @@ while end >= istart:
     else:
         holdid = None
 
-    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=holdid, queue=qname, email=email))
+    istart = start
+    iend = start + by - 1
+    while end >= istart:
+        if useMAF:
+            rargs = [rscript, config, str(istart), str(iend), maf]
+        else:
+            rargs = [rscript, config, str(istart), str(iend)]
 
-    istart = istart + by
-    iend = istart + by - 1
-    if (iend > end):
-        iend = end
+        jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=holdid, queue=qname, email=email))
 
-job = "anom_combine"
-rscript = os.path.join(pipeline, job + ".R")
-jobid[job + "_baf"] = QCpipeline.submitJob(job+"_baf", driver, [rscript, config, "BAF", str(end), str(by)], holdid=jobid['anom_baf'], queue=qname, email=email)
+        istart = istart + by
+        iend = istart + by - 1
+        if (iend > end):
+            iend = end
+
+    job = "anom_combine"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job + "_baf"] = QCpipeline.submitJob(job+"_baf", driver, [rscript, config, "BAF", str(end), str(by)], holdid=jobid['anom_baf'], queue=qname, email=email)
 
 
-job = "anom_loh"
-rscript = os.path.join(pipeline, job + ".R")
-jobid[job] = []
-istart = start
-iend = start + by - 1
-while end >= istart:
-    if useMAF:
-        rargs = [rscript, config, str(istart), str(iend), maf]
+if runloh:
+    job = "anom_loh"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job] = []
+    
+    if runbaf:
+        holdid = [jobid["anom_combine_baf"]]
     else:
-        rargs = [rscript, config, str(istart), str(iend)]
+        holdid = None
 
-    jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=[jobid["anom_combine_baf"]], queue=qname, email=email))
+    istart = start
+    iend = start + by - 1
+    while end >= istart:
+        if useMAF:
+            rargs = [rscript, config, str(istart), str(iend), maf]
+        else:
+            rargs = [rscript, config, str(istart), str(iend)]
 
-    istart = istart + by
-    iend = istart + by - 1
-    if (iend > end):
-        iend = end
+        jobid[job].append(QCpipeline.submitJob(job+str(istart), driver, rargs, holdid=holdid, queue=qname, email=email))
 
-job = "anom_combine"
-rscript = os.path.join(pipeline, job + ".R")
-jobid[job + "_loh"] = QCpipeline.submitJob(job+"_loh", driver, [rscript, config, "LOH", str(end), str(by)], holdid=jobid['anom_loh'], queue=qname, email=email)
+        istart = istart + by
+        iend = istart + by - 1
+        if (iend > end):
+            iend = end
+
+    job = "anom_combine"
+    rscript = os.path.join(pipeline, job + ".R")
+    jobid[job + "_loh"] = QCpipeline.submitJob(job+"_loh", driver, [rscript, config, "LOH", str(end), str(by)], holdid=jobid['anom_loh'], queue=qname, email=email)
 
 
-job = "anom_stats"
-rscript = os.path.join(pipeline, job + ".R")
-if useMAF:
-    rargs = [rscript, config, maf]
-else:
-    rargs = [rscript, config]
-jobid[job] = QCpipeline.submitJob(job, driver, rargs, holdid=[jobid["anom_combine_loh"]], queue=qname, email=email)
+if runstats:
+    job = "anom_stats"
+    rscript = os.path.join(pipeline, job + ".R")
+
+    if runloh:
+        holdid = [jobid["anom_combine_loh"]]
+    else:
+        holdid = None
+
+    if useMAF:
+        rargs = [rscript, config, maf]
+    else:
+        rargs = [rscript, config]
+    jobid[job] = QCpipeline.submitJob(job, driver, rargs, holdid=holdid, queue=qname, email=email)

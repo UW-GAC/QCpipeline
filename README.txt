@@ -14,74 +14,82 @@ create_project_dir.sh ProjectName user
 
 9-10) Create NetCDF and GDS files
 test 5 samples first:
-> python netcdf.py --email user@uw.edu --test ncdf.config
+> netcdf.py --email user@uw.edu --test ncdf.config
 (where "user@uw.edu" is your email address)
 
 run all:
-> python netcdf.py --email user@uw.edu ncdf.config
+> netcdf.py --email user@uw.edu ncdf.config
 Check output to make sure creation was successful and all checks were passed
 Pay attention to sections marked "MANUAL REVIEW"
 
 
 14-16) Gender check (heterozygosity and mean intensity)
-> python gender_check.py --email user@uw.edu gender.config
+> gender_check.py --email user@uw.edu gender.config
 
 
 18-20) Missing call rate
 "round2" in config file should be FALSE
-> python missing.py --email user@uw.edu missing.config
+> missing.py --email user@uw.edu missing.config
 
 
 21) Chromosome anomalies (need missing call rate first)
 test first:
-> python chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5
+> chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5 \
+--baf --loh --stats
 (first 10 scans in 2 batches of 5 scans each)
 
-> python chrom_anomalies.py --email user@uw.edu chrom_anom.config start end by
+> chrom_anomalies.py --email user@uw.edu chrom_anom.config start end by \
+--baf --loh --stats
 (where "start end by" indicates how many scans to run at a time,
  e.g. "1 2000 500" means run scans 1-2000 in batches of 500)
 
 Use the --maf option to exclude SNPs below a given MAF (e.g. 0.05):
-> python chrom_anomalies.py --email user@uw.edu --maf 0.05 chrom_anom.config 1 10 5
+> chrom_anomalies.py --email user@uw.edu --maf 0.05 chrom_anom.config 1 10 5
 This will run the allele frequency calculation first.
 
 Note that if allele frequency and/or BAF variance files specified in
 the config file already exist, they will not be recalculated.
 
+Use the flags "--baf", "--loh", and "--stats" to run components of the
+pipeline separately.  Note that running loh requires output from baf,
+and running stats requires output from both baf and loh.  (Thus it
+does not make sense to use options --baf --stats together without
+--loh.)
+
 
 22) Batch quality checks (allele frequency test and plots)
-> python batch.py --email user@uw.edu batch.config
+> batch.py --email user@uw.edu batch.config
 Default is chisq test (--type chisq).  
 For Fisher test:
-> python batch.py --type fisher --email user@uw.edu batch.config
+> batch.py --type fisher --email user@uw.edu batch.config
 
 
 26-28) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
-> python ibd.py --email user@uw.edu ibd.config
+> ibd.py --email user@uw.edu ibd.config
 
 The allele frequency file will be used if it already exists, otherwise
 it will be created.
 
 
 29) Sample quality check
-> python sample_qualty.py --email user@uw.edu sample_quality.config
+> sample_qualty.py --email user@uw.edu sample_quality.config
 
 
 34) Recalculate missing call rates
 "round2" in config file should be TRUE
-> python missing.py --email user@uw.edu missing.config
+> missing.py --email user@uw.edu missing.config
 
 
 38) Create subject-level NetCDF and GDS genotype files with anomalies filtered
-> python netcdf_subset.py --email user@uw.edu ncdf_subset.config
+> netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
 
 39) PCA
 First round, unduplicated study samples + external hapmaps:
-> python pca.py --email user@uw.edu pca.config --combined
+> pca.py --email user@uw.edu pca.config --combined
 Second round, unrelated study samples:
-> python pca.py --email user@uw.edu pca.config
+> pca.py --email user@uw.edu pca.config
 
 Selecting which samples should be included is left to the user: make
 vectors of scanID and save as RData files, then give the path to
@@ -89,7 +97,7 @@ these files in the config file.
 
 For subsequent runs with individual ethnic groups, make a new
 "study_unrelated.RData" file and update this parameter in the configuration
-> python pca.py --email user@uw.edu pca.config
+> pca.py --email user@uw.edu pca.config
 
 The LD pruning file will be used if it already exists, otherwise it
 will be created.
@@ -97,18 +105,18 @@ will be created.
 
 42a)
 iii) HWE
-> python hwe.py --email user@uw.edu hwe.config
+> hwe.py --email user@uw.edu hwe.config
 (repeat with different config files for mutiple ethnic groups)
 
 To run chromosomes in parallel:
-> python hwe.py --email user@uw.edu hwe.config start end by
+> hwe.py --email user@uw.edu hwe.config start end by
 where start, end, by are chromosome numbers.  'by' is optional, if
 omitted chromosomes will be run individually.  Values of 'end' > 23 are
 ignored (in this case 'end' will be set to 23).
 
 
 iv-vi) Allele frequency, duplicate discordance and Mendelian errors
-> python snp_filt.py --email user@uw.edu snp_filt.config
+> snp_filt.py --email user@uw.edu snp_filt.config
 use option --MAconc for minor allele concordance 
 
 use option --dupSNP for duplicate SNP discordance - snp annotation
@@ -123,7 +131,7 @@ SNP (this is slow)
 
 
 vii-viii) Allele frequency and heterozygosity by ethnic group and sex
-> python snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
+> snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
 (repeat with different config files for mutiple ethnic groups)
 
 
@@ -154,7 +162,7 @@ start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netI
 
 dbGaP files:
 3) make PLINK files
-> python plink.py  --email user@uw.edu --filtered plink.config
+> plink.py  --email user@uw.edu --filtered plink.config
 The unfiltered plink file will be made from the sample-level netCDF
 using only subj.plink samples.
 If "--filtered" argument is given, the script will ALSO create a
