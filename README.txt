@@ -23,16 +23,16 @@ Check output to make sure creation was successful and all checks were passed
 Pay attention to sections marked "MANUAL REVIEW"
 
 
-14-16) Gender check (heterozygosity and mean intensity)
+13-15) Gender check (heterozygosity and mean intensity)
 > gender_check.py --email user@uw.edu gender.config
 
 
-18-20) Missing call rate
+17-19) Missing call rate
 "round2" in config file should be FALSE
 > missing.py --email user@uw.edu missing.config
 
 
-21) Chromosome anomalies (need missing call rate first)
+20) Chromosome anomalies (need missing call rate first)
 test first:
 > chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5 \
 --baf --loh --stats
@@ -57,14 +57,14 @@ does not make sense to use options --baf --stats together without
 --loh.)
 
 
-22) Batch quality checks (allele frequency test and plots)
+21) Batch quality checks (allele frequency test and plots)
 > batch.py --email user@uw.edu batch.config
 Default is chisq test (--type chisq).  
 For Fisher test:
 > batch.py --type fisher --email user@uw.edu batch.config
 
 
-26-28) IBD (allele frequency, SNP selection, run IBD, plots,
+25-27) IBD (allele frequency, SNP selection, run IBD, plots,
             inbreeding coefficients)
 > ibd.py --email user@uw.edu ibd.config
 
@@ -72,16 +72,16 @@ The allele frequency file will be used if it already exists, otherwise
 it will be created.
 
 
-29) Sample quality check
+28) Sample quality check
 > sample_qualty.py --email user@uw.edu sample_quality.config
 
 
-34) Recalculate missing call rates
+33) Recalculate missing call rates
 "round2" in config file should be TRUE
 > missing.py --email user@uw.edu missing.config
 
 
-38) Create subject-level NetCDF and GDS genotype files with anomalies filtered
+37) Create subject-level NetCDF and GDS genotype files with anomalies filtered
 > netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
 
