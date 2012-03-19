@@ -43,10 +43,19 @@ hla.df <- get(data(list=paste("HLA", config["build"], sep=".")))
 hla <- chrom == "6" & pos >= hla.df$start.base & pos <= hla.df$end.base
 xtr.df <- get(data(list=paste("pseudoautosomal", config["build"], sep=".")))
 xtr <- chrom == "X" & pos >= xtr.df["X.XTR", "start.base"] & pos <= xtr.df["X.XTR", "end.base"]
+centromeres <- get(data(list=paste("centromeres", config["build"], sep=".")))
+gap <- rep(FALSE, length(snpID))
+for (i in 1:nrow(centromeres)) {
+  ingap <- chrom == centromeres$chrom[i] & pos > centromeres$left.base[i] &
+    pos < centromeres$right.base[i]
+  gap <- gap | ingap
+}
+table(chrom, gap)
 
 #ignore includes intensity-only and failed snps
 ignore <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1 
-snp.exclude <- ignore | hla | xtr
+snp.exclude <- ignore | hla | xtr | gap
+table(snp.exclude)
 
 # maf threshold
 if (!is.null(maf)) {
@@ -55,6 +64,7 @@ if (!is.null(maf)) {
   maf.filt <- is.na(afreq[,"all"]) | afreq[,"all"] <= maf | afreq[,"all"] >= (1-maf)
   snp.exclude <- snp.exclude | maf.filt
 }
+table(snp.exclude)
 
 snp.ok <- snpID[!snp.exclude]
 length(snp.ok)
@@ -86,8 +96,6 @@ if (as.logical(config["chromXY"])) {
   }
 }
 
-centromeres <- get(data(list=paste("centromeres", config["build"], sep=".")))
-centromeres <- centromeres[centromeres$chrom != "Y",]
 stats <- anomSegStats(blData, genoData, snp.ids=snp.ok, anom=anoms, centromere=centromeres)
 saveas(stats, paste(config["project"],".anom.stats",sep=""), config["out_anom_dir"])
 
