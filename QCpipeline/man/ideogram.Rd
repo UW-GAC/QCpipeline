@@ -4,13 +4,14 @@
 \title{BAF/LRR plots with chromosome ideograms}
 \description{Plot BAF/LRR with chromosome ideograms at the bottom.}
 \usage{
-chromIntensityPlotIdeogram(intenData, scan.ids, chrom.ids, ...,
+chromIntensityPlotIdeogram(intenData, scan.ids, chrom.ids,
+                           main=NULL, info=NULL, ...,
                            ideo.zoom=TRUE, ideo.rect=FALSE,
                            cex.axis=1.7, cex.lab=1.7, cex.main=1.7,
                            cex.sub=1.5, cex.leg=1.5)
 
-anomStatsPlotIdeogram(intenData, genoData, anom.stats,
-                      snp.ineligible, win=5, ...,
+anomStatsPlotIdeogram(intenData, genoData, anom.stats, snp.ineligible,
+                      win=5, main=NULL, info=NULL, ...,
                       ideo.zoom=FALSE, ideo.rect=TRUE,
                       cex.axis=1.7, cex.lab=1.7, cex.main=1.7,
                       cex.leg=1.5)
@@ -35,12 +36,13 @@ anomStatsPlotIdeogram(intenData, genoData, anom.stats,
   \item{win}{
     size of the window (a multiple of anomaly length) surrounding the anomaly to plot
   }
-  
+  \item{main}{ Vector of plot titles. If \code{NULL} then the title will include scanID, sex, and chromosome.}
+  \item{info}{ A character vector containing extra information to include in the main title. }
   \item{...}{additional arguments to \code{\link{chromIntensityPlot}} or
     \code{\link{anomStatsPlot}}}
   \item{ideo.zoom}{logical for whether to zoom in on the ideogram to
     match the range of the BAF/LRR plots}
-  \item{ideo.zoom}{logical for whether to draw a rectangle on the
+  \item{ideo.rect}{logical for whether to draw a rectangle on the
     ideogram indicating the range of the BAF/LRR plots}
   \item{cex.axis}{cex value for the axis}
   \item{cex.lab}{cex value for the labels}
@@ -76,8 +78,9 @@ genoData <-  GenotypeData(genonc, scanAnnot=illuminaScanADF, snpAnnot=illuminaSn
 # chromIntensityPlotIdeogram
 scanID <- getScanID(illuminaScanADF, index=1:2)
 #png("tmp_%03d.png", width=720, height=900)
+main <- paste("Sample", c("A", "B"), "- Chromosome X")
 chromIntensityPlotIdeogram(intenData=intenData, scan.ids=scanID,
-                           chrom.ids=c(23,23),
+                           chrom.ids=c(23,23), main=main,
                            colorGenotypes=TRUE, genoData=genoData)
 #dev.off()
 
@@ -103,8 +106,9 @@ stats <- anomSegStats(intenData, genoData, snp.ids=snp.ids, anom=anoms,
   centromere=centromeres.hg18)
 
 #png("tmp_%03d.png", width=720, height=900)
+main <- paste("Sample", c("A", "B"), "- Chromosome", stats$chromosome)
 anomStatsPlotIdeogram(intenData, genoData, anom.stats=stats,
-  snp.ineligible=snp.failed, centromere=centromeres.hg18)
+  snp.ineligible=snp.failed, centromere=centromeres.hg18, main=main)
 #dev.off()
 
 close(genoData)

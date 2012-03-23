@@ -1,7 +1,8 @@
-chromIntensityPlotIdeogram <- function(intenData, scan.ids, chrom.ids, ...,
+chromIntensityPlotIdeogram <- function(intenData, scan.ids, chrom.ids,
+                                       main=NULL, info=NULL, ...,
                                        ideo.zoom=TRUE, ideo.rect=FALSE,
-                                  cex.axis=1.7,
-        cex.main=1.7, cex.lab=1.7, cex.sub=1.5, cex.leg=1.5) {
+                                       cex.axis=1.7, cex.lab=1.7,
+                                       cex.main=1.7, cex.sub=1.5, cex.leg=1.5) {
 
   if (length(scan.ids) != length(chrom.ids)) {
     stop("scan.ids and chrom.ids must be parallel vectors of the same length")
@@ -20,9 +21,9 @@ chromIntensityPlotIdeogram <- function(intenData, scan.ids, chrom.ids, ...,
     par(mar=c(5,4,4,2)+0.1, mgp=c(2.5,0.75,0))
     par(cex.axis=cex.axis, cex.main=cex.main, cex.lab=cex.lab, cex.sub=cex.sub)
     chromIntensityPlot(intenData, scan.ids=scan.ids[i], chrom.ids=chrom.ids[i],
-                       type="LRR", ...)
+                       type="LRR", main=main[i], info=info[i], ...)
     chromIntensityPlot(intenData, scan.ids=scan.ids[i], chrom.ids=chrom.ids[i],
-                       type="BAF", ...)
+                       type="BAF", main=main[i], info=info[i], ...)
     par(mar=c(1,4,1,2)+0.1)
     posc <- pos[chrom == chrom.ids[i]]
     if (ideo.zoom) {
@@ -39,11 +40,11 @@ chromIntensityPlotIdeogram <- function(intenData, scan.ids, chrom.ids, ...,
 }
 
 
-anomStatsPlotIdeogram <- function(intenData, genoData, anom.stats,
-                                  snp.ineligible, win=5, ...,
+anomStatsPlotIdeogram <- function(intenData, genoData, anom.stats, snp.ineligible,
+                                  win=5, main=NULL, info=NULL, ...,
                                   ideo.zoom=FALSE, ideo.rect=TRUE,
-                                  cex.axis=1.7,
-        cex.main=1.7, cex.lab=1.7, cex.leg=1.5) {
+                                  cex.axis=1.7, cex.lab=1.7,
+                                  cex.main=1.7,  cex.leg=1.5) {
   chrom <- getChromosome(intenData)
   pos <- getPosition(intenData)
 
@@ -57,9 +58,9 @@ anomStatsPlotIdeogram <- function(intenData, genoData, anom.stats,
     par(mar=c(5,4,4,2)+0.1, mgp=c(2.5,0.75,0))
     par(cex.axis=cex.axis, cex.main=cex.main, cex.lab=cex.lab)
     anomStatsPlot(intenData, genoData, anom.stats[i,], snp.ineligible=snp.ineligible,
-                  type="LRR", ...)
+                  type="LRR", main=main[i], info=info[i], ...)
     anomStatsPlot(intenData, genoData, anom.stats[i,], snp.ineligible=snp.ineligible,
-                  type="BAF", ...)
+                  type="BAF", main=main[i], info=info[i], ...)
     
     par(mar=c(1,4,1,2)+0.1)
     posc <- pos[chrom == chrom.ids[i]]
