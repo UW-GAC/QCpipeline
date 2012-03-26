@@ -44,7 +44,11 @@ chr.type[is.element(chr.type, 1:22)] <- "A"
 np <- table(chr.type)
 
 # fraction of intensity only per chrom
-snp.io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
+if (!is.na(config["annot_snp_IntensityOnlyCol"])) {
+  snp.io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
+} else {
+  snp.io <- NULL
+}
 if (!is.null(snp.io) & sum(snp.io) > 0) {
   xm <- as.matrix(table(chr.type, snp.io))
   io <- xm[,"1"] / rowSums(xm)

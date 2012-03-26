@@ -101,8 +101,9 @@ saveas(stats, paste(config["project"],".anom.stats",sep=""), config["out_anom_di
 
 if (as.logical(config["chromXY"])) {
   if (nrow(anoms.XY) > 0) { 
-    io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
-    if (is.null(io)) {
+    if (!is.na(config["annot_snp_IntensityOnlyCol"])) {
+      io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
+    else {
       io <- rep(0, length(snpID))
     }
     sXY <- is.element(chrom, "XY") & is.element(io, 0)
