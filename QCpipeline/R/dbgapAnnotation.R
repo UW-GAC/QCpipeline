@@ -39,8 +39,8 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
     stopifnot(nrow(dups) + nrow(subj) == nrow(annot2))
   
     # remove the splitting variable(s)
-    subj <- subj[,!(varLabels(subj) %in% c(subjVar, dupVar, omitVar))] 
-    dups <- dups[,!(varLabels(dups) %in% c(subjVar, dupVar, omitVar))]
+    subj <- subj[,!(varLabels(subj) %in% c(dupVar, omitVar))] 
+    dups <- dups[,!(varLabels(dups) %in% c(dupVar, omitVar))]
 
     # prepare data dictionary
     meta <- varMetadata(subj)
