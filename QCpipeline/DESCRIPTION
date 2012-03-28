@@ -1,5 +1,5 @@
 Package: QCpipeline
-Version: 0.6.1
+Version: 0.6.2
 Type: Package
 Title: Utilities for the QC pipeline
 Description: Configuration and plotting code
