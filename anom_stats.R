@@ -103,7 +103,7 @@ if (as.logical(config["chromXY"])) {
   if (nrow(anoms.XY) > 0) { 
     if (!is.na(config["annot_snp_IntensityOnlyCol"])) {
       io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
-    else {
+    } else {
       io <- rep(0, length(snpID))
     }
     sXY <- is.element(chrom, "XY") & is.element(io, 0)
