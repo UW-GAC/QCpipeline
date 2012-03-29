@@ -17,7 +17,13 @@ print(config)
 scanID <- getScanID(scanAnnot)
 
 # get scans to include
-scan.include <- getobj(config["scan_include_file"])
+if (!is.na(config["scan_include_file"])) {
+  scan.include <- getobj(config["scan_include_file"])
+} else {
+  message("No scan_include_file specified, using all scans")
+  scan.include <- scanID
+}
+length(scan.include)
 
 # get chrom anomalies to filter
 if (!is.na(config["chrom_anom_file"])) {
