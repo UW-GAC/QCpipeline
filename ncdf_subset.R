@@ -36,18 +36,8 @@ if (!is.na(config["chrom_anom_file"])) {
 }
 dim(anom)
 
-# set Y chromosome to missing for females
-sex <- getSex(scanAnnot)
-(nf <- sum(sex %in% "F"))
-if (nf > 0) {
-  anom.Y <- data.frame("scanID"=scanID[sex %in% "F"], "chromosome"=rep(25, nf),
-                       "left.base"=rep(NA, nf), "right.base"=rep(NA, nf),
-                       "whole.chrom"=rep(TRUE, nf))
-  anom <- rbind(anom, anom.Y)
-}
-dim(anom)
-
 # filter XY if X is filtered, or if Y is filtered for males
+sex <- getSex(scanAnnot)
 allx <- anom$chromosome == 23
 table(allx)
 ally <- anom$chromosome == 25 & anom$scanID %in% scanID[sex %in% "M"]
@@ -59,6 +49,18 @@ if (sum(filtxy) > 0) {
   anom <- rbind(anom, anom.xy)
 }
 dim(anom)
+
+# set Y chromosome to missing for females
+if (as.logical(config["filterYinF"])) {
+  (nf <- sum(sex %in% "F"))
+  if (nf > 0) {
+    anom.Y <- data.frame("scanID"=scanID[sex %in% "F"], "chromosome"=rep(25, nf),
+                         "left.base"=rep(NA, nf), "right.base"=rep(NA, nf),
+                         "whole.chrom"=rep(TRUE, nf))
+    anom <- rbind(anom, anom.Y)
+  }
+  dim(anom)
+}
 
 # create a new netCDF with samples in 'scan.include' and anomalies set to missing
 parent.ncdf <- config["nc_file"]
