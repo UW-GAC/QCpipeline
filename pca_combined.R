@@ -49,6 +49,13 @@ stopifnot(is.logical(ext.unrel))
 ext.scan.ids <- getScanID(ext.scanAnnot)[ext.unrel]
 length(ext.scan.ids)
 
+# scans to exclude?
+if (!is.na(config["ext_scan_exclude_file"])) {
+  scan.excl <- getobj(config["ext_scan_exclude_file"])
+  ext.scan.ids <- setdiff(ext.scan.ids, scan.excl)
+} 
+length(ext.scan.ids)
+
 comb.scan.ids <- unique(c(study.scan.ids, hm.unrel.ids, ext.scan.ids))
 length(comb.scan.ids)
 

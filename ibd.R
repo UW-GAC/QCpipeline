@@ -25,6 +25,7 @@ length(snp.ids)
 if (!is.na(config["scan_ibd_include_file"])) {
   scan.ids <- getobj(config["scan_ibd_include_file"])
 } else {
+  # if scan.ids=NULL for IBD functions, all scans are used
   scan.ids <- NULL
 }
 length(scan.ids)

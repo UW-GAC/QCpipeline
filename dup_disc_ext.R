@@ -31,15 +31,40 @@ ext.nc <- NcdfGenotypeReader(config["ext_nc_geno_file"])
 snp.study <- pData(snpAnnot)[getVariable(snpAnnot, config["annot_snp_missingCol"]) < 1,
                              c(config["annot_snp_rsIDCol"], "chromosome", "position")]
 names(snp.study) <- c("rsID", "chromosome", "position")
+nrow(snp.study)
+
+# remove missing from external
+snp.ext <- pData(ext.snpAnnot)[getVariable(ext.snpAnnot, config["ext_annot_snp_missingCol"]) < 1,
+                               c(config["ext_annot_snp_rsIDCol"], "chromosome", "position")]
+names(snp.ext) <- c("rsID", "chromosome", "position")
+nrow(snp.ext)
+
 # find snps with same rsID, chrom, and position
-snp.ext <- pData(ext.snpAnnot)[,c(config["ext_annot_snp_rsIDCol"], "chromosome", "position")]
 names(snp.ext) <- c("rsID", "chromosome", "position")
 snp.common <- merge(snp.study, snp.ext)
 nrow(snp.common)
 
+# are there any scans to exclude?
+if (!is.na(config["disc_scan_exclude_file"])) {
+  scan.exclude1 <- getobj(config["disc_scan_exclude_file"])
+  stopifnot(all(scan.exclude1 %in% getScanID(genoData)))
+} else {
+  scan.exclude1 <- NULL
+}
+length(scan.exclude1)
+
+if (!is.na(config["ext_scan_exclude_file"])) {
+  scan.exclude2 <- getobj(config["ext_scan_exclude_file"])
+  stopifnot(all(scan.exclude2 %in% getScanID(extData)))
+} else {
+  scan.exclude2 <- NULL
+}
+length(scan.exclude2)
+
 discord <- duplicateDiscordanceAcrossDatasets(genoData, extData,
   subjName.cols=c(config["annot_scan_subjectCol"], config["ext_annot_scan_subjectCol"]),
   snpName.cols=c(config["annot_snp_rsIDCol"], config["ext_annot_snp_rsIDCol"]),
+  scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
   snp.include=snp.common$rsID)
 
 save(discord, file=config["out_disc_file"])
