@@ -71,19 +71,29 @@ length(snp.ok)
 
 file <- file.path(config["out_anom_dir"], paste(config["project"], "BAF.filtered.all.RData", sep="."))
 BAF <- getobj(file); nrow(BAF)
+if (!is.null(BAF)) if (nrow(BAF) == 0) BAF <- NULL
 
 file <- file.path(config["out_anom_dir"], paste(config["project"], "LOH.filtered.all.RData", sep="."))
 LOH <- getobj(file); nrow(LOH)
+if (!is.null(LOH)) if (nrow(LOH) == 0) LOH <- NULL
 
 # combine BAF and LOH
-BAF$method <- "BAF"
-BAF$mad.fac <- NA
+if (!is.null(BAF)) {
+  BAF$method <- "BAF"
+  BAF$mad.fac <- NA
+}
 if (!is.null(LOH)) {
   LOH$method <- "LOH"
+}
+if (!is.null(BAF) & !is.null(LOH)) {
   cols <- intersect(names(BAF), names(LOH))
   anoms <- rbind(BAF[,cols], LOH[,cols])
-} else {
+} else if (!is.null(BAF)) {
   anoms <- BAF
+} else if (!is.null(LOH)) {
+  anoms <- LOH
+} else {
+  stop("no anomalies detected")
 }
 anoms <- anoms[order(anoms$scanID, anoms$chromosome, anoms$left.index),]; dim(anoms)
 anoms$anom.id <- 1:nrow(anoms)
@@ -158,7 +168,7 @@ if (sum(any.chk) > 0) {
   snp.ineligible <- snpID[snp.exclude]
   png.file <- file.path(config["out_plot_dir"], paste(config["out_plot_prefix"], "_%003d.png", sep=""))
   png(png.file, width=720, height=720)
-  anomStatsPlot(blData, genoData, anom.stats=long.chk, snp.ineligible=snp.ineligible,
+  anomStatsPlotIdeogram(blData, genoData, anom.stats=long.chk, snp.ineligible=snp.ineligible,
                 win=as.integer(config["out_plot_win"]), centromere=centromeres, cex=0.25)
   dev.off()
 } else {
