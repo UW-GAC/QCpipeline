@@ -58,9 +58,9 @@ anomStatsPlotIdeogram <- function(intenData, genoData, anom.stats, snp.ineligibl
     par(mar=c(5,4,4,2)+0.1, mgp=c(2.5,0.75,0))
     par(cex.axis=cex.axis, cex.main=cex.main, cex.lab=cex.lab)
     anomStatsPlot(intenData, genoData, anom.stats[i,], snp.ineligible=snp.ineligible,
-                  type="LRR", main=main[i], info=info[i], ...)
+                  type="LRR", win=win, main=main[i], info=info[i], ...)
     anomStatsPlot(intenData, genoData, anom.stats[i,], snp.ineligible=snp.ineligible,
-                  type="BAF", main=main[i], info=info[i], ...)
+                  type="BAF", win=win, main=main[i], info=info[i], ...)
     
     par(mar=c(1,4,1,2)+0.1)
     posc <- pos[chrom == chrom.ids[i]]
