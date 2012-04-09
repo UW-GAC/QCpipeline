@@ -130,6 +130,19 @@ for(i in 1:nev){
 }
 dev.off()
 
+if (!is.na(config["out_corr_pruned_plot_prefix"])) {
+  snps.pruned <- getobj(config["out_pruned_file"])
+  ind <- getSnpID(snp) %in% snps.pruned
+  
+  png(paste(config["out_corr_pruned_plot_prefix"], "_%03d.png", sep=""), height=720, width=720)
+  par(mfrow=c(4,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
+  for(i in 1:nev){
+    snpCorrelationPlot(abs(corr$snpcorr[i,ind]), chrom[ind],
+                       main=paste("Eigenvector",i), ylim=c(0,1))
+  }
+  dev.off()
+}
+  
 # scree plot
 x <- pca$eigenval/sum(pca$eigenval)
 pdf(config["out_scree_plot"], width=6, height=6)
