@@ -118,10 +118,9 @@ if (type == "combined")  {
 corr <- getobj(config["out_corr_file"])
 snpAnnot <- getobj(config["annot_snp_file"])
 snp <- snpAnnot[match(corr$snp.id, getVariable(snpAnnot, idCol)),]
-chrom.labels <- unique(getChromosome(snp, char=TRUE))
+chrom <- getChromosome(snp, char=TRUE)
 
 nev <- as.integer(config["num_evs_to_plot"])
-chrom <- getChromosome(snpAnnot, char=TRUE)
 
 png(paste(config["out_corr_plot_prefix"], "_%03d.png", sep=""), height=720, width=720)
 par(mfrow=c(4,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
