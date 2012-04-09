@@ -74,6 +74,7 @@ table(snp.exclude)
 
 snp.ok <- snpID[!snp.exclude]
 length(snp.ok)
+save(snp.ok, file=config["out_eligible_snps"])
 
 if (as.logical(config["chromXY"])) {
   # remove only IO snps for XY region

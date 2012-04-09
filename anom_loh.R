@@ -1,6 +1,6 @@
 ##########
 # LOH anomaly detection
-# Usage: R --args config.file start end maf < anom_loh.R
+# Usage: R --args config.file start end < anom_loh.R
 ##########
 
 library(GWASTools)
@@ -19,14 +19,6 @@ st <- as.integer(args[2])
 ed <- as.integer(args[3])
 if (st > ed) stop("Start is larger than End")
 
-# read MAF threshold
-if (length(args) > 3) {
-  maf <- as.numeric(args[4])
-} else {
-  maf <- NULL
-}
-print(maf)
-
 # create GenotypeData and IntensityData objects
 (scanAnnot <- getobj(config["annot_scan_file"]))
 scanID <- getScanID(scanAnnot)
@@ -43,36 +35,7 @@ genonc <- NcdfGenotypeReader(geno.file)
 genoData <-  GenotypeData(genonc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # select SNPs
-chrom <- getChromosome(snpAnnot, char=TRUE)
-pos <- getPosition(snpAnnot)
-hla.df <- get(data(list=paste("HLA", config["build"], sep=".")))
-hla <- chrom == "6" & pos >= hla.df$start.base & pos <= hla.df$end.base
-xtr.df <- get(data(list=paste("pseudoautosomal", config["build"], sep=".")))
-xtr <- chrom == "X" & pos >= xtr.df["X.XTR", "start.base"] & pos <= xtr.df["X.XTR", "end.base"]
-centromeres <- get(data(list=paste("centromeres", config["build"], sep=".")))
-gap <- rep(FALSE, length(snpID))
-for (i in 1:nrow(centromeres)) {
-  ingap <- chrom == centromeres$chrom[i] & pos > centromeres$left.base[i] &
-    pos < centromeres$right.base[i]
-  gap <- gap | ingap
-}
-table(chrom, gap)
-
-#ignore includes intensity-only and failed snps
-ignore <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1 
-snp.exclude <- ignore | hla | xtr | gap
-table(snp.exclude)
-
-# maf threshold
-if (!is.null(maf)) {
-  afreq <- getobj(config["out_afreq_file"])
-  stopifnot(allequal(rownames(afreq), snpID))
-  maf.filt <- is.na(afreq[,"all"]) | afreq[,"all"] <= maf | afreq[,"all"] >= (1-maf)
-  snp.exclude <- snp.exclude | maf.filt
-}
-table(snp.exclude)
-
-snp.ok <- snpID[!snp.exclude]
+snp.ok <- getobj(config["out_eligible_snps"])
 length(snp.ok)
 
 # are there any scans to exclude?

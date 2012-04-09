@@ -1,6 +1,6 @@
 ##########
 # Anomaly stats and plots
-# Usage: R --args config.file maf < anom_stats.R
+# Usage: R --args config.file < anom_stats.R
 ##########
 
 library(GWASTools)
@@ -12,14 +12,6 @@ args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 print(config)
-
-# read MAF threshold
-if (length(args) > 1) {
-  maf <- as.numeric(args[2])
-} else {
-  maf <- NULL
-}
-print(maf)
 
 # create GenotypeData and IntensityData objects
 (scanAnnot <- getobj(config["annot_scan_file"]))
@@ -37,36 +29,7 @@ genonc <- NcdfGenotypeReader(geno.file)
 genoData <-  GenotypeData(genonc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # select SNPs
-chrom <- getChromosome(snpAnnot, char=TRUE)
-pos <- getPosition(snpAnnot)
-hla.df <- get(data(list=paste("HLA", config["build"], sep=".")))
-hla <- chrom == "6" & pos >= hla.df$start.base & pos <= hla.df$end.base
-xtr.df <- get(data(list=paste("pseudoautosomal", config["build"], sep=".")))
-xtr <- chrom == "X" & pos >= xtr.df["X.XTR", "start.base"] & pos <= xtr.df["X.XTR", "end.base"]
-centromeres <- get(data(list=paste("centromeres", config["build"], sep=".")))
-gap <- rep(FALSE, length(snpID))
-for (i in 1:nrow(centromeres)) {
-  ingap <- chrom == centromeres$chrom[i] & pos > centromeres$left.base[i] &
-    pos < centromeres$right.base[i]
-  gap <- gap | ingap
-}
-table(chrom, gap)
-
-#ignore includes intensity-only and failed snps
-ignore <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1 
-snp.exclude <- ignore | hla | xtr | gap
-table(snp.exclude)
-
-# maf threshold
-if (!is.null(maf)) {
-  afreq <- getobj(config["out_afreq_file"])
-  stopifnot(allequal(rownames(afreq), snpID))
-  maf.filt <- is.na(afreq[,"all"]) | afreq[,"all"] <= maf | afreq[,"all"] >= (1-maf)
-  snp.exclude <- snp.exclude | maf.filt
-}
-table(snp.exclude)
-
-snp.ok <- snpID[!snp.exclude]
+snp.ok <- getobj(config["out_eligible_snps"])
 length(snp.ok)
 
 file <- file.path(config["out_anom_dir"], paste(config["project"], "BAF.filtered.all.RData", sep="."))
@@ -165,7 +128,7 @@ if (sum(any.chk) > 0) {
   write.csv(datx, file=csv.file, quote=FALSE, row.names=FALSE)
 
   # plot (non-XY)
-  snp.ineligible <- snpID[snp.exclude]
+  snp.ineligible <- setdiff(snpID, snp.ok)
   png.file <- file.path(config["out_plot_dir"], paste(config["out_plot_prefix"], "_%003d.png", sep=""))
   png(png.file, width=720, height=720)
   anomStatsPlotIdeogram(blData, genoData, anom.stats=long.chk, snp.ineligible=snp.ineligible,
