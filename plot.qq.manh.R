@@ -9,7 +9,8 @@ config <- readConfig(args[1])
 print(config)
 
 # variables
-snpAnnot <- pData(getobj(config["annot_snp_file"]))
+snpAnnot <- getobj(config["annot_snp_file"])
+snpID <- getSnpID(snpAnnot)
 pathprefix <- config["assoc_output"]
 pathprefix
 actions <-  config["gene_action"]
@@ -45,14 +46,14 @@ for (i in 1:length(actions))
   # only keep chroms in plotchroms
   if (!is.na(config["plot_chroms"]))
   {
-    sub <- combined$snpID %in% snpAnnot$snpID[snpAnnot$chromosome %in% plotchroms]
+    sub <- combined$snpID %in% snpID[getChromosome(snpAnnot) %in% plotchroms]
   } else {
     sub <- rep(TRUE, nrow(combined))
   }
   
   # add filters, NOT subsetted with plotchroms
-  stopifnot(all(combined$snpID %in% snpAnnot$snpID))
-  combined$quality.filter <- snpAnnot[match(combined$snpID,snpAnnot$snpID), qf]
+  stopifnot(all(combined$snpID %in% snpID))
+  combined$quality.filter <- getVariable(snpAnnot, qf, index=match(combined$snpID,snpID))
   combined$qual.maf.filter <- combined$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>as.numeric(config["maf.filter"])
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
   save(combined, file=fname)
@@ -94,31 +95,23 @@ for (i in 1:length(actions))
     png(paste(qqfname,"_model_", i, "_",actions[i],"_manh_",type,".png",sep=""), width=720, height=720)
     par(mfrow=c(3,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
     pvaln <- pval[(!is.na(pval)) & sub]
-    chromosome <- snpAnnot$chromosome[match(combined$snpID[(!is.na(pval)) & sub],snpAnnot$snpID)]
-    chroms <- 23:26
-    names(chroms) <- c("X","XY","Y","M")
-    idx <- match(chroms, unique(chromosome))
-    chrom.labels <- unique(chromosome)
-    chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
+    chromosome <- getChromosome(snpAnnot, index=match(combined$snpID[(!is.na(pval)) & sub],snpID), char=TRUE)
     title <- paste("no filter\nN =", length(pvaln))
-    manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
+    manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - filtered, subsetted with plotchroms
     pvaln <- pval[combined$quality.filter & (!is.na(pval)) & sub]
-    chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$quality.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
-    idx <- match(chroms, unique(chromosome))
-    chrom.labels <- unique(chromosome)
-    chrom.labels[idx[!is.na(idx)]] <- names(chroms)[!is.na(idx)]
+    chromosome <- getChromosome(snpAnnot, index=match(combined$snpID[combined$quality.filter & (!is.na(pval)) & sub],snpID), char=TRUE)
     title <- paste("quality filter\nN =", length(pvaln))
-    manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
+    manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - maf filtered, subsetted with plotchroms
-    chromosome <- snpAnnot$chromosome[match(combined$snpID[combined$qual.maf.filter & (!is.na(pval)) & sub],snpAnnot$snpID)]
+    chromosome <- getChromosome(snpAnnot, index=match(combined$snpID[combined$qual.maf.filter & (!is.na(pval)) & sub],snpID), char=TRUE)
     pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
     title <- paste("quality filter + MAF >",config["maf.filter"],"\nN =", length(pvaln))
-    manhattanPlot(p=pvaln,chromosome=chromosome,chrom.labels=chrom.labels,
+    manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
     dev.off()
   }

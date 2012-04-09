@@ -37,6 +37,9 @@ sub <- NULL
 # make genotypedata and intensityData
 scanAnnot <- getobj(config["annot_scan_file"])
 snpAnnot <- getobj(config["annot_snp_file"])
+snpID <- getSnpID(snpAnnot)
+chrom <- getChromosome(snpAnnot)
+rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"])
 nc <- NcdfGenotypeReader(config["nc_geno_file_samp"])
 (genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)) 
 xync <- NcdfIntensityReader(config["nc_xy_file_samp"])
@@ -52,7 +55,7 @@ for (i in 1:length(actions))
       combined <- getobj(fname)
       if (!is.na(config["plot_chroms"]))
       {
-         sub <- combined$snpID %in% snpAnnot$snpID[snpAnnot$chromosome %in% plotchroms]
+         sub <- combined$snpID %in% snpID[chrom %in% plotchroms]
       } else {
          sub <- rep(TRUE, nrow(combined))
       }
@@ -63,9 +66,9 @@ for (i in 1:length(actions))
       snp.intid <- combined.intid[1:27,]
       
       pdf(paste(qqfname,"_model_", i, "_",actions[i],"_lowP_hits.pdf",sep="")) 
-      par(mfrow=c(3,3))        
-      text <- paste(pData(snpAnnot)[match(snp.intid$snpID, snpAnnot$snpID), config["annot_snp_rsIDCol"]],
-                    "Chr",snpAnnot$chromosome[match(snp.intid$snpID, snpAnnot$snpID)])
+      par(mfrow=c(3,3))
+      ind <- match(snp.intid$snpID, snpID)
+      text <- paste(rsID[ind], "Chr", chrom[ind])
       mtxt <- paste(text,"\np-value",sprintf("%.2e",
                     snp.intid[,paste("model.",i, ".", actions[i], ".LR.pval.G", sep="")]))
 
