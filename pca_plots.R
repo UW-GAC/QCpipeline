@@ -120,9 +120,11 @@ snpAnnot <- getobj(config["annot_snp_file"])
 snp <- snpAnnot[match(corr$snp.id, getVariable(snpAnnot, idCol)),]
 chrom.labels <- unique(getChromosome(snp, char=TRUE))
 
+nev <- as.integer(config["num_evs_to_plot"])
+
 png(paste(config["out_corr_plot_prefix"], "_%03d.png", sep=""), height=720, width=720)
 par(mfrow=c(4,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
-for(i in 1:8){
+for(i in 1:nev){
   snpCorrelationPlot(abs(corr$snpcorr[i,]), snp$chromosome,
                      chrom.labels=chrom.labels,
                      main=paste("Eigenvector",i), ylim=c(0,1))
@@ -132,5 +134,5 @@ dev.off()
 # scree plot
 x <- pca$eigenval/sum(pca$eigenval)
 pdf(config["out_scree_plot"], width=6, height=6)
-plot(1:8,100*x[1:8], xlab="Eigenvalue", ylab="Percent of variance accounted for")
+plot(1:nev,100*x[1:nev], xlab="Eigenvalue", ylab="Percent of variance accounted for")
 dev.off()

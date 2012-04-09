@@ -24,7 +24,8 @@ gdsobj <- openfn.gds(config["gds_geno_file"])
 pca <- snpgdsPCA(gdsobj, sample.id=scan.ids, snp.id=snp.ids)
 save(pca, file=config["out_pca_file"])
 
-pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:8)
+nev <- as.integer(config["num_evs_to_plot"])
+pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:nev)
 save(pca.corr, file=config["out_corr_file"])
 
 closefn.gds(gdsobj)
