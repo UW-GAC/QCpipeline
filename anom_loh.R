@@ -11,6 +11,13 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "nc_bl_file", "nc_geno_file",
+              "out_anom_dir", "out_eligible_snps", "project")
+optional <- c("scan_exclude_file")
+default <- c(NA)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # read start and end scan numbers

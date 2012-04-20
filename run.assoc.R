@@ -1,3 +1,8 @@
+##########
+# Run association tests
+# Usage: R --args config.file chromosome < run.assoc.R
+##########
+
 library(GWASTools)
 library(QCpipeline)
 sessionInfo()
@@ -6,7 +11,18 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "covar.list", "covars_as_factor", "gene_action", "model_type", "nc_geno_file", "outcome")
+optional <- c("assoc_output", "chrom_filter", "scan_exclude")
+default <- c("assoc", NA, NA)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
+
+# read chromosome
+if (length(args) < 2) stop("missing chromosome")
+chromosome.set <- as.numeric(args[2])  # this sets chromosome numbers given in args on the command line
+chromosome.set
 
 # make genotypedata
 scanAnnot <- getobj(config["annot_scan_file"])
@@ -37,9 +53,6 @@ if (!is.na(config["chrom_filter"])) {
 }
 
 # chromosomes to run analysis on
-chromosome.set <- as.numeric(args[2])  # this sets chromosome numbers given in args on the command line
-chromosome.set
-
 # outcome variables
 outcome <- config["outcome"]
 outcome <- unlist(strsplit(outcome," "))

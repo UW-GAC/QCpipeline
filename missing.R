@@ -11,6 +11,16 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
+optional <- c("annot_snp_IntensityOnlyCol", "out_e1_file", "out_e1_hist",
+              "out_e2_file", "out_e2_hist", "out_n1_file", "out_n2_file",
+              "out_snp_summary", "round2", "scan_exclude_file")
+default <- c(NA, "missing.e1.RData", "missing_e1.pdf", "missing.e2.RData",
+             "missing_e2.pdf", "missing.n1.RData", "missing.n2.RData",
+             "snp_summary.RData", TRUE, NA)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 (scanAnnot <- getobj(config["annot_scan_file"]))

@@ -11,6 +11,14 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
+optional <- c("annot_snp_dupSnpCol", "annot_snp_rsIDCol", "dupsnp_scan_exclude_file",
+              "out_dupsnp_file")
+default <- c("dup.any.id", "rsID", NA, "dup_snps.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 (scanAnnot <- getobj(config["annot_scan_file"]))

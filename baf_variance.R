@@ -12,6 +12,14 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_snp_file", "nc_bl_file", "nc_geno_file")
+optional <- c("annot_snp_missingCol", "out_baf_mean_file", "out_baf_med_file",
+              "out_baf_sd_file")
+default <- c("missing.n1", "baf_mean_by_scan_chrom.RData", "median_baf_sd_by_scan.RData",
+             "baf_sd_by_scan_chrom.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 (snpAnnot <- getobj(config["annot_snp_file"]))

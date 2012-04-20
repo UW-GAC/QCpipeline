@@ -11,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "nc_subj_geno_file", "scan_include_file")
+optional <- c("out_hwe_prefix", "scan_chrom_filter")
+default <- c("hwe", NA)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 nc <- NcdfGenotypeReader(config["nc_subj_geno_file"])

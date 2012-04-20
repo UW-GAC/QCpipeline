@@ -12,6 +12,17 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "ext_annot_scan_file",
+              "out_comb_gds_geno_file", "out_disc_file", "out_pruned_file",
+              "study_unduplicated_file")
+optional <- c("annot_scan_hapmapCol", "annot_scan_subjectCol", "annot_scan_unrelCol",
+              "annot_snp_rsIDCol", "annot_snp_missingCol", "ext_scan_exclude_file",
+              "ext_annot_scan_unrelCol", "num_evs_to_plot", "out_corr_file", "out_pca_file")
+default <- c("geno.cntl", "subjectID", "unrelated", "rsID", "missing.n1", NA,
+             "unrelated", 12, "pca_combined_corr.RData", "pca_combined.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # pruned SNPs

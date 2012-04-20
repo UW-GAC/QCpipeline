@@ -12,6 +12,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("gds_geno_file", "out_afreq_file", "out_snp_file")
+optional <- c("out_inbrd_file")
+default <- c("inbreed_coeff.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # SNP filter - contain the condition of every two SNPs being at least 15kb apart

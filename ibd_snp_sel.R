@@ -11,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_snp_file", "out_afreq_file")
+optional <- c("annot_snp_missingCol", "out_snp_file")
+default <- c("missing.n1", "ibd_snp_sel.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 (snpAnnot <- getobj(config["annot_snp_file"]))

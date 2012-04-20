@@ -11,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file", "baf_mean_file", "baf_sd_file", "nc_bl_file")
+optional <- c("annot_scan_hetACol", "annot_snp_missingCol", "ibd_con_file", "out_baf_asym", "out_baf_asym_plot_prefix", "out_baf_sd_boxplot", "out_baf_sd_outliers", "out_baf_sd_plot_prefix", "out_het_boxplot", "out_het_outliers", "out_het_plot_prefix", "out_ibd_plot_prefix", "plot_all_unknown", "race_unknown", "range_het", "range_sd")
+default <- c("het.A", "missing.n1", NA, "baf_aysm.RData", "baf_asym", "baf_sd.pdf", "baf_sd_outl.RData", "baf_sd_outl", "het_outl.pdf", "het_outl.RData", "het_outl", "high_con", TRUE, NA, 1.5, 1.5)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 (scanAnnot <- getobj(config["annot_scan_file"]))
@@ -31,7 +37,6 @@ baf.sd <- getobj(config["baf_sd_file"])
 
 # definition of outliers - range.sd*i(nterquartile range)
 range.sd <- as.numeric(config["range_sd"])
-if (is.na(range.sd)) range.sd <- 1.5
 
 # create a matrix
 bsd <- matrix(nrow=nrow(baf.sd[[1]]), ncol=length(baf.sd),
@@ -78,7 +83,7 @@ if (nbaf > 0) {
 
   png(paste(config["out_baf_sd_plot_prefix"], "_%03d.png", sep=""), width=720, height=720)
   chromIntensityPlot(blData, scan.ids=baf.outl, chrom.ids=rep(chr.sel, nbaf),
-                     code=rep("BAF SD", nbaf), snp.exclude=snp.exclude, cex=0.25)
+                     info=rep("BAF SD", nbaf), snp.exclude=snp.exclude, cex=0.25)
   dev.off()
 }
 
@@ -112,7 +117,7 @@ if (nasym > 0) {
 
   png(paste(config["out_baf_asym_plot_prefix"], "_%03d.png", sep=""), width=720, height=720)
   chromIntensityPlot(blData, scan.ids=asym, chrom.ids=rep(chr.sel, nasym),
-                     code=rep("Asymmetry", nasym), snp.exclude=snp.exclude, cex=0.25)
+                     info=rep("Asymmetry", nasym), snp.exclude=snp.exclude, cex=0.25)
   dev.off()
 }
 
@@ -131,14 +136,13 @@ if (!is.na(config["race_unknown"]) & as.logical(config["plot_all_unknown"])) {
   if (nunk > 0) {   
     png(paste(config["out_het_plot_prefix"], "_raceunknown_%03d.png", sep=""), width=720, height=720)
     chromIntensityPlot(blData, scan.ids=unknown.ids, chrom.ids=rep(chr.sel, nunk),
-                       code=rep("race unknown", nunk), snp.exclude=snp.exclude, cex=0.25)
+                       info=rep("race unknown", nunk), snp.exclude=snp.exclude, cex=0.25)
     dev.off()
   }
 }
 
 # definition of outliers 
 range.het <- as.numeric(config["range_het"])
-if (is.na(range.het)) range.het <- 1.5
 
 pdf(config["out_het_boxplot"], width=6, height=6)
 bp <- boxplot(samp$het.A ~ as.factor(samp$race), range=range.het, varwidth=TRUE, las=2,
@@ -162,7 +166,7 @@ if (nhet > 0) {
   
   png(paste(config["out_het_plot_prefix"], "_%03d.png", sep=""), width=720, height=720)
   chromIntensityPlot(blData, scan.ids=outliers$scanID, chrom.ids=rep(chr.sel, nhet),
-                     code=outliers$code, snp.exclude=snp.exclude, cex=0.25)
+                     info=outliers$code, snp.exclude=snp.exclude, cex=0.25)
   dev.off()
 }
 
@@ -175,7 +179,7 @@ if (!is.na(config["ibd_con_file"])) {
   
   png(paste(config["out_ibd_plot_prefix"], "_%03d.png", sep=""), width=720, height=720)
   chromIntensityPlot(blData, scan.ids=ibd.con, chrom.ids=rep(chr.sel, ncon),
-                     code=rep("high connectivity", ncon), snp.exclude=snp.exclude, cex=0.25)
+                     info=rep("high connectivity", ncon), snp.exclude=snp.exclude, cex=0.25)
 }
 
 

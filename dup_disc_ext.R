@@ -11,6 +11,17 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "ext_annot_scan_file",
+              "ext_annot_snp_file", "ext_nc_geno_file", "nc_geno_file")
+optional <- c("annot_scan_subjectCol", "annot_snp_missingCol", "annot_snp_rsIDCol",
+              "disc_scan_exclude_file", "ext_annot_scan_subjectCol",
+              "ext_annot_snp_missingCol", "ext_annot_snp_rsIDCol",
+              "ext_scan_exclude_file", "out_disc_file", "out_disc_plot")
+default <- c("subjectID", "missing.n1", "rsID", NA, "subjectID", NA, "rsID",
+             NA, "dup_disc_ext.RData", "dup_disc_ext.pdf")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)
@@ -34,7 +45,13 @@ names(snp.study) <- c("rsID", "chromosome", "position")
 nrow(snp.study)
 
 # remove missing from external
-snp.ext <- pData(ext.snpAnnot)[getVariable(ext.snpAnnot, config["ext_annot_snp_missingCol"]) < 1,
+if (!is.na(config["ext_annot_snp_missingCol"])) {
+  ext.sel <- getVariable(ext.snpAnnot, config["ext_annot_snp_missingCol"]) < 1
+} else {
+  ext.sel <- rep(TRUE, nrow(ext.snpAnnot))
+}
+table(ext.sel)
+snp.ext <- pData(ext.snpAnnot)[ext.sel,
                                c(config["ext_annot_snp_rsIDCol"], "chromosome", "position")]
 names(snp.ext) <- c("rsID", "chromosome", "position")
 nrow(snp.ext)

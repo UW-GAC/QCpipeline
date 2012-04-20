@@ -1,3 +1,8 @@
+##########
+# Merge chromosomes for association tests
+# Usage: R --args config.file start end < merge.chroms.R
+##########
+
 library(GWASTools)
 library(QCpipeline)
 sessionInfo()
@@ -6,7 +11,18 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("assoc_output", "gene_action")
+optional <- NULL
+default <- NULL
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
+
+# chromosomes to merge
+if (length(args) < 3) stop("missing start and end chromosomes")
+start <- as.integer(args[2])
+end <- as.integer(args[3])
 
 # merge output 
 # output file name example: study.model.1.additive.chr.24_24.RData
@@ -19,7 +35,7 @@ for (i in 1:length(actions))
 {
   cnt <- NULL
   tmp <- list()
-  for (j in (args[2]:args[3]))
+  for (j in start:end)
   {
     fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".chr.",j,"_",j,".RData", sep="")
     dat <- NULL

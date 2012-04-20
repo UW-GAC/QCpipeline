@@ -11,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("out_anom_dir", "project")
+optional <- NULL
+default <- NULL
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # read end and by scan numbers

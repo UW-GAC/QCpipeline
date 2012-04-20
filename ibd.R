@@ -12,12 +12,13 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
-print(config)
 
-# default method
-if (is.na(config["ibd_method"])) {
-  config["ibd_method"] <- "MoM"
-}
+# check config and set defaults
+required <- c("gds_geno_file", "out_snp_file")
+optional <- c("ibd_method", "out_ibd_file", "out_ibd_kc32_file", "scan_ibd_include_file")
+default <- c("MoM", "ibd.RData", "ibd_kc32.RData", NA)
+config <- setConfigDefaults(config, required, optional, default)
+print(config)
 
 snp.ids <- getobj(config["out_snp_file"])
 length(snp.ids)

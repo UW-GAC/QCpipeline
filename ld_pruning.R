@@ -12,6 +12,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "build", "gds_geno_file", "study_unrelated_file")
+optional <- c("annot_snp_rsIDCol", "ld_r_threshold", "ld_win_size", "out_disc_file", "out_pruned_file")
+default <- c("rsID", 0.32, 10, NA, "snps_pruned.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # select scans
@@ -26,14 +32,14 @@ length(scan.sel)
 snpID <- getSnpID(snpAnnot)
 
 # remove discordant SNPs if duplicate discordance has been run
-if (file.exists(config["out_disc_file"])) {
+if (!is.na(config["out_disc_file"])) {
   discord <- getobj(config["out_disc_file"])
   disc <- discord$discordance.by.snp
   snp.conc.rsid <- row.names(disc[disc$discordant == 0,])
   rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"])
   snp.sel <- snpID[rsID %in% snp.conc.rsid]
 } else {
-  message("discordance file not found; using all SNPs")
+  message("no discordance file specified; using all SNPs")
   snp.sel <- snpID
 }
 length(snp.sel)

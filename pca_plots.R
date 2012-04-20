@@ -11,6 +11,16 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file",
+              "ext_annot_scan_file",  "out_corr_file", "out_pca_file")
+optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_raceCol",
+              "num_evs_to_plot", "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
+              "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot")
+default <- c(NA, "rsID", "pop.group", 12, "pca_corr", "pca_corr_pruned", "pca_dens.pdf",
+             "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # check for type
@@ -50,10 +60,10 @@ if (type == "study") {
 pca <- getobj(config["out_pca_file"])
 samp <- samp[match(pca$sample.id, samp$scanID),]
 stopifnot(allequal(pca$sample.id, samp$scanID))
-table(samp$race, samp$ethnicity, exclude=NULL)
+table(samp$race, samp$ethnicity, useNA="ifany")
 
 # color by race
-table(samp$race, exclude=NULL)
+table(samp$race, useNA="ifany")
 Sys.setlocale("LC_COLLATE", "C")
 samp$plotcol <- "black"
 race <- as.character(sort(unique(samp$race)))
@@ -64,10 +74,10 @@ if (length(race) > 0) {
     samp$plotcol[sel] <- config[r]
   }
 }
-table(samp$plotcol, exclude=NULL)
+table(samp$plotcol, useNA="ifany")
 
 # plot symbol by ethnicity
-table(samp$ethnicity, exclude=NULL)
+table(samp$ethnicity, useNA="ifany")
 samp$plotsym <- 1
 ethn <- as.character(sort(unique(samp$ethnicity)))
 if (length(ethn) > 0) {
@@ -77,7 +87,7 @@ if (length(ethn) > 0) {
     samp$plotsym[sel] <- as.integer(config[e])
   }
 }
-table(samp$plotsym, exclude=NULL)
+table(samp$plotsym, useNA="ifany")
 
 # labels
 (x <- pca$eigenval[1:4]/sum(pca$eigenval))

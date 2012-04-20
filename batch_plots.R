@@ -11,6 +11,22 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_scan_raceCol", "inten_file")
+optional <- c("annot_scan_batchCol", "annot_scan_missAutoCol", "annot_scan_redoCol",
+              "out_chisq_file", "out_fisher_file", "out_hist_plot", "out_inten_plot",
+              "out_lambda_race_plot", "out_mcr_plot", "out_meanchisq_nscan_plot",
+              "out_meanchisq_race_plot", "out_meanmcr_meanchisq_plot",
+              "out_meanmcr_meanor_plot", "out_meanmcr_nscan_plot",
+              "out_meanor_nscan_plot", "out_meanor_race_plot")
+default <- c("Sample.Plate", "miss.e1.auto", "Redo.Processing.Plate", "batch_chisq",
+             "batch_fisher", "batch_nscan_hist.pdf", "batch_chr1inten.pdf",
+             "batch_lambda_race.pdf", "batch_mcr.pdf", "batch_meanchisq_nscan.pdf",
+             "batch_meanchisq_race.pdf", "batch_meanmcr_meanchisq.pdf",
+             "batch_meanmcr_meanor.pdf", "batch_meanmcr_nscan.pdf",
+             "batch_meanor_nscan.pdf", "batch_meanor_race.pdf")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # check for test
@@ -119,13 +135,13 @@ if (type == "chisq") {
 }
 
 if (type == "chisq") {
-  pdf(config["out_meanchisq_ncsan_plot"], width=6, height=6)
+  pdf(config["out_meanchisq_nscan_plot"], width=6, height=6)
   tmp <- batch.res$mean.chisq[match(names(bn), names(batch.res$mean.chisq))]
   plot(bn, tmp, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab="number of samples per batch", pch=pch)
   if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", pch=2)
   dev.off()
 } else if (type == "fisher") {
-  pdf(config["out_meanor_ncsan_plot"], width=6, height=6)
+  pdf(config["out_meanor_nscan_plot"], width=6, height=6)
   tmp <- batch.res$mean.or[match(names(bn), names(batch.res$mean.or))]
   plot(bn, tmp, ylab="mean Fisher's OR", xlab="number of samples per batch", pch=pch)
   if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", pch=2)

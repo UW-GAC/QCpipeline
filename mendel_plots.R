@@ -11,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_snp_file", "mend.bin.end", "mend.bin.start", "out_mend_file", "nc_geno_file", "nc_xy_file")
+optional <- c("annot_snp_rsIDCol", "out_mend_clust_prefix")
+default <- c("rsID", "mendel_clust")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 men <- getobj(config["out_mend_file"])

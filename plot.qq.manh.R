@@ -1,3 +1,8 @@
+##########
+# QQ and Manhattan plots for association tests
+# Usage: R --args config.file < plot.qq.manh.R
+##########
+
 library(GWASTools)
 library(QCpipeline)
 sessionInfo()
@@ -6,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_snp_file", "assoc_output", "covar.list", "gene_action", "model_type", "outcome")
+optional <- c("maf.filter", "plot_chroms", "plot_out", "quality.filter", "signif_line")
+default <- c(0.02, NA, "assoc", "quality.filter", 5e-8)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # variables
@@ -34,7 +45,6 @@ if (!is.na(config["plot_chroms"])) {
   plotchroms
 }
 sub <- NULL
-if (is.na(config["signif_line"])) config["signif_line"] <- 5e-8
 
 for (i in 1:length(actions))
 {

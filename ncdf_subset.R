@@ -11,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "nc_geno_file", "nc_file")
+optional <- c("chrom_anom_file", "filterYinF", "scan_include_file")
+default <- c(NA, TRUE, NA)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 (scanAnnot <- getobj(config["annot_scan_file"]))

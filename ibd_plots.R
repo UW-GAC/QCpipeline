@@ -11,6 +11,17 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "out_ibd_kc32_file")
+optional <- c("annot_scan_subjectCol", "exp_rel_file", "out_ibd_con_file",
+              "out_ibd_con_plot", "out_ibd_exp_plot", "out_ibd_obs_plot",
+              "out_ibd_rel_file", "out_ibd_unobs_dup_file", "out_ibd_unobs_rel_file",
+              "scan_ibd_include_file")
+default <- c("subjectID", NA, "ibd_connectivity.RData", "ibd_connectivity.pdf",
+             "ibd_expected.pdf", "ibd_observed.pdf", "ibd_obsrel.RData",
+             "ibd_unobs_dup.RData", "ibd_unobs_rel.RData", NA)
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 ibd <- getobj(config["out_ibd_kc32_file"])
@@ -47,7 +58,7 @@ if (!is.na(config["exp_rel_file"])) {
   names(ibd)[names(ibd) == "relation"] <- "rel2"
   ibd$exp.rel <- ibd$rel
   ibd$exp.rel[is.na(ibd$exp.rel)] <- ibd$rel2[is.na(ibd$exp.rel)]
-  print(table(ibd$exp.rel, exclude=NULL))
+  print(table(ibd$exp.rel, useNA="ifany"))
   ibd$rel <- NULL
   ibd$rel2 <- NULL
 } else {

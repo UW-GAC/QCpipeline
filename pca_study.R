@@ -12,6 +12,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("gds_geno_file", "out_pruned_file", "study_unrelated_file")
+optional <- c("num_evs_to_plot", "out_corr_file", "out_pca_file")
+default <- c(12, "pca_corr.RData", "pca.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 snp.ids <- getobj(config["out_pruned_file"])

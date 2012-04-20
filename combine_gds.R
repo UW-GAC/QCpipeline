@@ -12,6 +12,14 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "ext_annot_scan_file",
+              "ext_annot_snp_file", "ext_nc_geno_file", "nc_geno_file")
+optional <- c("annot_scan_subjectCol", "annot_snp_rsIDCol", "ext_annot_scan_subjectCol",
+              "ext_annot_snp_rsIDCol", "out_comb_gds_geno_file")
+default <- c("subjectID", "rsID", "subjectID", "rsID", "comb_geno.gds")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)

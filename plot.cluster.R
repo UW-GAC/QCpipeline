@@ -1,3 +1,8 @@
+##########
+# Cluster plots for association tests
+# Usage: R --args config.file < plot.cluster.R
+##########
+
 library(GWASTools)
 library(QCpipeline)
 sessionInfo()
@@ -6,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "annot_snp_file", "assoc_output", "covar.list", "gene_action", "model_type", "nc_geno_file_samp", "nc_xy_file_samp", "outcome")
+optional <- c("annot_snp_rsIDCol", "plot_chroms", "plot_out", "quality.filter")
+default <- c("rsID", NA, "assoc", "quality.filter")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 

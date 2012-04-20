@@ -11,6 +11,12 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
+
+# check config and set defaults
+required <- c("annot_scan_file", "nc_geno_file")
+optional <- c("annot_scan_subjectCol", "mend_scan_exclude_file", "out_mend_file")
+default <- c("subjectID", NA, "mendel_err.RData")
+config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 (scanAnnot <- getobj(config["annot_scan_file"]))
