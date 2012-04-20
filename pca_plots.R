@@ -14,11 +14,12 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file",
-              "ext_annot_scan_file",  "out_corr_file", "out_pca_file")
-optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_raceCol",
+              "out_corr_file", "out_pca_file")
+optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
+              "ext_annot_scan_raceCol",
               "num_evs_to_plot", "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
               "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot")
-default <- c(NA, "rsID", "pop.group", 12, "pca_corr", "pca_corr_pruned", "pca_dens.pdf",
+default <- c(NA, "rsID", NA, "pop.group", 12, "pca_corr", "pca_corr_pruned", "pca_dens.pdf",
              "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
