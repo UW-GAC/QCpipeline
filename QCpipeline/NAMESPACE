@@ -4,10 +4,8 @@ import(grid)
 import(gridBase)
 import(hexbin)
 import(Biostrings)
-importFrom(quantsmooth, paintCytobands, lengthChromosome)
 
 export(readConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
        dbgapScanAnnotation, dbgapSnpAnnotation,
-       make.allele.mappings, make.allele.annotation,
-       chromIntensityPlotIdeogram, anomStatsPlotIdeogram)
+       make.allele.mappings, make.allele.annotation)
