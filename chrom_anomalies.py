@@ -7,17 +7,53 @@ import os
 import subprocess
 from optparse import OptionParser
 
-usage = """python %prog [options] config start end by"""
+usage = """%prog [options] config start end by
+
+Detect chromosome anomalies with the following steps:
+1) Find BAF variance (median BAF SD)
+2) If using MAF threshold, calculate allele frequency
+3) Detect BAF anomalies, running samples in parallel with start,end,by
+4) Combine BAF anomalies
+5) Detect LOH anomalies, running samples in parallel with start,end,by
+6) Combine LOH anomalies
+7) Calculate anomaly stats and make plots of anomalies > thresh.indiv 
+   (or sum on a chromosome > thresh.sum)
+
+Required config parameters:
+annot_scan_file  scan annotation file
+annot_snp_file   snp annotation file
+build            genome build (hg18 or hg19)
+nc_bl_file       BAF/LRR netCDF file
+nc_geno_file     genotype netCDF file
+project          project name (prepend to output files)
+out_anom_dir     output directory for anomaly data
+out_plot_dir     output directory for anomaly plots
+
+Optional config parameters [default]:
+annot_snp_IntensityOnlyCol  [NA]                            column of intensity-only in snp annotation
+annot_snp_missingCol        [missing.n1]                    column of missing call rate in snp annotation
+chromXY                     [FALSE]                         find anomalies in pseudoautosomal region?  
+plot.win                    [1]                             size of plot window (multiple of anomaly length)
+scan_exclude_file           [NA]                            vector of scanID to exclude
+thresh.indiv                [10]                            threshold for sum of all anomalies on a chromosome (Mb)
+thresh.sum                  [5]                             threshold for plotting individual anomalies (Mb)  
+out_afreq_file              [allele_freq.RData]             output (or existing) allele frequency file
+out_baf_mean_file           [baf_mean_by_scan_chrom.RData]  output BAF mean file
+out_baf_med_file            [median_baf_sd_by_scan.RData]   output (or existing) median BAF SD file
+out_baf_sd_file             [baf_sd_by_scan_chrom.RData]    output BAF SD file
+out_eligible_snps           [snps_eligible.RData]           output file of eligible SNPs
+out_plot_prefix             [long_plot]                     output prefix for anomaly plots
+"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
+parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
+                  help="cluster queue name [default %default]")
 parser.add_option("-m", "--maf", dest="maf", default=None,
                   help="do not use SNPs with MAF below this threshold")
-parser.add_option("-q", "--queue", dest="qname",
-                  default="gcc.q", help="cluster queue name")
 parser.add_option("--baf", dest="baf",
                   action="store_true", default=False,
                   help="Run BAF detection")

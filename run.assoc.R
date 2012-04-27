@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "covar.list", "covars_as_factor", "gene_action", "model_type", "nc_geno_file", "outcome")
-optional <- c("assoc_output", "chrom_filter", "scan_exclude")
+optional <- c("out_assoc_prefix", "scan_chrom_filter", "scan_exclude")
 default <- c("assoc", NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
@@ -43,8 +43,8 @@ for (i in idx)
 }
   
 # sample/subject chromosome.filter sorted by scanID
-if (!is.na(config["chrom_filter"])) {
-  filt <- getobj(config["chrom_filter"])
+if (!is.na(config["scan_chrom_filter"])) {
+  filt <- getobj(config["scan_chrom_filter"])
   stopifnot(all(rownames(filt) == scanAnnot$scanID))
   chk <- apply(filt, 1, function(x) !all(x==F))
   print(table(chk)) # TRUE: to be kept for association
@@ -97,7 +97,7 @@ stopifnot(length(outcome) == len & length(model.type) == len &
           length(gene.action.list) == len & length(covar.list) == len )
 
 # output
-outfile <- config["assoc_output"]
+outfile <- config["out_assoc_prefix"]
 
 # scan.exclude
 scan.exclude <- NULL

@@ -13,21 +13,22 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "assoc_output", "covar.list", "gene_action", "model_type", "outcome")
-optional <- c("maf.filter", "plot_chroms", "plot_out", "quality.filter", "signif_line")
-default <- c(0.02, NA, "assoc", "quality.filter", 5e-8)
+required <- c("annot_snp_file", "out_assoc_prefix", "covar.list", "gene_action",
+              "model_type", "outcome")
+optional <- c("annot_snp_filtCol", "maf.filter", "plot_chroms", "out_plot_prefix", "signif_line")
+default <- c("quality.filter", 0.02, NA, "assoc", 5e-8)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # variables
 snpAnnot <- getobj(config["annot_snp_file"])
 snpID <- getSnpID(snpAnnot)
-pathprefix <- config["assoc_output"]
+pathprefix <- config["out_assoc_prefix"]
 pathprefix
 actions <-  config["gene_action"]
 actions <- unlist(strsplit(actions," "))
 actions
-qqfname <- config["plot_out"]
+qqfname <- config["out_plot_prefix"]
 qqfname
 outcome <- config["outcome"]
 outcome <- unlist(strsplit(outcome," "))
@@ -38,7 +39,7 @@ model.type <- config["model_type"]
 model.type <- unlist(strsplit(model.type," "))
 stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
 model.type
-qf <- config["quality.filter"]
+qf <- config["annot_snp_filtCol"]
 qf
 if (!is.na(config["plot_chroms"])) {
   plotchroms <- getobj(config["plot_chroms"])

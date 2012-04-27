@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "nc_geno_file", "nc_xy_file", "out_hwe_prefix")
+required <- c("annot_snp_file", "nc_samp_geno_file", "nc_samp_xy_file", "out_hwe_prefix")
 optional <- c("annot_snp_missingCol", "annot_snp_rsIDCol", "out_clust_prefix", "out_inbrd_plot", "out_maf_plot", "out_qq_plot")
 default <- c("missing.n1", "rsID", "hwe_clust", "hwe_inbrd.pdf", "hwe_maf.png", "hwe_qq.png")
 config <- setConfigDefaults(config, required, optional, default)
@@ -91,9 +91,9 @@ sum(bins) #  - covers all snps in alog
 sum(unlist(lapply(ids,length)))
 bins
 
-xyNC <- NcdfIntensityReader(config["nc_xy_file"])
+xyNC <- NcdfIntensityReader(config["nc_samp_xy_file"])
 xyData <- IntensityData(xyNC, snpAnnot=snpAnnot)
-genoNC <- NcdfGenotypeReader(config["nc_geno_file"])
+genoNC <- NcdfGenotypeReader(config["nc_samp_geno_file"])
 genoData <- GenotypeData(genoNC, snpAnnot=snpAnnot)
 
 for(j in 1:3){  # independent sets of samples, each in a different png file

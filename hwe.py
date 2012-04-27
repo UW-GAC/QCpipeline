@@ -7,15 +7,42 @@ import os
 import subprocess
 from optparse import OptionParser
 
-usage = """python %prog [options] config start end by"""
+usage = """%prog [options] config start end by
+
+Test for deviations from Hardy-Weinberg Equilbrium and plot results.
+start, end, by are optional chromosome numbers to run in parallel.
+If given, the results from all chromosomes are merged.  Chromosome
+values > 23 are ignored.
+Cluster plots are randomly sampled SNPs from bins of pvalue.  There are
+3 sets of 9 SNPs from each bin and an additional 9*7 SNPs from the bins 
+flanking 1e-4.
+
+Required config parameters:
+annot_scan_file    scan annotation file
+annot_snp_file     snp annotation file
+nc_geno_file       genotype netCDF file (filtered subject-level recommended)
+nc_samp_geno_file  sample-level genotype netCDF file for plots
+nc_samp_xy_file    sample-level XY intensity netCDF file for plots
+scan_include_file  vector of scanID to include in HWE
+
+Optional config parameters [default]:
+annot_snp_missingCol  [missing.n1]     column of missing call rate in snp annotation
+annot_snp_rsIDCol     [rsID]           column of rsID in snp annotation
+scan_chrom_filter     [NA]             scan-chromosome filter matrix
+out_clust_prefix      [hwe_clust]      output prefix for cluster plots
+out_hwe_prefix        [hwe]            output prefix for HWE results
+out_inbrd_plot        [hwe_inbrd.pdf]  output histogram of inbreeding coefficients
+out_maf_plot          [hwe_maf.png]    output plot of MAF vs p value
+out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)
+"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
-parser.add_option("-q", "--queue", dest="qname",
-                  default="gcc.q", help="cluster queue name")
+parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
+                  help="cluster queue name [default %default]")
 (options, args) = parser.parse_args()
 
 if len(args) < 1 or len(args) > 4:
@@ -70,6 +97,6 @@ rscript = os.path.join(pipeline, job + ".R")
 if split:
     holdid = [jobid['hwe_merge']]
 else:
-    holdid=jobid['hwe']
+    holdid = jobid['hwe']
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 

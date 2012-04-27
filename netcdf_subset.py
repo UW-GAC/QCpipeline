@@ -7,15 +7,33 @@ import os
 import subprocess
 from optparse import OptionParser
 
-usage = """python %prog [options] config"""
+usage = """%prog [options] config
+
+Create subset netCDF and GDS files with chromosome anomalies filtered
+and scans excluded.
+
+Required config parameters:
+annot_scan_file  scan annotation file
+annot_snp_file   snp annotation file
+nc_file          input genotype netCDF file
+nc_geno_file     output genotype netCDF file
+gds_geno_file    output genotype GDS file
+
+Optional config parameters [default]:
+annot_snp_alleleACol  [NA]    column of allele A in snp annotation (for GDS file)
+annot_snp_alleleBCol  [NA]    column of allele B in snp annotation (for GDS file)
+annot_snp_rsIDCol     [NA]    column of rsID in snp annotation (for GDS file)
+chrom_anom_file       [NA]    data frame of chromosome anomalies to filter, with columns scanID, chromosome, left.base, right.base, whole.chrom
+filterYinF            [TRUE]  filter Y chromosome for females?
+scan_include_file     [NA]    vector of scanID to include (NA=all)"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
-parser.add_option("-q", "--queue", dest="qname",
-                  default="gcc.q", help="cluster queue name")
+parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
+                  help="cluster queue name [default %default]")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:

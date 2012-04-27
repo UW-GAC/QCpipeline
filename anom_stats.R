@@ -15,7 +15,7 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "nc_bl_file", "nc_geno_file",
               "out_anom_dir", "out_eligible_snps", "out_plot_dir", "project")
-optional <- c("annot_snp_IntensityOnlyCol", "chromXY", "out_plot_prefix", "out_plot_win",
+optional <- c("annot_snp_IntensityOnlyCol", "chromXY", "out_plot_prefix", "plot.win",
               "thresh.sum", "thresh.indiv", "scan_exclude_file")
 default <- c(NA, FALSE, "long_plot", 1, 5, 10, NA)
 config <- setConfigDefaults(config, required, optional, default)
@@ -138,7 +138,7 @@ if (sum(any.chk) > 0) {
   png.file <- file.path(config["out_plot_dir"], paste(config["out_plot_prefix"], "_%003d.png", sep=""))
   png(png.file, width=720, height=720)
   anomStatsPlotIdeogram(blData, genoData, anom.stats=long.chk, snp.ineligible=snp.ineligible,
-                win=as.integer(config["out_plot_win"]), centromere=centromeres, cex=0.25)
+                win=as.integer(config["plot.win"]), centromere=centromeres, cex=0.25)
   dev.off()
 } else {
   message("no long anomalies found")

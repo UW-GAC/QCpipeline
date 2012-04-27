@@ -7,15 +7,29 @@ import os
 import subprocess
 from optparse import OptionParser
 
-usage = """python %prog [options] config"""
+usage = """%prog [options] config
+
+SNP filters by ethnic group and sex:
+1) allele frequency
+2) heterozygosity
+
+Required config parameters:
+annot_scan_file  scan annotation file
+nc_geno_file     genotype netCDF file
+
+Optional config parameters [default]:
+scan_exclude_file   [NA]                 vector of scanID to exclude (all but one ethnicity)
+out_afreq_file      [allele_freq.RData]  output file for allele frequency
+out_het_file        [het_by_snp.RData]   output file for heterozygosity by snp
+"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
-parser.add_option("-q", "--queue", dest="qname",
-                  default="gcc.q", help="cluster queue name")
+parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
+                  help="cluster queue name [default %default]")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:

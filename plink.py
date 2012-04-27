@@ -7,15 +7,40 @@ import os
 import subprocess
 from optparse import OptionParser
 
-usage = """python %prog [options] config"""
+usage = """%prog [options] config
+
+Create subject-level PLINK files.
+1) Make ped and map files
+2) Convert to bed/bim/fam
+3) Create tar.gz file with bed/bim/fam
+An unfiltered file is always created from the sample-level netCDF 
+using subj.plink samples.
+If the "filtered" option is given, a filtered file is also created
+from the subject-level netCDF.
+
+Required config parameters:
+annot_scan_file       scan annotation file (with columns subj.plink, family, father, mother)
+annot_snp_alleleACol  column of allele A in snp annotation
+annot_snp_alleleBCol  column of allele B in snp annotation
+annot_snp_file        snp annotation file
+nc_samp_geno_file     sample-level genotype netCDF file
+out_log_prefix        output prefix for log files
+out_plink_prefix      output prefix for plink files
+
+Required for "filtered" option:
+nc_subj_geno_file     subject-level genotype netCDF file
+
+Optional config parameters [default]:
+annot_scan_subjectCol  [subjectID]  column of subjectID in scan annotation
+annot_snp_rsIDCol      [rsID]       column of rsID in snp annotation"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
-parser.add_option("-q", "--queue", dest="qname",
-                  default="gcc.q", help="cluster queue name")
+parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
+                  help="cluster queue name [default %default]")
 parser.add_option("-f", "--filtered", dest="filt",
                   action="store_true", default=False,
                   help="create filtered PLINK file")

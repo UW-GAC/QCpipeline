@@ -7,18 +7,84 @@ import os
 import subprocess
 from optparse import OptionParser
 
-usage = """python %prog [options] config"""
+usage = """%prog [options] config
+
+Principal Component Analysis with the following steps:
+1) If using "combined" option:
+  a) check duplicate discordance between datasets
+  b) create combined GDS file from two netCDF files
+2) LD pruning to select SNPs (unless file already exists)
+  - uses scans from study_unrelated_file
+3) PCA calculations
+  a) if combined, scans will be from study_unduplicated_file
+     plus unrelated hapmaps from study controls and external
+  b) if not combined, scans will be from study_unrelated_file only
+4) Plot results
+
+Required config parameters:
+annot_scan_file       scan annotation file
+annot_scan_raceCol    column of race in scan annotation
+annot_snp_file        snp annotation file
+build                 genome build (hg18 or hg19)
+gds_geno_file         genotype GDS file (filtered subject-level recommended)
+nc_geno_file          genotype netCDF file (filtered subject-level recommended)
+study_unrelated_file  vector of scanID for PCA and LD pruning (no hapmaps)
+
+Required for "combined" option:
+ext_annot_scan_file
+ext_annot_snp_file
+ext_nc_geno_file
+study_unduplicated_file  vector of scanID from study for combined PCA
+
+Optional config parameters [default]:
+annot_scan_ethnCol           [NA]                  column of ethnicity in scan annotation
+annot_scan_hapmapCol         [geno.cntl]           column of hapmap (0/1) in scan annotation
+annot_scan_subjectCol        [subjectID]           column of subjectID in scan annotation
+annot_scan_unrelCol          [unrelated]           column of unrelated (T/F) in scan annotation
+annot_snp_missingCol         [missing.n1]          column of missing call rate in snp annotation
+annot_snp_rsIDCol            [rsID]                column of rsID in snp annotation
+disc_scan_exclude_file       [NA]                  vector of scanID to exclude from discordance check
+ext_annot_scan_raceCol       [pop.group]           column of race in external scan annotation
+ext_annot_scan_subjectCol    [subjectID]           column of subjectID in external scan annoatation
+ext_annot_scan_unrelCol      [unrelated]           column of unrelated (T/F) in external scan annoatation
+ext_annot_snp_missingCol     [NA]                  column of missing call rate in external snp annotation
+ext_annot_snp_rsIDCol        [rsID]                column of rsID in external snp annotation
+ext_scan_exclude_file        [NA]                  vector of scanID to exclude from external dataset
+ld_r_threshold               [0.32]                r threshold for LD pruning (0.32 = sqrt(0.1))
+ld_win_size                  [10]                  size of sliding window for LD pruning (in Mb)
+num_evs_to_plot              [12]                  number of eigenvectors for correlation and scree plots
+out_comb_gds_geno_file       [comb_geno.gds]       output combined GDS file
+out_corr_file                [pca_corr.RData]      output file of PC-SNP correlations
+out_corr_plot_prefix         [pca_corr]            output prefix for correlation plots (all SNPs)
+out_corr_pruned_plot_prefix  [NA]                  output prefix for correlation plots (pruned SNPs only)
+out_dens_plot                [pca_dens.pdf]        output plot of EV2 vs EV1 with density sidebars
+out_disc_file                [dup_disc_ext.RData]  output duplicate discordance file
+out_disc_plot                [dup_disc_ext.pdf]    output duplicate discordance plot
+out_ev12_plot                [pca_ev12.pdf]        output plot of EV2 vs EV1
+out_pairs_plot               [pca_pairs.png]       output pairs plot of EV 1-4
+out_pca_file                 [pca.RData]           output file of PCA results
+out_pruned_file              [snps_pruned.RData]   output file of pruned snps
+out_scree_plot               [pca_scree.pdf]       output scree plot
+
+Additional parameters:
+each value for race should be a parameter with an associated color
+optionally, each value for ethnicity can be a parameter with an associated symbol
+e.g.,
+CEU           blue
+YRI           red
+Not_Hispanic  1
+Hispanic      4"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
+parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
+                  help="cluster queue name [default %default]")
 parser.add_option("-c", "--combined", dest="combined",
                   action="store_true", default=False,
                   help="make combined dataset")
-parser.add_option("-q", "--queue", dest="qname",
-                  default="gcc.q", help="cluster queue name")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:

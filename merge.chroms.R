@@ -13,7 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("assoc_output", "gene_action")
+required <- c("out_assoc_prefix", "gene_action")
 optional <- NULL
 default <- NULL
 config <- setConfigDefaults(config, required, optional, default)
@@ -26,7 +26,7 @@ end <- as.integer(args[3])
 
 # merge output 
 # output file name example: study.model.1.additive.chr.24_24.RData
-pathprefix <- config["assoc_output"]
+pathprefix <- config["out_assoc_prefix"]
 actions <-  config["gene_action"]
 actions <- unlist(strsplit(actions," "))
 
