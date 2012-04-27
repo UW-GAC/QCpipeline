@@ -13,7 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "nc_bl_file", "nc_geno_file",
+required <- c("annot_scan_file", "annot_snp_file", "build", "nc_bl_file", "nc_geno_file",
               "out_anom_dir", "out_eligible_snps", "out_plot_dir", "project")
 optional <- c("annot_snp_IntensityOnlyCol", "chromXY", "out_plot_prefix", "plot.win",
               "thresh.sum", "thresh.indiv", "scan_exclude_file")
