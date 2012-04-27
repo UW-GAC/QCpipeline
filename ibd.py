@@ -72,12 +72,12 @@ if os.path.exists(configdict['out_afreq_file']):
     print "using allele freq file " + configdict['out_afreq_file']
 else:
     job = "allele_freq"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
     waitAfreq = True
 
 job = "ibd_snp_sel"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 if waitAfreq:
     holdid = [jobid["allele_freq"]]
 else:
@@ -85,13 +85,13 @@ else:
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 
 job = "ibd"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd_snp_sel']], queue=qname, email=email)
 
 job = "ibd_plots"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd']], queue=qname, email=email)
 
 job = "inbreed_coeff"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd_snp_sel']], queue=qname, email=email)

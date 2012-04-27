@@ -89,7 +89,7 @@ jobid = dict()
 if assoc:
     # run by chrom
     job = "run.assoc"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     # range of chroms
     chroms = []
     if cStart <= cEnd:
@@ -102,7 +102,7 @@ if assoc:
 
 if merge:
     job = "merge.chroms"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     # generate holdid list 
     if assoc: # need to wait till association tests finish running
         holdid = []
@@ -117,7 +117,7 @@ if merge:
         
 if plotq:
     job = "plot.qq.manh"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     # generate holdid list 
     if merge:
         holdid = [jobid["merge.chroms"]]
@@ -129,7 +129,7 @@ if plotq:
 
 if plotc:
     job = "plot.cluster"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     # generate holdid list 
     holdid = []
     if merge:

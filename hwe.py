@@ -79,7 +79,7 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 job = "hwe"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 if split:
     jobid[job] = []
     for c in range(0,len(cStart)):
@@ -89,11 +89,11 @@ else:
 
 if split:
     job = "hwe_merge"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(start), str(end), str(by)], holdid=jobid['hwe'], queue=qname, email=email)
 
 job = "hwe_plots"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 if split:
     holdid = [jobid['hwe_merge']]
 else:

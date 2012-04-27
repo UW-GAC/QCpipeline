@@ -92,35 +92,35 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 job = "allele_freq"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "dup_disc"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
 
 if mac:
     job = "dup_disc_maf"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
 
 job = "snp_filt_plots"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 holdid = [jobid["dup_disc"]]
 if mac:
     holdid.append(jobid["dup_disc_maf"])
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 
 job = "mendel_err"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 if mendclust:
     job = "mendel_plots"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["mendel_err"]], queue=qname, email=email)
 
 if dupsnp:
     job = "dup_snps"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)

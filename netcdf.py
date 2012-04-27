@@ -92,11 +92,11 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 for job in ["ncdf_geno", "ncdf_xy", "ncdf_bl"]:
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
     
 if not test:
     job = "gds_geno"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ncdf_geno']], queue=qname, email=email)
     

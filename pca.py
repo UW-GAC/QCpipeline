@@ -107,11 +107,11 @@ jobid = dict()
 
 if combined:
     job = "dup_disc_ext"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
     job = "combine_gds"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 # skip LD if file already exists
@@ -124,25 +124,25 @@ else:
         holdid = [jobid['dup_disc_ext']]
     else:
         holdid = None
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
     waitLD = True
 
 if combined:
     job = "pca_combined"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     holdid = [jobid['dup_disc_ext'], jobid['combine_gds']]
     if waitLD:
         holdid.append(jobid['ld_pruning'])
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 
     job = "pca_plots"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job+"_combined", driver, [rscript, config, "combined"], holdid=[jobid['pca_combined']], queue=qname, email=email)
 
 else:
     job = "pca_study"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     if waitLD:
         holdid = [jobid['ld_pruning']]
     else:
@@ -150,5 +150,5 @@ else:
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 
     job = "pca_plots"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job+"_study", driver, [rscript, config, "study"], holdid=[jobid['pca_study']], queue=qname, email=email)

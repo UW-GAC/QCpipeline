@@ -71,9 +71,9 @@ elif (type == "fisher"):
 else:
     sys.exit("test type must be chisq or fisher")
 
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid["batch_test"] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "batch_plots"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=[jobid['batch_test']], queue=qname, email=email)

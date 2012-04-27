@@ -49,9 +49,9 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 for job in ["het_by_scan", "mean_inten"]:
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "gender_plot"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['het_by_scan'], jobid['mean_inten']], queue=qname, email=email)

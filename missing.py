@@ -51,6 +51,6 @@ import QCpipeline
 driver = os.path.join(pipeline, "runRscript.sh")
 
 job = "missing"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 

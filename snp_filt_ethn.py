@@ -47,10 +47,10 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 job = "allele_freq"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "het_by_snp"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 

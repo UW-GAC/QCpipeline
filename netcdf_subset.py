@@ -51,9 +51,9 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 job = "ncdf_subset"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "gds_geno"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ncdf_subset']], queue=qname, email=email)

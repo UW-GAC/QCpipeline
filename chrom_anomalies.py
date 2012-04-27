@@ -95,7 +95,7 @@ if os.path.exists(configdict['out_baf_med_file']):
     print "using BAF SD file " + configdict['out_baf_med_file']
 else:
     job = "baf_variance"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
     waitSD = True
 
@@ -108,13 +108,13 @@ if maf is not None:
         print "using allele freq file " + configdict['out_afreq_file']
     else:
         job = "allele_freq"
-        rscript = os.path.join(pipeline, job + ".R")
+        rscript = os.path.join(pipeline, "R", job + ".R")
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
         waitAfreq = True
 
 if runbaf:
     job = "anom_baf"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = []
 
     if waitSD and waitAfreq:
@@ -142,13 +142,13 @@ if runbaf:
             iend = end
 
     job = "anom_combine"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job + "_baf"] = QCpipeline.submitJob(job+"_baf", driver, [rscript, config, "BAF", str(end), str(by)], holdid=jobid['anom_baf'], queue=qname, email=email)
 
 
 if runloh:
     job = "anom_loh"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = []
     
     if runbaf:
@@ -172,13 +172,13 @@ if runloh:
             iend = end
 
     job = "anom_combine"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job + "_loh"] = QCpipeline.submitJob(job+"_loh", driver, [rscript, config, "LOH", str(end), str(by)], holdid=jobid['anom_loh'], queue=qname, email=email)
 
 
 if runstats:
     job = "anom_stats"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
 
     if runloh:
         holdid = [jobid["anom_combine_loh"]]

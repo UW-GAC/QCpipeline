@@ -66,7 +66,7 @@ driver = os.path.join(pipeline, "runRscript.sh")
 jobid = dict()
 
 job = "plink_unfiltered"
-rscript = os.path.join(pipeline, job + ".R")
+rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "plink_unfiltered_bed"
@@ -85,7 +85,7 @@ jobid[job] = QCpipeline.submitJob(job, "tar", arglist, options="-b y -j y -cwd",
 if filt:
     plinkfile = configdict["out_plink_prefix"] + "_filtered"
     job = "plink_filtered"
-    rscript = os.path.join(pipeline, job + ".R")
+    rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
     job = "plink_filtered_bed"
