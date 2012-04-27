@@ -36,8 +36,7 @@ scan_chrom_filter  [NA]              scan-chromosome filter matrix
 scan_exclude       [NA]              vector of scanID to exclude
 signif_line        [5e-08]           genome-wide significance level for manhattan plot
 out_assoc_prefix   [assoc]           output prefix for association results       
-out_plot_prefix    [assoc]           output prefix for plots
-"""
+out_plot_prefix    [assoc]           output prefix for plots"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",

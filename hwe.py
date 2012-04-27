@@ -33,8 +33,7 @@ out_clust_prefix      [hwe_clust]      output prefix for cluster plots
 out_hwe_prefix        [hwe]            output prefix for HWE results
 out_inbrd_plot        [hwe_inbrd.pdf]  output histogram of inbreeding coefficients
 out_maf_plot          [hwe_maf.png]    output plot of MAF vs p value
-out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)
-"""
+out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",

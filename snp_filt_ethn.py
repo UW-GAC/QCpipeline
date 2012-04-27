@@ -20,8 +20,7 @@ nc_geno_file     genotype netCDF file
 Optional config parameters [default]:
 scan_exclude_file   [NA]                 vector of scanID to exclude (all but one ethnicity)
 out_afreq_file      [allele_freq.RData]  output file for allele frequency
-out_het_file        [het_by_snp.RData]   output file for heterozygosity by snp
-"""
+out_het_file        [het_by_snp.RData]   output file for heterozygosity by snp"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",

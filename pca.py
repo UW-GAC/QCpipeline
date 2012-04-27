@@ -31,9 +31,9 @@ nc_geno_file          genotype netCDF file (filtered subject-level recommended)
 study_unrelated_file  vector of scanID for PCA and LD pruning (no hapmaps)
 
 Required for "combined" option:
-ext_annot_scan_file
-ext_annot_snp_file
-ext_nc_geno_file
+ext_annot_scan_file      external dataset scan annotation file
+ext_annot_snp_file       external dataset snp annotation file
+ext_nc_geno_file         external dataset genotype netCDF file
 study_unduplicated_file  vector of scanID from study for combined PCA
 
 Optional config parameters [default]:

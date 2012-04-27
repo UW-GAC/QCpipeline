@@ -53,8 +53,7 @@ out_maf_xchrom_plot       [maf_x_hist.pdf]      output histogram of MAF for X ch
 out_mend_clust_prefix     [mendel_clust]        output prefix for mendelian error cluster plots
 out_mend_file             [mendel_err.RData]    output file for mendelian errors
 out_snp_conc_plot         [snp_conc.pdf]        output plot of snp concordance
-out_snp_corr_plot         [snp_corr.pdf]        output plot of snp correlation
-"""
+out_snp_corr_plot         [snp_corr.pdf]        output plot of snp correlation"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
