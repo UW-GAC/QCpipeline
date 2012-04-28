@@ -11,7 +11,6 @@ sessionInfo()
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
-config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_snp_file", "nc_samp_geno_file", "nc_samp_xy_file", "out_hwe_prefix")
