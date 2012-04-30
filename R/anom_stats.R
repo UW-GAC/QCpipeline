@@ -138,8 +138,9 @@ if (sum(any.chk) > 0) {
   snp.ineligible <- setdiff(snpID, snp.ok)
   png.file <- file.path(config["out_plot_dir"], paste(config["out_plot_prefix"], "_%003d.png", sep=""))
   png(png.file, width=720, height=720)
-  anomStatsPlotIdeogram(blData, genoData, anom.stats=long.chk, snp.ineligible=snp.ineligible,
-                win=as.integer(config["plot.win"]), centromere=centromeres, cex=0.25)
+  anomStatsPlot(blData, genoData, anom.stats=long.chk, snp.ineligible=snp.ineligible,
+                win=as.integer(config["plot.win"]), centromere=centromeres, cex=0.25,
+                cex.axis=1.7, cex.main=1.7, cex.lab=1.7)
   dev.off()
 } else {
   message("no long anomalies found")
