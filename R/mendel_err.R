@@ -63,6 +63,8 @@ mean(mendel.err.rate, na.rm=TRUE)
 # what number and fraction of SNPs have a non-zero error rate
 sel <- mendel.sampsize > 0
 sum(sel)
+sum(mendel.err.cnt[sel]>0)
+sum(mendel.err.cnt[sel]>0)/sum(sel)
 sum(mendel.err.cnt[sel]>1)
 sum(mendel.err.cnt[sel]>1)/sum(sel)
 sum(mendel.err.cnt[sel]>2)

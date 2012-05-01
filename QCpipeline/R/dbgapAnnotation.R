@@ -69,7 +69,7 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
       }
 
       for (i in 1:length(conslev)) {
-        s <- dups[dups$consent == conslev[i],]
+        s <- dups[dups[[consentVar]] == conslev[i],]
         write.csv(s, file=consent.dupfiles[i], quote=FALSE, row.names=FALSE)
       }
     }
