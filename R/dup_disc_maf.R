@@ -48,4 +48,8 @@ disc <- duplicateDiscordance(genoData, subjName.col=config["annot_scan_subjectCo
                              scan.exclude=scan.exclude, snp.exclude=snp.exclude,
                              minor.allele.only=TRUE, allele.freq=afreq[,"all"])
 
+# give output data frame the same dimensions as snp annotation
+snp <- merge(data.frame(snpID), disc$discordance.by.snp, all.x=TRUE)
+disc$discordance.by.snp <- snp
+
 save(disc, file=config["out_disc_maf_file"])

@@ -20,13 +20,15 @@ config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 men <- getobj(config["out_mend_file"])
-err <- men$snp$error.cnt
-err[men$snp$check.cnt == 0] <- NA
+men <- men$snp
+stopifnot(names(men) == c("snpID", "error.cnt", "check.cnt"))
+names(men) <- c("snpID", "err", "chk")
+men$err[men$chk == 0] <- NA
 
 snpAnnot <- getobj(config["annot_snp_file"])
 snp <- getVariable(snpAnnot, c("snpID", config["annot_snp_rsIDCol"], "chromosome"))
 names(snp) <- c("snpID", "rsID", "chromosome")
-snp <- merge(snp, data.frame(snpID=names(err), err=err))
+snp <- merge(snp, men)
 
 bin.start <- config["mend.bin.start"]
 bin.start <- unlist(strsplit(bin.start, " ", fixed=TRUE))

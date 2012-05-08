@@ -63,6 +63,10 @@ disc$discordance.by.pair <- disc.subj
 disc$correlation.by.pair <- corr.subj
 
 # by snp
+# give output data frame the same dimensions as snp annotation
+snp <- merge(data.frame(snpID), disc$discordance.by.snp, all.x=TRUE)
+disc$discordance.by.snp <- snp
+
 # probability of discordance for various error rates
 (N <- max(disc$discordance.by.snp$npair))
 prob.disc <- duplicateDiscordanceProbability(N)

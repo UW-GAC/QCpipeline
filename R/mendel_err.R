@@ -13,9 +13,10 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "nc_geno_file")
-optional <- c("annot_scan_subjectCol", "mend_scan_exclude_file", "out_mend_file")
-default <- c("subjectID", NA, "mendel_err.RData")
+required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
+optional <- c("annot_scan_subjectCol", "annot_snp_missingCol",
+              "mend_scan_exclude_file", "out_mend_file")
+default <- c("subjectID", "missing.n1", NA, "mendel_err.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -23,9 +24,12 @@ print(config)
 stopifnot(all(hasVariable(scanAnnot, c("family", "father", "mother", "sex"))))
 scanID <- getScanID(scanAnnot)
 
+(snpAnnot <- getobj(config["annot_snp_file"]))
+snpID <- getSnpID(snpAnnot)
+
 ncfile <- config["nc_geno_file"]
 nc <- NcdfGenotypeReader(ncfile)
-genoData <- GenotypeData(nc, scanAnnot=scanAnnot)
+genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # are there any scans to exclude?
 if (!is.na(config["mend_scan_exclude_file"])) {
@@ -42,6 +46,18 @@ men.list <- with(annot, mendelList(family, subjectID,
                                    father, mother, sex, scanID))
 
 mendel <- mendelErr(genoData, men.list)
+
+# turn mendel$snp into a data frame instead of a list
+stopifnot(allequal(snpID, names(mendel$snp$error.cnt)))
+stopifnot(allequal(snpID, names(mendel$snp$check.cnt)))
+snp <- data.frame("snpID"=snpID, "error.cnt"=mendel$snp$error.cnt,
+                  "check.cnt"=mendel$snp$check.cnt)
+# set missing SNPs to NA
+miss <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1
+snp$error.cnt[miss] <- NA
+snp$check.cnt[miss] <- NA
+mendel$snp <- snp
+
 save(mendel, file=config["out_mend_file"])
 
 # results
