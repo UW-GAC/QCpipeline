@@ -59,7 +59,6 @@ parser.add_option("--plotClust", dest="plotcl",
                   help="cluster plots")
 (options, args) = parser.parse_args()
 
-config = args[0]
 pipeline = options.pipeline
 email = options.email
 assoc = options.assoc
@@ -68,13 +67,17 @@ plotq = options.plotqq
 plotc = options.plotcl
 qname = options.qname
 
-# 3 arguments (config file, starting chrom,and end chrom) when assoc = True
-# require 3 arguments all the time (config, start chrom, and end chrom)
-if (len(args) == 3):
+# 3 arguments (config file, starting chrom, and end chrom) when assoc = True
+if len(args) < 1:
+    parser.error("incorrect number of arguments")
+if (len(args) != 3) and (assoc or merge):
+    parser.error("incorrect number of arguments")
+
+config = args[0]
+if len(args) > 1:
     cStart = int(args[1]) 
     cEnd = int(args[2]) 
-
-print cStart, cEnd
+#    print cStart, cEnd
 
 sys.path.append(pipeline)
 import QCpipeline
