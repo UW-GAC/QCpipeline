@@ -80,17 +80,23 @@ for (i in 1:length(actions))
     # QQ plots - unfiltered plot, subsetted with plotchroms
     pvaln <- pval[!is.na(pval) & sub]
     title <- paste("no filter\nN =", length(pvaln))
-    qqPlot(pvaln, trunc=F, main=title)
+    lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
+    subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
+    qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
 
     # QQ plots - filtered, subsetted with plotchroms
     pvaln <- pval[combined$quality.filter & (!is.na(pval)) & sub]
     title <- paste("quality filter\nN =", length(pvaln))
-    qqPlot(pvaln, trunc=F, main=title)
+    lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
+    subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
+    qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
 
     # QQ plots - maf filtered, subsetted with plotchroms
     pvaln <- pval[combined$qual.maf.filter & (!is.na(pval)) & sub]
     title <- paste("quality filter + MAF >",config["maf.filter"],"\nN =", length(pvaln))
-    qqPlot(pvaln, trunc=F, main=title)
+    lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
+    subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
+    qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
 
     # obs-exp plot
     pvalx <- -log10(sort(pvaln)) # sort() removes NAs
