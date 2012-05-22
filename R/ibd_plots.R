@@ -16,10 +16,12 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "out_ibd_kc32_file")
 optional <- c("annot_scan_subjectCol", "exp_rel_file", "out_ibd_con_file",
               "out_ibd_con_plot", "out_ibd_exp_plot", "out_ibd_obs_plot",
-              "out_ibd_rel_file", "out_ibd_unobs_dup_file", "out_ibd_unobs_rel_file",
+              "out_ibd_rel_file", "out_ibd_unexp_plot",
+              "out_ibd_unobs_dup_file", "out_ibd_unobs_rel_file",
               "scan_ibd_include_file")
 default <- c("subjectID", NA, "ibd_connectivity.RData", "ibd_connectivity.pdf",
              "ibd_expected.pdf", "ibd_observed.pdf", "ibd_obsrel.RData",
+             "ibd_unexpected.pdf",
              "ibd_unobs_dup.RData", "ibd_unobs_rel.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
@@ -79,6 +81,31 @@ table(ibd$obs.rel)
 
 pdf(config["out_ibd_obs_plot"], width=6, height=6)
 ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")
+dev.off()
+
+# plot of unexpected relationships (KC > 0.1)
+unexp <- ibd$exp.rel != ibd$obs.rel & ibd$KC > 0.1
+table(ibd$obs.rel[unexp])
+
+pdf(config["out_ibd_unexp_plot"], width=6, height=6)
+psym <- rep(1, nrow(ibd))
+psym[unexp] <- 2
+# make our own color code so we can modify the plot legend
+pcol <- rep("black", nrow(ibd))
+pcol[ibd$exp.rel == "Dup"] <- "magenta"
+pcol[ibd$exp.rel == "PO"] <- "cyan"
+pcol[ibd$exp.rel == "FS"] <- "red"
+pcol[ibd$exp.rel == "HS"] <- "blue"
+ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym, rel.draw=c("FS", "HS"))
+rel <- unique(ibd$exp.rel)
+col <- unique(pcol)
+sym <- c(rep(1, length(rel)), 2)
+ord <- order(rel)
+rel[rel == "U"] <- "Unrel"
+rel <- paste("Exp", rel)
+rel <- c(rel[ord], "Unexp")
+col <- c(col[ord], "black")
+legend("topright", legend=rel, col=col, pch=sym)
 dev.off()
 
 
