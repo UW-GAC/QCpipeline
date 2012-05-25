@@ -79,13 +79,15 @@ snpset2$disc.sampsize <- disc.sampsize
 snpset2$disc.fraction <- snpset2$disc.count/snpset2$disc.sampsize
 
 # probability of discordance for various error rates
-N <- max(snpset2$disc.sampsize)
-prob.disc <- duplicateDiscordanceProbability(N, max.disc=20)
+N <- max(snpset2$disc.sampsize, na.rm=TRUE)
+max.disc <- 20
+prob.disc <- duplicateDiscordanceProbability(N, max.disc=max.disc)
 
 # find out how  many snps fall into each category of discordance
-num <- rep(NA, 8)
+ncat <- max.disc + 1
+num <- rep(NA, ncat)
 discordant <- snpset2$disc.count
-for(i in 1:8) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
+for(i in 1:ncat) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
 prob.tbl <- cbind(prob.disc, num)
 
 disc <- list("disc"=snpset2, "probability"=prob.tbl)

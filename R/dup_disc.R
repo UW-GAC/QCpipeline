@@ -68,13 +68,15 @@ snp <- merge(data.frame(snpID), disc$discordance.by.snp, all.x=TRUE)
 disc$discordance.by.snp <- snp
 
 # probability of discordance for various error rates
-(N <- max(disc$discordance.by.snp$npair))
-prob.disc <- duplicateDiscordanceProbability(N)
+(N <- max(disc$discordance.by.snp$npair, na.rm=TRUE))
+max.disc <- 7
+prob.disc <- duplicateDiscordanceProbability(N, max.disc=max.disc)
 
 # find out how  many snps fall into each category of discordance
-num <- rep(NA, 8)
+ncat <- max.disc + 1
+num <- rep(NA, ncat)
 discordant <- disc$discordance.by.snp$discordant
-for(i in 1:8) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
+for(i in 1:ncat) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
 prob.tbl <- cbind(prob.disc, num)
 disc$probability <- prob.tbl
 
