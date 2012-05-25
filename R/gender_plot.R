@@ -35,12 +35,13 @@ sex <- getVariable(scanAnnot, config["annot_scan_sexCol"])
 if (is.null(sex)) {
   stop(paste("sex variable", config["annot_scan_sexCol"], "not found in annotation"))
 }
-if (!all(sex %in% c("M", "F"))) {
-  stop("sex must be coded as M/F")
+if (!all(sex %in% c("M", "F", NA))) {
+  stop("sex must be coded as M/F or NA")
 }
 plotcol <- rep(NA, nrow(scanAnnot))
 plotcol[sex == "F"] <- "red"
 plotcol[sex == "M"] <- "blue"
+plotcol[is.na(sex)] <- "black"
 
 # plot labels - X and Y probes
 (snpAnnot <- getobj(config["annot_snp_file"]))
@@ -53,7 +54,7 @@ ylab <- paste("Y intensity (",ny," probes)", sep="")
 # best guess at real sex
 # only used for plotting anomalous points on top
 male <- mninten[,"Y"] > 0.5 & mninten[,"X"] < 1.0
-anom <- (male & sex == "F") | (!male & sex == "M")
+anom <- (male & sex == "F") | (!male & sex == "M") | is.na(sex)
 
 # plot
 pdf(file=config["out_pdf"], width=8, height=8)
