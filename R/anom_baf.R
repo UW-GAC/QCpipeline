@@ -14,10 +14,10 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "build", "nc_bl_file", "nc_geno_file",
-              "out_afreq_file", "out_anom_dir", "out_baf_med_file", "project")
+              "out_anom_dir", "out_baf_med_file", "project")
 optional <- c("annot_snp_IntensityOnlyCol", "annot_snp_missingCol", "chromXY",
-              "out_eligible_snps", "scan_exclude_file")
-default <- c(NA, "missing.n1", FALSE, "snps_eligible.RData", NA)
+              "out_afreq_file", "out_eligible_snps", "scan_exclude_file")
+default <- c(NA, "missing.n1", FALSE, "allele_freq.RData", "snps_eligible.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
