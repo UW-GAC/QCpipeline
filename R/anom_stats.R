@@ -88,6 +88,7 @@ if (as.logical(config["chromXY"])) {
     } else {
       io <- rep(0, length(snpID))
     }
+    chrom <- getChromosome(snpAnnot, char=TRUE)
     sXY <- is.element(chrom, "XY") & is.element(io, 0)
     sel.XY  <-  snpID[sXY]
     XY <- centromeres[is.element(centromeres$chrom,"X"),]
