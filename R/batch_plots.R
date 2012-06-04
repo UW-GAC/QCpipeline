@@ -56,30 +56,33 @@ for (i in 1:n) {
   racefrac[i] <- nmaj / nsamp
 }
 
-pch <- rep(1, length(batches))
+pcol <- rep("black", length(batches))
+bpcol <- rep("black", length(batches))
 redo <- getVariable(scanAnnot, config["annot_scan_redoCol"])
 if (!is.null(redo)) {
   redobatches <- unique(batch[redo %in% "Y"])
-  pch[batches %in% redobatches] <- 2
+  pcol[batches %in% redobatches] <- "red"
+  # boxplot labels will always be sorted
+  bpcol[sort(batches) %in% redobatches] <- "red"
 }
 
 
 if (type == "chisq") {
   pdf(config["out_meanchisq_race_plot"], width=6, height=6)
-  plot(racefrac, batch.res$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
+  plot(racefrac, batch.res$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"), col=pcol)
   abline(v=mean(racefrac), lty=2) # mean over all plates
   if (!is.null(redo)) {
-    legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+    legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("redo","mean"), col=c("red","black"), pch=c(1,-1), lty=c(0,2))
   } else {
     legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("mean"), pch=c(-1), lty=c(2))
   }
   dev.off()
 } else if (type == "fisher") {
   pdf(config["out_meanor_race_plot"], width=6, height=6)
-  plot(racefrac, batch.res$mean.or, ylab="mean Fisher's OR", xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
+  plot(racefrac, batch.res$mean.or, ylab="mean Fisher's OR", xlab=paste("fraction of", majority, "samples per batch"), col=pcol)
   abline(v=mean(racefrac), lty=2) # mean over all plates
   if (!is.null(redo)) {
-    legend(bestLegendPos(racefrac, batch.res$mean.or), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+    legend(bestLegendPos(racefrac, batch.res$mean.or), c("redo","mean"),  col=c("red","black"), pch=c(1,-1), lty=c(0,2))
   } else {
     legend(bestLegendPos(racefrac, batch.res$mean.or), c("mean"), pch=c(-1), lty=c(2))
   }
@@ -87,10 +90,10 @@ if (type == "chisq") {
 }
 
 pdf(config["out_lambda_race_plot"], width=6, height=6)
-plot(racefrac, batch.res$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"), pch=pch)
+plot(racefrac, batch.res$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"), col=pcol)
 abline(v=mean(racefrac), lty=2) # mean over all plates
 if (!is.null(redo)) {
-  legend(bestLegendPos(racefrac, batch.res$lambda), c("redo","mean"), pch=c(2,-1), lty=c(0,2))
+  legend(bestLegendPos(racefrac, batch.res$lambda), c("redo","mean"),  col=c("red","black"), pch=c(1,-1), lty=c(0,2))
 } else {
   legend(bestLegendPos(racefrac, batch.res$lambda), c("mean"), pch=c(-1), lty=c(2))
 }
@@ -113,38 +116,38 @@ for(i in 1:n) {
   bn[i] <- length(x)
 }
 pdf(config["out_meanmcr_nscan_plot"], width=6, height=6)
-plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing call rate", pch=pch)
+plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing call rate", col=pcol)
 y <- lm(bmiss ~ bn)
 #abline(y$coefficients)
 anova(y)
-if (!is.null(redo)) legend(bestLegendPos(bn, bmiss), "redo", pch=2)
+if (!is.null(redo)) legend(bestLegendPos(bn, bmiss), "redo", col="red", pch=1)
 dev.off()
 
 if (type == "chisq") {
   pdf(config["out_meanmcr_meanchisq_plot"], width=6, height=6)
   tmp <- batch.res$mean.chisq[match(names(bmiss), names(batch.res$mean.chisq))]
-  plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", pch=pch)
-  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", pch=2)
+  plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", col=pcol)
+  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", col="red", pch=1)
   dev.off()
 } else if (type == "fisher") {
   pdf(config["out_meanmcr_meanor_plot"], width=6, height=6)
   tmp <- batch.res$mean.or[match(names(bmiss), names(batch.res$mean.or))]
-  plot(tmp, bmiss, xlab="mean Fisher's OR", ylab="mean autosomal missing call rate", pch=pch)
-  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", pch=2)
+  plot(tmp, bmiss, xlab="mean Fisher's OR", ylab="mean autosomal missing call rate", col=pcol)
+  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", col="red", pch=1)
   dev.off()
 }
 
 if (type == "chisq") {
   pdf(config["out_meanchisq_nscan_plot"], width=6, height=6)
   tmp <- batch.res$mean.chisq[match(names(bn), names(batch.res$mean.chisq))]
-  plot(bn, tmp, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab="number of samples per batch", pch=pch)
-  if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", pch=2)
+  plot(bn, tmp, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab="number of samples per batch", col=pcol)
+  if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", col="red", pch=1)
   dev.off()
 } else if (type == "fisher") {
   pdf(config["out_meanor_nscan_plot"], width=6, height=6)
   tmp <- batch.res$mean.or[match(names(bn), names(batch.res$mean.or))]
-  plot(bn, tmp, ylab="mean Fisher's OR", xlab="number of samples per batch", pch=pch)
-  if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", pch=2)
+  plot(bn, tmp, ylab="mean Fisher's OR", xlab="number of samples per batch", col=pcol)
+  if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", col="red", pch=1)
   dev.off()
 }
 
@@ -159,7 +162,7 @@ lm.result <- lm(model)
 anova(lm.result)
 pdf(config["out_mcr_plot"], width=6, height=6)
 par(mar=c(6, 4, 4, 2) + 0.1)
-boxplot(model, varwidth=TRUE, las=2, ylab="log10(autosomal missing call rate)", main=config["annot_scan_batchCol"])
+boxplot(model, varwidth=TRUE, las=2, ylab="log10(autosomal missing call rate)", main=config["annot_scan_batchCol"], border=bpcol)
 dev.off()
 
 
@@ -168,5 +171,5 @@ mninten <- getobj(config["inten_file"])
 mninten <- mninten[[1]]
 pdf(config["out_inten_plot"], width=6, height=6)
 par(mar=c(6, 4, 4, 2) + 0.1)
-boxplot(mninten[,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"])
+boxplot(mninten[,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"], border=bpcol)
 dev.off()
