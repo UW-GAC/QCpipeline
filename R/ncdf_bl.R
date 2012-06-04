@@ -179,3 +179,8 @@ stopifnot(all(res$inten.chk$ballelefreq == 1))
 table(res$inten.chk$logrratio, exclude=NULL)
 stopifnot(all(res$inten.chk$logrratio == 1))
 
+
+# last check that annotation matches netCDF
+(nc <- NcdfIntensityReader(ncfile))
+data <- IntensityData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
+close(data)

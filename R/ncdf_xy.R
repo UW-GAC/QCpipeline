@@ -179,3 +179,9 @@ stopifnot(all(res$inten.chk$x == 1))
 
 table(res$inten.chk$y, exclude=NULL)
 stopifnot(all(res$inten.chk$y == 1))
+
+
+# last check that annotation matches netCDF
+(nc <- NcdfIntensityReader(ncfile))
+data <- IntensityData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
+close(data)

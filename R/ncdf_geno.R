@@ -169,3 +169,9 @@ stopifnot(all(res$snp.order == 1))
 
 table(res$geno.chk, exclude=NULL)
 stopifnot(all(res$geno.chk == 1))
+
+
+# last check that annotation matches netCDF
+(nc <- NcdfGenotypeReader(ncfile))
+data <- GenotypeData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
+close(data)
