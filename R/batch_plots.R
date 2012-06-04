@@ -60,7 +60,7 @@ pcol <- rep("black", length(batches))
 bpcol <- rep("black", length(batches))
 redo <- getVariable(scanAnnot, config["annot_scan_redoCol"])
 if (!is.null(redo)) {
-  redobatches <- unique(batch[redo %in% "Y"])
+  redobatches <- unique(batch[redo %in% c("Y", "Yes", "yes", "YES", TRUE)])
   pcol[batches %in% redobatches] <- "red"
   # boxplot labels will always be sorted
   bpcol[sort(batches) %in% redobatches] <- "red"
