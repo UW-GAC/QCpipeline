@@ -32,11 +32,12 @@ scan_ibd_include_file   [NA]                      vector of scanID to include in
 out_afreq_file          [allele_freq.RData]       output (or existing) allele frequency file
 out_ibd_con_file        [ibd_connectivity.RData]  output connectivity data file
 out_ibd_con_plot        [ibd_connectivity.pdf]    output connectivity plot
-out_ibd_exp_plot        [ibd_expected.pdf]        output IBD plot with expected relationships
+out_ibd_exp_plot        [ibd_expected.pdf]        output IBD plot color-coded by expected relationships
 out_ibd_file            [ibd.RData]               output file of full IBD results
 out_ibd_kc32_file       [ibd_kc32.RData]          output file with data frame of pairs with KC > 1/32
-out_ibd_obs_plot        [ibd_observed.pdf]        output IBD plot with observed relationships
+out_ibd_obs_plot        [ibd_observed.pdf]        output IBD plot color-coded by observed relationships
 out_ibd_rel_file        [ibd_obsrel.RData]        output file of observed relationships
+out_ibd_unexp_plot      [ibd_unexpected.pdf]      output IBD plot color-coded by expected relationships, and different symbols for unexpected with KC > 0.1
 out_ibd_unobs_dup_file  [ibd_unobs_dup.RData]     output file of expected but unobserved duplicates
 out_ibd_unobs_rel_file  [ibd_unobs_rel.RData]     output file of expected but unobserved relationships
 out_inbrd_file          [inbreed_coeff.RData]     output file of inbreeding coefficients
