@@ -12,18 +12,24 @@ usage = """%prog [options] config
 Calculate heterozygosity and mean intensity by scan and chromosome.
 Plot X vs Y intensity, X and Y intensity vs X heterozyogsity, and
 X vs autosomal heterozygosity with annotated males and females color-coded.
+Plot BAF/LRR for X and XY SNPs for sex chromosome anomalies identified in comments.
 
 Required config parameters:
 annot_scan_file  scan annotation file
 annot_snp_file   snp annotation file
+build            genome build (hg18 or hg19)
+nc_bl_file       BAF/LRR netCDF file
 nc_geno_file     genotype netCDF file
 nc_xy_file       XY intensity netCDF file
 
 Optional config parameters [default]:
-annot_scan_sexCol  [sex]                column of annotated sex (M/F/NA) in scan annotation
-out_het_file       [het_by_scan.RData]  output heterozygosity by scan and chromosome
-out_inten_file     [mean_inten.RData]   output mean intensity by scan and chromosome
-out_pdf            [sex_check.pdf]      output sex check plot"""
+annot_scan_commentCol  [Comment]            column of comments in scan annotation incuding sex chrom anomaly codes (XXX, XXY, XYY, XO)
+annot_scan_localIDCol  [local.scanID]       column of local scanID in scan annotation (for anom plot titles)
+annot_scan_sexCol      [sex]                column of annotated sex (M/F/NA) in scan annotation
+out_het_file           [het_by_scan.RData]  output heterozygosity by scan and chromosome
+out_inten_file         [mean_inten.RData]   output mean intensity by scan and chromosome
+out_pdf                [sex_check.pdf]      output sex check plot
+out_sexchrom_prefix    [sexchrom_anom]      output prefix for sex chrom anomaly plots"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
@@ -48,7 +54,7 @@ import QCpipeline
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-for job in ["het_by_scan", "mean_inten"]:
+for job in ["het_by_scan", "mean_inten", "sexchrom_anom_plot"]:
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
