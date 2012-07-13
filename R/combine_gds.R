@@ -16,9 +16,12 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "ext_annot_scan_file",
               "ext_annot_snp_file", "ext_nc_geno_file", "nc_geno_file")
-optional <- c("annot_scan_subjectCol", "annot_snp_rsIDCol", "ext_annot_scan_subjectCol",
-              "ext_annot_snp_rsIDCol", "out_comb_gds_geno_file")
-default <- c("subjectID", "rsID", "subjectID", "rsID", "comb_geno.gds")
+optional <- c("annot_scan_subjectCol", "annot_snp_rsIDCol",
+              "comb_scan_exclude_file", "comb_snp_exclude_file",
+              "ext_annot_scan_subjectCol","ext_annot_snp_rsIDCol",
+              "out_comb_annot_scan_file", "out_comb_annot_snp_file", "out_comb_gds_geno_file")
+default <- c("subjectID", "rsID", NA, NA, "subjectID", "rsID",
+             "comb_scan_annot.RData", "comb_snp_annot.RData", "comb_geno.gds")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -28,11 +31,20 @@ nc <- NcdfGenotypeReader(config["nc_geno_file"])
 scanAnnot <- scanAnnot[scanAnnot$scanID %in% getScanID(nc),]; dim(scanAnnot)
 close(nc)
 
-ext.scanAnnot <- getobj(config["ext_annot_scan_file"])
+ext.scanAnnot <- getobj(config["ext_annot_scan_file"]); dim(ext.scanAnnot)
 dupids <- intersect(scanAnnot$scanID, ext.scanAnnot$scanID)
 if (length(dupids) > 0) {
   stop("scan IDs are not unique - files cannot be combined")
 }
+
+# any scans to exclude?
+if (!is.na(config["comb_scan_exclude_file"])) {
+  scan.exclude <- getobj(config["comb_scan_exclude_file"])
+  scanAnnot <- scanAnnot[!(scanAnnot$scanID %in% scan.exclude),]
+  ext.scanAnnot <- ext.scanAnnot[!(ext.scanAnnot$scanID %in% scan.exclude),]
+}
+dim(scanAnnot)
+dim(ext.scanAnnot)
 
 proj <- c("study", "ext")
 
@@ -52,16 +64,29 @@ snp.include <- merge(snp.info1[,c("rsID", "chromosome", "position")],
 snp.info <- snp.info1[snp.info1$rsID %in% snp.include$rsID,]
 nrow(snp.info)
 
+# any snps to exclude?
+if (!is.na(config["comb_snp_exclude_file"])) {
+  snp.exclude <- getobj(config["comb_snp_exclude_file"])
+  snp.info <- snp.info[!(snp.info$snpID %in% snp.exclude),]
+}
+nrow(snp.info)
+
 # sample information
-samp.info1 <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"]))
+samp.info1 <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"], "sex"))
 names(samp.info1)[2] <- "subjectID"
-samp.info2 <- getVariable(ext.scanAnnot, c("scanID", config["ext_annot_scan_subjectCol"]))
+samp.info2 <- getVariable(ext.scanAnnot, c("scanID", config["ext_annot_scan_subjectCol"], "sex"))
 names(samp.info2)[2] <- "subjectID"
 samp.info <- list(samp.info1, samp.info2)
 names(samp.info) <- proj
 
 FileList <- list(config["nc_geno_file"], config["ext_nc_geno_file"])
 names(FileList) <- proj
+
+# save annotation files
+samp.info.all <- ScanAnnotationDataFrame(rbind(samp.info1, samp.info2))
+save(samp.info.all, file=config["out_comb_annot_scan_file"])
+snp.info.all <- SnpAnnotationDataFrame(snp.info[,c("snpID", "rsID", "chromosome", "position")])
+save(snp.info.all, file=config["out_comb_annot_snp_file"])
 
 
 #############################################################
@@ -86,7 +111,10 @@ add.gdsn(gfile1, "sample.id", sample1.id, compress="ZIP.max", closezip=TRUE) # s
 # add "snp.id"
 nSNP <- dim(snp.info)[1] 
 
-add.gdsn(gfile1, "snp.id", snp.info$rsID, compress="ZIP.max", closezip=TRUE) 
+add.gdsn(gfile1, "snp.id", snp.info$snpID, compress="ZIP.max", closezip=TRUE)
+
+# add "rs.id"
+add.gdsn(gfile1, "snp.rs.id", snp.info$rsID, compress="ZIP.max", closezip=TRUE) 
 
 # add "position"
 add.gdsn(gfile1, "snp.position", as.integer(snp.info$position), compress="ZIP.max", closezip=TRUE)
@@ -123,11 +151,11 @@ for (pro in names(FileList))
 	snp.flag <- match(snp.info$rsID, snp.info.list[[pro]]$rsID)
                          
 	# sample selection
-       	s1 <- samp.info[[pro]]$scanID # s1: all scanIDs in samp.info[[pro]]
+       	s1 <- which(sampleID %in% samp.info[[pro]]$scanID) # s1: all scanIDs in samp.info[[pro]]
 
 	# for-loop for each sample
 	#cat(pro, ":", length(samp1.flag), "samples for set1\n")
-        for (i in 1:length(s1))
+        for (i in s1)
 	{
 		v <- get.var.ncdf(nc, "genotype", start=c(1, i), count=c(-1, 1))[snp.flag]
 		write.gdsn(gGeno1, v, start=c(1, samp1.idx), count=c(-1, 1))
@@ -140,3 +168,8 @@ for (pro in names(FileList))
 
 # close GDS files
 closefn.gds(gfile1)
+
+# check
+gds <- GdsGenotypeReader(config["out_comb_gds_geno_file"])
+(gData <- GenotypeData(gds, snpAnnot=snp.info.all, scanAnnot=samp.info.all))
+close(gData)

@@ -31,13 +31,11 @@ length(scan.sel)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
-# remove discordant SNPs if duplicate discordance has been run
+# if duplicate discordance has been run, select only concordant SNPs
 if (!is.na(config["out_disc_file"])) {
   discord <- getobj(config["out_disc_file"])
   disc <- discord$discordance.by.snp
-  snp.conc.rsid <- row.names(disc[disc$discordant == 0,])
-  rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"])
-  snp.sel <- snpID[rsID %in% snp.conc.rsid]
+  snp.sel <- disc$snpID[disc$discordant == 0]
 } else {
   message("no discordance file specified; using all SNPs")
   snp.sel <- snpID

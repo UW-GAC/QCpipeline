@@ -17,9 +17,10 @@ required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file",
               "out_corr_file", "out_pca_file")
 optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
               "ext_annot_scan_raceCol",
-              "num_evs_to_plot", "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
+              "num_evs_to_plot", "out_comb_annot_snp_file",
+              "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
               "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot")
-default <- c(NA, "rsID", NA, "pop.group", 12, "pca_corr", NA, "pca_dens.pdf",
+default <- c(NA, "rsID", NA, "pop.group", 12, NA, "pca_corr", NA, "pca_dens.pdf",
              "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
@@ -122,13 +123,12 @@ dev.off()
 
 #plot SNP-PC correlation
 if (type == "combined")  {
-  idCol <- config["annot_snp_rsIDCol"]
+  snpAnnot <- getobj(config["out_comb_annot_snp_file"])
 } else {
-  idCol <- "snpID"
+  snpAnnot <- getobj(config["annot_snp_file"])
 }
 corr <- getobj(config["out_corr_file"])
-snpAnnot <- getobj(config["annot_snp_file"])
-snp <- snpAnnot[match(corr$snp.id, getVariable(snpAnnot, idCol)),]
+snp <- snpAnnot[match(corr$snp.id, getSnpID(snpAnnot)),]
 chrom <- getChromosome(snp, char=TRUE)
 
 nev <- as.integer(config["num_evs_to_plot"])

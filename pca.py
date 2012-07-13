@@ -11,8 +11,8 @@ usage = """%prog [options] config
 
 Principal Component Analysis with the following steps:
 1) If using "combined" option:
-  a) check duplicate discordance between datasets
-  b) create combined GDS file from two netCDF files
+  a) create combined GDS file from two netCDF files
+  b) check duplicate discordance between datasets
 2) LD pruning to select SNPs (unless file already exists)
   - uses scans from study_unrelated_file
 3) PCA calculations
@@ -37,34 +37,34 @@ ext_nc_geno_file         external dataset genotype netCDF file
 study_unduplicated_file  vector of scanID from study for combined PCA
 
 Optional config parameters [default]:
-annot_scan_ethnCol           [NA]                  column of ethnicity in scan annotation
-annot_scan_hapmapCol         [geno.cntl]           column of hapmap (0/1) in scan annotation
-annot_scan_subjectCol        [subjectID]           column of subjectID in scan annotation
-annot_scan_unrelCol          [unrelated]           column of unrelated (T/F) in scan annotation
-annot_snp_missingCol         [missing.n1]          column of missing call rate in snp annotation
-annot_snp_rsIDCol            [rsID]                column of rsID in snp annotation
-disc_scan_exclude_file       [NA]                  vector of scanID to exclude from discordance check
-ext_annot_scan_raceCol       [pop.group]           column of race in external scan annotation
-ext_annot_scan_subjectCol    [subjectID]           column of subjectID in external scan annoatation
-ext_annot_scan_unrelCol      [unrelated]           column of unrelated (T/F) in external scan annoatation
-ext_annot_snp_missingCol     [NA]                  column of missing call rate in external snp annotation
-ext_annot_snp_rsIDCol        [rsID]                column of rsID in external snp annotation
-ext_scan_exclude_file        [NA]                  vector of scanID to exclude from external dataset
-ld_r_threshold               [0.32]                r threshold for LD pruning (0.32 = sqrt(0.1))
-ld_win_size                  [10]                  size of sliding window for LD pruning (in Mb)
-num_evs_to_plot              [12]                  number of eigenvectors for correlation and scree plots
-out_comb_gds_geno_file       [comb_geno.gds]       output combined GDS file
-out_corr_file                [pca_corr.RData]      output file of PC-SNP correlations
-out_corr_plot_prefix         [pca_corr]            output prefix for correlation plots (all SNPs)
-out_corr_pruned_plot_prefix  [NA]                  output prefix for correlation plots (pruned SNPs only)
-out_dens_plot                [pca_dens.pdf]        output plot of EV2 vs EV1 with density sidebars
-out_disc_file                [dup_disc_ext.RData]  output duplicate discordance file
-out_disc_plot                [dup_disc_ext.pdf]    output duplicate discordance plot
-out_ev12_plot                [pca_ev12.pdf]        output plot of EV2 vs EV1
-out_pairs_plot               [pca_pairs.png]       output pairs plot of EV 1-4
-out_pca_file                 [pca.RData]           output file of PCA results
-out_pruned_file              [snps_pruned.RData]   output file of pruned snps
-out_scree_plot               [pca_scree.pdf]       output scree plot
+annot_scan_ethnCol           [NA]                     column of ethnicity in scan annotation
+annot_scan_hapmapCol         [geno.cntl]              column of hapmap (0/1) in scan annotation
+annot_scan_subjectCol        [subjectID]              column of subjectID in scan annotation
+annot_scan_unrelCol          [unrelated]              column of unrelated (T/F) in scan annotation
+annot_snp_rsIDCol            [rsID]                   column of rsID in snp annotation
+comb_scan_exclude_file       [NA]                     vector of scanID (study and/or external) to exclude from combined GDS
+comb_snp_exclude_file        [NA]                     vector of snpID (in study annotation) to exclude from combined GDS
+ext_annot_scan_raceCol       [pop.group]              column of race in external scan annotation
+ext_annot_scan_subjectCol    [subjectID]              column of subjectID in external scan annoatation
+ext_annot_scan_unrelCol      [unrelated]              column of unrelated (T/F) in external scan annoatation
+ext_annot_snp_rsIDCol        [rsID]                   column of rsID in external snp annotation
+ld_r_threshold               [0.32]                   r threshold for LD pruning (0.32 = sqrt(0.1))
+ld_win_size                  [10]                     size of sliding window for LD pruning (in Mb)
+num_evs_to_plot              [12]                     number of eigenvectors for correlation and scree plots
+out_comb_scan_annot_file     [comb_scan_annot.RData]  output combined scan annotation
+out_comb_snp_annot_file      [comb_snp_annot.RData]   output combined snp annotation
+out_comb_gds_geno_file       [comb_geno.gds]          output combined GDS file
+out_corr_file                [pca_corr.RData]         output file of PC-SNP correlations
+out_corr_plot_prefix         [pca_corr]               output prefix for correlation plots (all SNPs)
+out_corr_pruned_plot_prefix  [NA]                     output prefix for correlation plots (pruned SNPs only)
+out_dens_plot                [pca_dens.pdf]           output plot of EV2 vs EV1 with density sidebars
+out_disc_file                [dup_disc_ext.RData]     output duplicate discordance file
+out_disc_plot                [dup_disc_ext.pdf]       output duplicate discordance plot
+out_ev12_plot                [pca_ev12.pdf]           output plot of EV2 vs EV1
+out_pairs_plot               [pca_pairs.png]          output pairs plot of EV 1-4
+out_pca_file                 [pca.RData]              output file of PCA results
+out_pruned_file              [snps_pruned.RData]      output file of pruned snps
+out_scree_plot               [pca_scree.pdf]          output scree plot
 
 Additional parameters:
 each value for race should be a parameter with an associated color
@@ -106,13 +106,13 @@ driver = os.path.join(pipeline, "runRscript.sh")
 jobid = dict()
 
 if combined:
-    job = "dup_disc_ext"
-    rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
-
     job = "combine_gds"
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+
+    job = "dup_disc_ext"
+    rscript = os.path.join(pipeline, "R", job + ".R")
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['combine_gds']], queue=qname, email=email)
 
 # skip LD if file already exists
 waitLD = False
