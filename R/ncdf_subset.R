@@ -34,6 +34,8 @@ length(scan.include)
 # get chrom anomalies to filter
 if (!is.na(config["chrom_anom_file"])) {
   anom <- getobj(config["chrom_anom_file"])
+  if ("filter" %in% names(anom)) anom <- anom[anom$filter,]
+  if (!("whole.chrom" %in% names(anom))) anom$whole.chrom <- FALSE
   anom <- anom[,c("scanID", "chromosome", "left.base", "right.base", "whole.chrom")]
 } else {
   # dummy anomaly data frame

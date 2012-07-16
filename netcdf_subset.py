@@ -23,7 +23,7 @@ Optional config parameters [default]:
 annot_snp_alleleACol  [NA]    column of allele A in snp annotation (for GDS file)
 annot_snp_alleleBCol  [NA]    column of allele B in snp annotation (for GDS file)
 annot_snp_rsIDCol     [NA]    column of rsID in snp annotation (for GDS file)
-chrom_anom_file       [NA]    data frame of chromosome anomalies to filter, with columns scanID, chromosome, left.base, right.base, whole.chrom
+chrom_anom_file       [NA]    data frame of chromosome anomalies, with columns scanID, chromosome, left.base, right.base, whole.chrom, filter
 filterYinF            [TRUE]  filter Y chromosome for females?
 scan_include_file     [NA]    vector of scanID to include (NA=all)"""
 parser = OptionParser(usage=usage)
