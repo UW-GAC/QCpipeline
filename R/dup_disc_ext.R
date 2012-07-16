@@ -32,7 +32,7 @@ save(discord, file=config["out_disc_file"])
 
 # print results
 nsubj <- length(discord$discordance.by.subject)
-allpairs <- unlist(discord$discordance.by.subject)
+allpairs <- unlist(lapply(discord$discordance.by.subject, function(x){x[upper.tri(x)]}))
 npairs <- length(allpairs)
 subjsum <- paste(npairs, "duplicate pairs among", nsubj, "subjects")
 print(subjsum)
