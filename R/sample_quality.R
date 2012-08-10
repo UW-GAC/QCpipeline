@@ -83,7 +83,8 @@ if (nbaf > 0) {
 
   png(paste(config["out_baf_sd_plot_prefix"], "_%03d.png", sep=""), width=720, height=720)
   chromIntensityPlot(blData, scan.ids=baf.outl, chrom.ids=rep(chr.sel, nbaf),
-                     info=rep("BAF SD", nbaf), snp.exclude=snp.exclude, cex=0.25)
+                     info=rep("BAF SD", nbaf), snp.exclude=snp.exclude, cex=0.25,
+                     ideogram=FALSE)
   dev.off()
 }
 
