@@ -23,13 +23,14 @@ nc_geno_file     genotype netCDF file
 nc_xy_file       XY intensity netCDF file
 
 Optional config parameters [default]:
-annot_scan_commentCol  [Comment]            column of comments in scan annotation incuding sex chrom anomaly codes (XXX, XXY, XYY, XO)
-annot_scan_localIDCol  [local.scanID]       column of local scanID in scan annotation (for anom plot titles)
-annot_scan_sexCol      [sex]                column of annotated sex (M/F/NA) in scan annotation
-out_het_file           [het_by_scan.RData]  output heterozygosity by scan and chromosome
-out_inten_file         [mean_inten.RData]   output mean intensity by scan and chromosome
-out_pdf                [sex_check.pdf]      output sex check plot
-out_sexchrom_prefix    [sexchrom_anom]      output prefix for sex chrom anomaly plots"""
+annot_scan_commentCol       [Comment]            column of comments in scan annotation incuding sex chrom anomaly codes (XXX, XXY, XYY, XO)
+annot_scan_localIDCol       [local.scanID]       column of local scanID in scan annotation (for anom plot titles)
+annot_scan_sexCol           [sex]                column of annotated sex (M/F/NA) in scan annotation
+annot_snp_IntensityOnlyCol  [NA]                 column of intensity-only in snp annotation
+out_het_file                [het_by_scan.RData]  output heterozygosity by scan and chromosome
+out_inten_file              [mean_inten.RData]   output mean intensity by scan and chromosome
+out_pdf                     [sex_check.pdf]      output sex check plot
+out_sexchrom_prefix         [sexchrom_anom]      output prefix for sex chrom anomaly plots"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",

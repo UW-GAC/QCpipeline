@@ -13,9 +13,10 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "build", "nc_bl_file")
-optional <- c( "annot_scan_commentCol", "annot_scan_localIDCol", "annot_scan_sexCol", "out_sexchrom_prefix")
-default <- c("Comment", "local.scanID", "sex", "sexchrom_anom")
+required <- c("annot_scan_file", "annot_snp_file", "build", "nc_bl_file")
+optional <- c("annot_scan_commentCol", "annot_scan_localIDCol", "annot_scan_sexCol",
+              "annot_snp_IntensityOnlyCol", "out_sexchrom_prefix")
+default <- c("Comment", "local.scanID", "sex", NA, "sexchrom_anom")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -32,6 +33,16 @@ xyxo <- grep("XY/XO", comment)
 anom.ind <- setdiff(anom.ind, xyxo)
 length(anom.ind)
 
+(snpAnnot <- getobj(config["annot_snp_file"]))
+
+# don't plot intensity-only
+if (!is.na(config["annot_snp_IntensityOnlyCol"])) {
+  snp.io <- getVariable(snpAnnot, config["annot_snp_IntensityOnlyCol"])
+  snp.excl <- snp.io == 1
+} else {
+  snp.excl <- NULL
+}
+
 if (length(anom.ind) > 0) {
   scanID <- getScanID(scanAnnot)
   anom.id <- scanID[anom.ind]
@@ -43,11 +54,12 @@ if (length(anom.ind) > 0) {
   
   bl.file <- config["nc_bl_file"]
   blnc <- NcdfIntensityReader(bl.file)
-  blData <-  IntensityData(blnc, scanAnnot=scanAnnot)
+  blData <-  IntensityData(blnc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
   png.file <- file.path(paste(config["out_sexchrom_prefix"], "_%003d.png", sep=""))
   png(png.file, width=720, height=720)
-  pseudoautoIntensityPlot(blData, scan.ids=anom.id, main=main, hg.build=config["build"])
+  pseudoautoIntensityPlot(blData, scan.ids=anom.id, main=main, hg.build=config["build"],
+                          snp.exclude=snp.excl)
   dev.off()
   
   close(blData)
