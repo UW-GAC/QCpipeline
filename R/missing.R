@@ -86,7 +86,7 @@ if ("TRUE" %in% colnames(xm)) {
   mf <- rep(0, nrow(xm))
   names(mf) <- rownames(xm)
 }
-if (is.na(tf["Y"]) {
+if (is.na(tf["Y"])) {
   mf <- c(mf, "Y"=NA)
 }
   
