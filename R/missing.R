@@ -70,13 +70,26 @@ if (!is.null(snp.io) & sum(snp.io) > 0) {
 
 # fraction of non-intensity only snps that are tech failures
 xm <- as.matrix(table(chr.type[nonio], missing.n1[nonio] == 1))
-tf <- xm[,"TRUE"] / rowSums(xm)
+if ("TRUE" %in% colnames(xm)) {
+  tf <- xm[,"TRUE"] / rowSums(xm)
+} else {
+  tf <- rep(0, nrow(xm))
+  names(tf) <- rownames(xm)
+}
 
 # fraction of snps with missing.n1>0.05 among passed SNPs
 goodsnp <- nonio & missing.n1 < 1
 xm <- as.matrix(table(chr.type[goodsnp], missing.n1[goodsnp]>0.05))
-mf <- xm[,"TRUE"] / rowSums(xm)
-
+if ("TRUE" %in% colnames(xm)) {
+  mf <- xm[,"TRUE"] / rowSums(xm)
+} else {
+  mf <- rep(0, nrow(xm))
+  names(mf) <- rownames(xm)
+}
+if (is.na(tf["Y"]) {
+  mf <- c(mf, "Y"=NA)
+}
+  
 if (!is.null(snp.io)) {
   snptbl <- rbind(np, io, tf, mf)
   row.names(snptbl) <- c("number of probes", "intensity-only", "SNP tech failures", "missing>0.05")
