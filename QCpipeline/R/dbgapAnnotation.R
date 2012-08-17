@@ -26,11 +26,10 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
 
     # variables to include in sample annotation file
     if (type == "annotation") thistype <- annotationCol else thistype <- analysisCol
-    sann <- unique(c(varLabels(scanAnnot)[varMetadata(scanAnnot)[[thistype]]],
-                     consentVar, subjVar, dupVar, omitVar))
+    sann <- varLabels(scanAnnot)[varMetadata(scanAnnot)[[thistype]]]
 
     # remove any samples that will not be posted on dbGaP
-    annot2 <- scanAnnot[!scanAnnot[[omitVar]], sann]
+    annot2 <- scanAnnot[!scanAnnot[[omitVar]],]
 
     # split the sample annotation into the main, unduplicated set
     # (one sample per subject) and the duplicated set
@@ -38,26 +37,17 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
     dups <- annot2[annot2[[dupVar]],]
     stopifnot(nrow(dups) + nrow(subj) == nrow(annot2))
   
-    # remove the splitting variable(s)
-    if (type == "annotation") {
-      rmcols <- c(dupVar, omitVar)
-    } else {
-      rmcols <- c(subjVar, dupVar, omitVar)
-    }
-    subj <- subj[,!(varLabels(subj) %in% rmcols)] 
-    dups <- dups[,!(varLabels(dups) %in% rmcols)]
-
     # prepare data dictionary
-    meta <- varMetadata(subj)
-    meta$type <- unlist(lapply(pData(subj), class))
+    meta <- varMetadata(subj)[sann,]
+    meta$type <- unlist(lapply(pData(subj)[, sann], class))
     meta$variable <- row.names(meta)
     dd <- meta[,c("variable", "labelDescription", "type")]
     names(dd) <- c("variable", "description", "type")
 
     # write the files
-    subj <- pData(subj)
+    subj <- pData(subj)[, sann]
     write.csv(subj, file=annotfile, quote=FALSE, row.names=FALSE)
-    dups <- pData(dups)
+    dups <- pData(dups)[, sann]
     write.csv(dups, file=dupfile, quote=FALSE, row.names=FALSE)
     write.table(dd, file=ddfile, sep="\t", quote=FALSE, row.names=FALSE)
 
