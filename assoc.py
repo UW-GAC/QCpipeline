@@ -138,11 +138,6 @@ if plotc:
         holdid = [jobid["merge.chroms"]]
         #print "hold id for plotc: "
         #print holdid
-    if plotq:
-        holdid = holdid + [jobid["plot.qq.manh"]]
-        #print "hold id for plotc: "
-        #print holdid
-    if len(holdid)> 0:    
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
     else:
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)

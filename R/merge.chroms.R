@@ -13,9 +13,9 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("out_assoc_prefix", "gene_action")
-optional <- NULL
-default <- NULL
+required <- c("annot_snp_file", "out_assoc_prefix", "gene_action")
+optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "maf.filter")
+default <- c("quality.filter", "rsID", 0.02)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -47,9 +47,20 @@ for (i in 1:length(actions))
     tmp[[as.character(j)]] <- dat
   }
   combined <- do.call("rbind", tmp)
-  print(dim(combined))
-  fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.RData", sep="")
+  
+  # add rsID, chromosome, filters
+  snpAnnot <- getobj(config["annot_snp_file"])
+  snpID <- getSnpID(snpAnnot)
+  stopifnot(all(combined$snpID %in% snpID))
+  index <- match(combined$snpID,snpID)
 
+  combined$rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"], index=index)
+  combined$chromosome <- getChromosome(snpAnnot, char=TRUE, index=index)
+  combined$quality.filter <- getVariable(snpAnnot, config["annot_snp_filtCol"], index=index)
+  combined$qual.maf.filter <- combined$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>as.numeric(config["maf.filter"])
+  
+  print(dim(combined))
+  fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
   cat(paste("Saving", fname, "...\n"))
   save(combined, file=fname)
 }

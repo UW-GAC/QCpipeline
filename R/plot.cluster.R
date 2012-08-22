@@ -39,13 +39,10 @@ model.type <- config["model_type"]
 model.type <- unlist(strsplit(model.type," "))
 stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
 model.type
-qf <- config["annot_snp_filtCol"]
-qf
 if (!is.na(config["plot_chroms"])) {
   plotchroms <- getobj(config["plot_chroms"])
   plotchroms
 }
-sub <- NULL
 
 # make genotypedata and intensityData
 scanAnnot <- getobj(config["annot_scan_file"])
@@ -69,10 +66,9 @@ for (i in 1:length(actions))
       if (!is.na(config["plot_chroms"]))
       {
          sub <- combined$snpID %in% snpID[chrom %in% plotchroms]
-      } else {
-         sub <- rep(TRUE, nrow(combined))
+         combined <- combined[sub,]
       }
-      combined <- combined[combined$quality.filter & sub,]
+      combined <- combined[combined$quality.filter,]
       
       varp <- paste("model.",i,".", actions[i], ".LR.pval.G", sep="")
       combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
