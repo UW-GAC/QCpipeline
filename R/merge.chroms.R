@@ -47,6 +47,11 @@ for (i in 1:length(actions))
     tmp[[as.character(j)]] <- dat
   }
   combined <- do.call("rbind", tmp)
+
+  # since this is a single-model data frame, strip out unnecessary parts of column names
+  names(combined) <- sub(paste("model", i, actions[i], "", sep="."), "", names(combined), fixed=TRUE)
+  names(combined) <- sub(paste("model", i, "", sep="."), "", names(combined), fixed=TRUE)
+  names(combined) <- sub(".G", "", names(combined), fixed=TRUE)
   
   # add rsID, chromosome, filters
   snpAnnot <- getobj(config["annot_snp_file"])

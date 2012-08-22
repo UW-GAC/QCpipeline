@@ -63,7 +63,7 @@ for (i in 1:length(actions))
     png(paste(qqfname,"_model_", i, "_",actions[i],"_qq_",type,".png",sep=""), width=720, height=720)
     par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
         cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
-    varp <- paste("model", i, actions[i], type,"pval.G", sep=".")
+    varp <- paste(type,"pval", sep=".")
     pval <- combined[,varp]
 
     # QQ plots - unfiltered plot, subsetted with plotchroms

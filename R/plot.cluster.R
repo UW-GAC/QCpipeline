@@ -70,7 +70,7 @@ for (i in 1:length(actions))
       }
       combined <- combined[combined$quality.filter,]
       
-      varp <- paste("model.",i,".", actions[i], ".LR.pval.G", sep="")
+      varp <- "LR.pval"
       combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
       snp.intid <- combined.intid[1:27,]
       
@@ -78,8 +78,7 @@ for (i in 1:length(actions))
       par(mfrow=c(3,3))
       ind <- match(snp.intid$snpID, snpID)
       text <- paste(rsID[ind], "Chr", chrom[ind])
-      mtxt <- paste(text,"\np-value",sprintf("%.2e",
-                    snp.intid[,paste("model.",i, ".", actions[i], ".LR.pval.G", sep="")]))
+      mtxt <- paste(text,"\np-value",sprintf("%.2e",snp.intid[,varp]))
 
       # plot
       genoClusterPlot(xyData,genoData, plot.type="RTheta", snp.intid$snpID, mtxt)
