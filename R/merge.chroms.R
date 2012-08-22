@@ -48,6 +48,20 @@ for (i in 1:length(actions))
   }
   combined <- do.call("rbind", tmp)
 
+  # For SNPs which were monomorphic in either cases or controls, do Fisher Exact test
+  warncol <- paste("model", i, actions[i], sep=".", "warningOrError")
+  mono <- combined[[warncol]] %in% c(0,1)
+  print(paste(sum(mono), "SNPs monomorphic in either cases or controls"))
+  if (sum(mono) > 0) {
+    cat("Running Fisher exact test")
+    fish <- assocTestFisherExact(combined[mono,])
+    snpID <- combined$snpID
+    # add only new columns
+    dat <- merge(combined, fish[,c(1,6:13)], all.x=TRUE, sort=FALSE)
+    # put snps back in original order
+    combined <- dat[match(snpID, dat$snpID),]
+  } 
+  
   # since this is a single-model data frame, strip out unnecessary parts of column names
   names(combined) <- sub(paste("model", i, actions[i], "", sep="."), "", names(combined), fixed=TRUE)
   names(combined) <- sub(paste("model", i, "", sep="."), "", names(combined), fixed=TRUE)
