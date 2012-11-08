@@ -20,8 +20,6 @@ from the subject-level netCDF.
 
 Required config parameters:
 annot_scan_file       scan annotation file (with columns subj.plink, family, father, mother)
-annot_snp_alleleACol  column of allele A in snp annotation
-annot_snp_alleleBCol  column of allele B in snp annotation
 annot_snp_file        snp annotation file
 nc_samp_geno_file     sample-level genotype netCDF file
 out_log_prefix        output prefix for log files
@@ -32,6 +30,8 @@ nc_subj_geno_file     subject-level genotype netCDF file
 
 Optional config parameters [default]:
 annot_scan_subjectCol  [subjectID]  column of subjectID in scan annotation
+annot_snp_alleleACol   [alleleA]    column of allele A in snp annotation
+annot_snp_alleleBCol   [alleleB]    column of allele B in snp annotation
 annot_snp_rsIDCol      [rsID]       column of rsID in snp annotation"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",

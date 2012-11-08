@@ -77,12 +77,12 @@ it will be created.
 > sample_qualty.py --email user@uw.edu sample_quality.config
 
 
-33) Recalculate missing call rates
+34) Recalculate missing call rates
 "round2" in config file should be TRUE
 > missing.py --email user@uw.edu missing.config
 
 
-37) Create subject-level NetCDF and GDS genotype files with anomalies filtered
+38) Create subject-level NetCDF and GDS genotype files with anomalies filtered
 > netcdf_subset.py --email user@uw.edu ncdf_subset.config
 
 
