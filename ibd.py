@@ -10,11 +10,10 @@ from optparse import OptionParser
 usage = """%prog [options] config
 
 Identity by Descent with the following steps:
-1) Calculate allele frequency (unless file already exists)
-2) Select SNPs (autosomal, missing > 5%, MAF > 0, >15 kb apart)
-3) IBD calculations
-4) Assign observed relationships and plot results
-5) Calculate individual inbreeding coefficients
+1) Select SNPs with LD pruning (from autosomal, non-monomorphic, missing<0.05)
+2) IBD calculations
+3) Assign observed relationships and plot results
+4) Calculate individual inbreeding coefficients
 
 Required config parameters:
 annot_scan_file  scan annotation file
@@ -27,9 +26,10 @@ annot_scan_subjectCol   [subjectID]               column of subjectID in scan an
 annot_snp_missingCol    [missing.n1]              column of missing call rate in snp annotation
 exp_rel_file            [NA]                      file with data frame of expected relationships
 ibd_method              [MoM]                     IBD method (MoM or MLE)
-scan_exclude_file       [NA]                      vector of scanID to exclude from allele frequency
+ld_r_threshold          [0.32]                    r threshold for LD pruning (0.32 = sqrt(0.1))
+ld_win_size             [10]                      size of sliding window for LD pruning (in Mb)
+maf_threshold           [0.05]                    minimum MAF for non-monomorphic SNPs to consider in LD pruning
 scan_ibd_include_file   [NA]                      vector of scanID to include in IBD (NA=all)
-out_afreq_file          [allele_freq.RData]       output (or existing) allele frequency file
 out_ibd_con_file        [ibd_connectivity.RData]  output connectivity data file
 out_ibd_con_plot        [ibd_connectivity.pdf]    output connectivity plot
 out_ibd_exp_plot        [ibd_expected.pdf]        output IBD plot color-coded by expected relationships
@@ -68,22 +68,9 @@ configdict = QCpipeline.readConfig(config)
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-waitAfreq = False
-if os.path.exists(configdict['out_afreq_file']):
-    print "using allele freq file " + configdict['out_afreq_file']
-else:
-    job = "allele_freq"
-    rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
-    waitAfreq = True
-
 job = "ibd_snp_sel"
 rscript = os.path.join(pipeline, "R", job + ".R")
-if waitAfreq:
-    holdid = [jobid["allele_freq"]]
-else:
-    holdid = None
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
 job = "ibd"
 rscript = os.path.join(pipeline, "R", job + ".R")

@@ -4,6 +4,7 @@
 ##########
 
 library(GWASTools)
+library(SNPRelate)
 library(QCpipeline)
 sessionInfo()
 
@@ -13,27 +14,30 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "out_afreq_file")
-optional <- c("annot_snp_missingCol", "out_snp_file")
-default <- c("missing.n1", "ibd_snp_sel.RData")
+required <- c("gds_geno_file")
+optional <- c("ld_r_threshold", "ld_win_size", "maf_threshold",
+              "out_snp_file", "scan_ibd_include_file")
+default <- c(0.32, 10, 0.05, "ibd_snp_sel.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-(snpAnnot <- getobj(config["annot_snp_file"]))
-snpID <- getSnpID(snpAnnot)
+if (!is.na(config["scan_ibd_include_file"])) {
+  scan.ids <- getobj(config["scan_ibd_include_file"])
+} else {
+  # if scan.ids=NULL for IBD functions, all scans are used
+  scan.ids <- NULL
+}
+length(scan.ids)
 
-afreq <- getobj(config["out_afreq_file"])
-stopifnot(allequal(rownames(afreq), snpID))
+maf <- as.numeric(config["maf_threshold"])
+r <- as.numeric(config["ld_r_threshold"])
+win <- as.numeric(config["ld_win_size"]) * 1e6
 
-chrom <- getChromosome(snpAnnot)
-pos <- getPosition(snpAnnot)
-missing <- getVariable(snpAnnot, config["annot_snp_missingCol"])
-maf.filt <- !is.na(afreq[,"all"]) & afreq[,"all"] > 0 & afreq[,"all"] < 1
-pool <- chrom < 23 & missing < 0.05 & maf.filt
-table(pool)
+gdsobj <- openfn.gds(config["gds_geno_file"])
+snpset <- snpgdsLDpruning(gdsobj, sample.id=scan.ids,
+                          autosome.only=TRUE, maf=maf, missing.rate=0.05,
+                          method="corr", slide.max.bp=win, ld.threshold=r)
+closefn.gds(gdsobj)
 
-rsnp <- apartSnpSelection(chrom, pos, min.dist=15000, init.sel=pool)
-table(rsnp)
-
-snps.ibd <- snpID[rsnp]
+snps.ibd <- unlist(snpset, use.names=FALSE)
 save(snps.ibd, file=config["out_snp_file"])

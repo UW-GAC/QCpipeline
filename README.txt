@@ -65,12 +65,9 @@ For Fisher test:
 > batch.py --type fisher --email user@uw.edu batch.config
 
 
-25-27) IBD (allele frequency, SNP selection, run IBD, plots,
-            inbreeding coefficients)
+25-27) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
 > ibd.py --email user@uw.edu ibd.config
-
-The allele frequency file will be used if it already exists, otherwise
-it will be created.
+SNPs for IBD are selected with LD pruning.
 
 
 28) Sample quality check
