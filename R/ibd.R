@@ -44,19 +44,6 @@ closefn.gds(gdsobj)
 save(ibd, file=config["out_ibd_file"])
 
 # save only pairs where KC > 1/32
-n <- dim(ibd$k0)[1]
-k2 <- 1 - ibd$k0 - ibd$k1
-KC <- 0.5*k2 + 0.25*ibd$k1
-cutoff <- 1/32
-flag <- lower.tri(ibd$k0) & (KC >= cutoff)
-
-rv <- data.frame(
-  sample1 = matrix(ibd$sample.id, nrow=n, ncol=n, byrow=TRUE)[flag],
-  sample2 = matrix(ibd$sample.id, nrow=n, ncol=n)[flag],
-  k0 = ibd$k0[flag],
-  k1 = ibd$k1[flag],
-  KC = KC[flag] )
-
-ibd <- rv
-
+ibd <- snpgdsIBDSelection(ibd, kinship.cutoff=1/32)
+names(ibd)[names(ibd) == "kinshipcoeff"] <- "KC"
 save(ibd, file=config["out_ibd_kc32_file"])
