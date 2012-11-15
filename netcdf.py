@@ -18,7 +18,7 @@ array_build      genotyping build (e.g., hg19)
 array_name       name of the genotyping array
 raw_path         path to raw data
 nc_bl_file       output BAF/LRR netCDF file
-nc_xy_file       output XY intensity netCDF file
+nc_xy_file       output XY intensity netCDF file (quality score optional)
 nc_geno_file     output genotype netCDF file
 gds_geno_file    output genotype GDS file
 
@@ -37,6 +37,7 @@ raw_snpCol            [1]                    column number with snp name
 raw_sampleCol         [2]                    column number with scan name
 raw_a1Col             [10]                   column number with allele 1
 raw_a2Col             [11]                   column number with allele 2
+raw_qCol              [NA]                   column number with quality score (NA to omit)
 raw_xCol              [14]                   column number with X intensity
 raw_yCol              [15]                   column number with Y intensity
 raw_bafCol            [18]                   column number with BAF

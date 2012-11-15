@@ -23,6 +23,8 @@ run all:
 Check output to make sure creation was successful and all checks were passed
 Pay attention to sections marked "MANUAL REVIEW"
 
+Quality score will only be included in "xy" file if raw_qCol is not NA.
+
 
 13-15) Gender check (heterozygosity and mean intensity)
 > gender_check.py --email user@uw.edu gender.config

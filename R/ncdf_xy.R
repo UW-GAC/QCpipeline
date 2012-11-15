@@ -16,13 +16,15 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "array_build", "array_name",
               "nc_xy_file", "raw_path")
 optional <- c("annot_scan_fileCol", "annot_scan_nameCol", "annot_snp_nameCol",
-              "nc_xy_checkFile", "nc_xy_diagFile", "raw_xCol", "raw_yCol",
+              "nc_xy_checkFile", "nc_xy_diagFile", "raw_qCol", "raw_xCol", "raw_yCol",
               "raw_colTotal", "raw_sampleCol", "raw_scanNameInFile", "raw_sepType",
               "raw_skipNum", "raw_snpCol")
 default <- c("file", "Sample.Name", "rsID", "nc_xy_check.RData", "nc_xy_diag.RData",
-             14, 15, 19, 2, 1, ",", 11, 1)
+             NA, 14, 15, 19, 2, 1, ",", 11, 1)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
+
+getqual <- !is.na(config["raw_qCol"])
 
 scanAnnot <- getobj(config["annot_scan_file"])
 
@@ -42,10 +44,12 @@ nsamp <- nrow(scanAnnot)
 snpdf <- getVariable(snpAnnot, c("snpID", "chromosome", "position"))
 
 ncfile <- config["nc_xy_file"]
+vars <- c("X","Y")
+if (getqual) vars <- c("quality", vars)
 system.time({
   ncdfCreate(snp.annotation = snpdf,
              ncdf.filename = ncfile,
-             variables = c("X","Y"),
+             variables = vars,
              n.samples = nsamp,
              precision = "single",
              array.name = config["array_name"],
@@ -76,8 +80,10 @@ names(scandf) <- c("scanID", "scanName", "file")
 col.nums <- as.integer(c(config["raw_snpCol"], config["raw_xCol"], config["raw_yCol"]))
 names(col.nums) <- c("snp", "x", "y")
 if (config["raw_scanNameInFile"] == 1) {
-  col.nums <- append(col.nums, as.integer(config["raw_sampleCol"]), after=1)
-  names(col.nums)[2] <- "sample"
+  col.nums <- c(col.nums, "sample"=as.integer(config["raw_sampleCol"]))
+}
+if (getqual) {
+  col.nums <- c(col.nums, "qs"=as.integer(config["raw_qCol"]))
 }
 skip.num <- as.integer(config["raw_skipNum"])
 col.total <- as.integer(config["raw_colTotal"])
@@ -123,6 +129,15 @@ scanID <- getScanID(data)
 range(scanID)
 
 n <- nsamp-4   # number of samples minus 4 to get last 5 samples
+
+if (getqual) {
+  q <- getQuality(data, snp=c(1,-1), scan=c(n,5))
+  dim(q)
+  nsnp <- nrow(snpAnnot)
+  stopifnot(dim(q) == c(nsnp, 5))
+  q[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
+  q[(nsnp-4):nsnp,] # last 5 snps
+}
 
 x <- getX(data, snp=c(1,-1), scan=c(n,5))
 dim(x)
@@ -173,6 +188,11 @@ stopifnot(all(res$chk == 1))
 
 table(res$snp.order, exclude=NULL)
 stopifnot(all(res$snp.order == 1))
+
+if (getqual) { 
+  print(table(res$qs.chk, exclude=NULL))
+  stopifnot(all(res$chk == 1))
+}
 
 table(res$inten.chk$x, exclude=NULL)
 stopifnot(all(res$inten.chk$x == 1))
