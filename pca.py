@@ -29,6 +29,8 @@ build                 genome build (hg18 or hg19)
 gds_geno_file         genotype GDS file (filtered subject-level recommended)
 nc_geno_file          genotype netCDF file (filtered subject-level recommended)
 study_unrelated_file  vector of scanID for PCA and LD pruning (no hapmaps)
+out_corr_file         output file of PC-SNP correlations
+out_pca_file          output file of PCA results
 out_pruned_file       output file of pruned snps
 
 Required for "combined" option:
@@ -55,7 +57,6 @@ num_evs_to_plot              [12]                     number of eigenvectors for
 out_comb_scan_annot_file     [comb_scan_annot.RData]  output combined scan annotation
 out_comb_snp_annot_file      [comb_snp_annot.RData]   output combined snp annotation
 out_comb_gds_geno_file       [comb_geno.gds]          output combined GDS file
-out_corr_file                [pca_corr.RData]         output file of PC-SNP correlations
 out_corr_plot_prefix         [pca_corr]               output prefix for correlation plots (all SNPs)
 out_corr_pruned_plot_prefix  [NA]                     output prefix for correlation plots (pruned SNPs only)
 out_dens_plot                [pca_dens.pdf]           output plot of EV2 vs EV1 with density sidebars
@@ -63,7 +64,6 @@ out_disc_file                [dup_disc_ext.RData]     output duplicate discordan
 out_disc_plot                [dup_disc_ext.pdf]       output duplicate discordance plot
 out_ev12_plot                [pca_ev12.pdf]           output plot of EV2 vs EV1
 out_pairs_plot               [pca_pairs.png]          output pairs plot of EV 1-4
-out_pca_file                 [pca.RData]              output file of PCA results
 out_scree_plot               [pca_scree.pdf]          output scree plot
 
 Additional parameters:
