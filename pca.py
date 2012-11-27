@@ -29,6 +29,7 @@ build                 genome build (hg18 or hg19)
 gds_geno_file         genotype GDS file (filtered subject-level recommended)
 nc_geno_file          genotype netCDF file (filtered subject-level recommended)
 study_unrelated_file  vector of scanID for PCA and LD pruning (no hapmaps)
+out_pruned_file       output file of pruned snps
 
 Required for "combined" option:
 ext_annot_scan_file      external dataset scan annotation file
@@ -63,7 +64,6 @@ out_disc_plot                [dup_disc_ext.pdf]       output duplicate discordan
 out_ev12_plot                [pca_ev12.pdf]           output plot of EV2 vs EV1
 out_pairs_plot               [pca_pairs.png]          output pairs plot of EV 1-4
 out_pca_file                 [pca.RData]              output file of PCA results
-out_pruned_file              [snps_pruned.RData]      output file of pruned snps
 out_scree_plot               [pca_scree.pdf]          output scree plot
 
 Additional parameters:
