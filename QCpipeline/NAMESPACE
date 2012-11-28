@@ -9,4 +9,4 @@ export(readConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
        dbgapScanAnnotation, dbgapSnpAnnotation,
        make.allele.mappings, make.allele.annotation,
-       defineFamilies)
+       defineFamilies, igvBatch)

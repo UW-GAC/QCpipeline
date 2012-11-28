@@ -26,13 +26,14 @@ igvBatch(chromosome, position, bam, outdir="./",
 \author{Stephanie Gogarten}
 \seealso{}
 \examples{
-\dontrun{
 bamfile <- "/projects/geneva/gcc-fs2/Peters_seq/bam/B00Y2ACXX_1_GGCTAC.bam"
-outdir <- "/projects/geneva/gcc-fs2/Peters_seq/stephanie/results/igv_plots"
+outdir <- tempdir()
+outfile <- tempfile()
 chrom <- c(1, 1)
 pos <- c(155265446, 224804891)
-igvBatch(chrom, pos, bamfile, outdir, file="batch.igv",
+igvBatch(chrom, pos, bamfile, outdir, file=outfile,
          genome="hg19", collapse=TRUE)
-}
+readLines(outfile)
+file.remove(outfile)
 }
 \keyword{}
