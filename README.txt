@@ -70,7 +70,8 @@ For Fisher test:
 25-27) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
 > ibd.py --email user@uw.edu ibd.config
 SNPs for IBD are selected with LD pruning.
-
+The LD pruning file will be used if it already exists, otherwise it
+will be created.
 
 28) Sample quality check
 > sample_qualty.py --email user@uw.edu sample_quality.config

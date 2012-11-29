@@ -10,7 +10,8 @@ from optparse import OptionParser
 usage = """%prog [options] config
 
 Identity by Descent with the following steps:
-1) Select SNPs with LD pruning (from autosomal, non-monomorphic, missing<0.05)
+1) Select SNPs with LD pruning  (unless file already exists)
+   (from autosomal, non-monomorphic, missing<0.05)
 2) IBD calculations
 3) Assign observed relationships and plot results
 4) Calculate individual inbreeding coefficients
@@ -68,18 +69,33 @@ configdict = QCpipeline.readConfig(config)
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-job = "ibd_snp_sel"
-rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+
+# skip LD if file already exists
+waitLD = False
+if os.path.exists(configdict['out_snp_file']):
+    print "using SNPs in " + configdict['out_snp_file']
+else:
+    job = "ibd_snp_sel"
+    rscript = os.path.join(pipeline, "R", job + ".R")
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+    waitLD = True
 
 job = "ibd"
+if waitLD:
+    holdid = [jobid['ibd_snp_sel']]
+else:
+    holdid = None
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd_snp_sel']], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 
 job = "ibd_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd']], queue=qname, email=email)
 
 job = "inbreed_coeff"
+if waitLD:
+    holdid = [jobid['ibd_snp_sel']]
+else:
+    holdid = None
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd_snp_sel']], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
