@@ -28,6 +28,8 @@ annot_snp_snpCol_2    [rsID]       column of matching snp ID in snp annotation 2
 scan_exclude_file_1   [NA]         vector of scanID to exclude from dataset 1
 scan_exclude_file_2   [NA]         vector of scanID to exclude from dataset 2
 snp_include_file      [NA]         vector of matching snp ID to include
+out_summary_prefix    [NA]         prefix for summary output files
+summary_include_file  [NA]         vector of snp ID to include in summary
 """
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
