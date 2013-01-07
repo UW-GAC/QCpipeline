@@ -31,9 +31,9 @@ names(snp) <- c("snpID", "rsID", "chromosome")
 snp <- merge(snp, men)
 
 bin.start <- config["mend.bin.start"]
-bin.start <- unlist(strsplit(bin.start, " ", fixed=TRUE))
+bin.start <- as.integer(unlist(strsplit(bin.start, " ", fixed=TRUE), use.names=FALSE))
 bin.end <- config["mend.bin.end"]
-bin.end <- unlist(strsplit(bin.end, " ", fixed=TRUE))
+bin.end <- as.integer(unlist(strsplit(bin.end, " ", fixed=TRUE), use.names=FALSE))
 stopifnot(length(bin.start) == length(bin.end))
 
 bins <- rep(NA, (length(bin.start)))

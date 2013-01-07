@@ -37,6 +37,21 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
                   help="cluster queue name [default %default]")
+parser.add_option("--overall", dest="overall",
+                  action="store_true", default=False,
+                  help="overall discordance")
+parser.add_option("--minor", dest="minor",
+                  action="store_true", default=False,
+                  help="minor allele discordance")
+parser.add_option("--miss1fail", dest="miss1fail",
+                  action="store_true", default=False,
+                  help="minor allele discordance where missing in dataset 1 counts as discordance")
+parser.add_option("--miss2fail", dest="miss2fail",
+                  action="store_true", default=False,
+                  help="minor allele discordance where missing in dataset 2 counts as discordance")
+parser.add_option("--senspec", dest="senspec",
+                  action="store_true", default=False,
+                  help="minor allele sensitivity and specificity")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -47,6 +62,19 @@ pipeline = options.pipeline
 email = options.email
 qname = options.qname
 
+# which tests to run?
+tests = []
+if options.overall:
+    tests.append("all")
+if options.minor:
+    tests.append("minor")
+if options.miss1fail:
+    tests.append("miss1fail")
+if options.miss2fail:
+    tests.append("miss2fail")
+if options.senspec:
+    tests.append("senspec")
+
 sys.path.append(pipeline)
 import QCpipeline
 
@@ -54,7 +82,7 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 
-for type in ["all", "minor", "miss2fail"]:
+for type in tests:
     job = "dup_disc_2sets"
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[type] = QCpipeline.submitJob("disc_"+type, driver, [rscript, config, type], queue=qname, email=email)

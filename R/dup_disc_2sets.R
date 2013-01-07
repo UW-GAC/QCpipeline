@@ -1,7 +1,7 @@
 ##########
 # Duplicate discordance across two datasets
-# Usage: R --args config.file <type> < dup_disc_2sets.R
-# Overall discordance is default, alternate types are "minor", "miss1fail", "miss2fail"
+# Usage: R --args config.file type < dup_disc_2sets.R
+# types are "all", "minor", "miss1fail", "miss2fail", "senspec"
 ##########
 
 library(GWASTools)
@@ -29,26 +29,39 @@ default <- c("subjectID", "subjectID",
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-if (length(args) > 1 & args[2] == "minor") {
-  MAonly <- TRUE
-  miss.fail <- c(FALSE, FALSE)
-  outfile <- paste(config["out_prefix"], "_minor.RData", sep="")
-  message("calculating minor allele discordance")
-} else if (length(args) > 1 & args[2] == "miss1fail") {
-  MAonly <- TRUE
-  miss.fail <- c(TRUE, FALSE)
-  outfile <- paste(config["out_prefix"], "_miss1fail.RData", sep="")
-  message("calculating minor allele discordance, including missing in dataset 1")
-} else if (length(args) > 1 & args[2] == "miss2fail") {
-  MAonly <- TRUE
-  miss.fail <- c(FALSE, TRUE)
-  outfile <- paste(config["out_prefix"], "_miss2fail.RData", sep="")
-  message("calculating minor allele discordance, including missing in dataset 2")
-} else {
+if (length(args) < 2) stop("missing discordance type")
+type <- args[2]
+
+if (type == "all") {
+  func.name <- "duplicateDiscordanceAcrossDatasets"
   MAonly <- FALSE
   miss.fail <- c(FALSE, FALSE)
   outfile <- paste(config["out_prefix"], "_all.RData", sep="")
   message("calculating overall discordance")
+} else if (type == "minor") {
+  func.name <- "duplicateDiscordanceAcrossDatasets"
+  MAonly <- TRUE
+  miss.fail <- c(FALSE, FALSE)
+  outfile <- paste(config["out_prefix"], "_minor.RData", sep="")
+  message("calculating minor allele discordance")
+} else if (type == "miss1fail") {
+  func.name <- "duplicateDiscordanceAcrossDatasets"
+  MAonly <- TRUE
+  miss.fail <- c(TRUE, FALSE)
+  outfile <- paste(config["out_prefix"], "_miss1fail.RData", sep="")
+  message("calculating minor allele discordance, including missing in dataset 1")
+} else if (type == "miss2fail") {
+  func.name <- "duplicateDiscordanceAcrossDatasets"
+  MAonly <- TRUE
+  miss.fail <- c(FALSE, TRUE)
+  outfile <- paste(config["out_prefix"], "_miss2fail.RData", sep="")
+  message("calculating minor allele discordance, including missing in dataset 2")
+} else if (type == "senspec") {
+  func.name <- "minorAlleleSensitivitySpecificity"
+  outfile <- paste(config["out_prefix"], "_senspec.RData", sep="")
+  message("calculating minor allele sensitivity and specificity")
+} else {
+  stop("unknown discordance type; options are all, minor, miss1fail, miss2fail, senspec")
 }
 
 # dataset 1
@@ -113,14 +126,23 @@ if (!is.na(config["snp_include_file"])) {
 }
 length(snp.include)
 
-
-disc <- duplicateDiscordanceAcrossDatasets(genoData1, genoData2,
-  subjName.cols=config[c("annot_scan_subjCol_1","annot_scan_subjCol_2")],
-  snpName.cols=config[c("annot_snp_snpCol_1", "annot_snp_snpCol_2")],
-  one.pair.per.subj=TRUE, minor.allele.only=MAonly,
-  missing.fail=miss.fail,
-  scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
-  snp.include=snp.include)
+if (func.name == "duplicateDiscordanceAcrossDatasets") {
+  disc <- duplicateDiscordanceAcrossDatasets(genoData1, genoData2,
+    subjName.cols=config[c("annot_scan_subjCol_1","annot_scan_subjCol_2")],
+    snpName.cols=config[c("annot_snp_snpCol_1", "annot_snp_snpCol_2")],
+    one.pair.per.subj=TRUE, minor.allele.only=MAonly,
+    missing.fail=miss.fail,
+    scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
+    snp.include=snp.include)
+} else if (func.name == "minorAlleleSensitivitySpecificity") {
+  disc <- minorAlleleSensitivitySpecificity(genoData1, genoData2,
+    subjName.cols=config[c("annot_scan_subjCol_1","annot_scan_subjCol_2")],
+    snpName.cols=config[c("annot_snp_snpCol_1", "annot_snp_snpCol_2")],
+    scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
+    snp.include=snp.include)
+} else {
+  stop("unknown function name")
+}
 
 save(disc, file=outfile)
 
