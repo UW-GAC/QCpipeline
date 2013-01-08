@@ -59,8 +59,8 @@ snp.annot1 <- pData(snpAnnot1)[snpAnnot1[[config["annot_snp_snpCol_1"]]] %in% sn
 names(snp.annot1) <- c("snp.id", "MAF")
 
 snpAnnot2 <- getobj(config["annot_snp_file_2"])
-snp.annot2 <- pData(snpAnnot2)[snpAnnot2[[config["annot_snp_snpCol_1"]]] %in% snp.id,
-                               c(config["annot_snp_snpCol_1"], config["annot_snp_clustSepCol_2"])]
+snp.annot2 <- pData(snpAnnot2)[snpAnnot2[[config["annot_snp_snpCol_2"]]] %in% snp.id,
+                               c(config["annot_snp_snpCol_2"], config["annot_snp_clustSepCol_2"])]
 names(snp.annot2) <- c("snp.id", "cluster.sep")
 
 snp.annot <- merge(snp.annot1, snp.annot2)
