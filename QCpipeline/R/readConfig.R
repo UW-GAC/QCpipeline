@@ -7,6 +7,10 @@ readConfig <- function(file, ...) {
   return(config)
 }
 
+writeConfig <- function(config, file, ...) {
+  write.table(config, file=file, col.names=FALSE, ...)
+}
+
 setConfigDefaults <- function(config, required, optional, default) {
   stopifnot(length(optional) == length(default))
   

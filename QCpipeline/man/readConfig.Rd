@@ -1,10 +1,13 @@
 \name{readConfig}
 \alias{readConfig}
+\alias{writeConfig}
 \alias{setConfigDefaults}
 \title{Read a configuration file}
 \description{Read a configuration file}
 \usage{
 readConfig(file, ...)
+
+writeConfig(config, file, ...)
 
 setConfigDefaults(config, required, optional, default)
 }
@@ -23,6 +26,8 @@ setConfigDefaults(config, required, optional, default)
   \code{readConfig} returns a named character vector of parameter
   values.
 
+  \code{writeConfig} writes a named character vector to a file.
+
   \code{setConfigDefaults} takes a named character vector returned by
   \code{readConfig} and adds additional parameters in
   \code{optional} with values in \code{default}.
@@ -32,16 +37,18 @@ setConfigDefaults(config, required, optional, default)
 \author{Stephanie Gogarten}
 \seealso{}
 \examples{
-f <- tempfile()
-write.table(cbind(letters[1:10], 1:10), file=f, quote=FALSE,
+file <- tempfile()
+write.table(cbind(letters[1:10], 1:10), file=file, quote=FALSE,
             row.names=FALSE, col.names=FALSE)
-config <- readConfig(f)
+config <- readConfig(file)
 
 required <- letters[1:5]
 optional <- letters[11:15]
 default <- 11:15
 config <- setConfigDefaults(config, required, optional, default)
 
-unlink(f)
+writeConfig(config, file)
+
+unlink(file)
 }
 \keyword{}

@@ -5,7 +5,7 @@ import(gridBase)
 import(hexbin)
 import(Biostrings)
 
-export(readConfig, setConfigDefaults,
+export(readConfig, writeConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
        dbgapScanAnnotation, dbgapSnpAnnotation,
        make.allele.mappings, make.allele.annotation,
