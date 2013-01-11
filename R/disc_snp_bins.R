@@ -30,27 +30,22 @@ type <- args[2]
 
 discfile <- paste(config["out_prefix"], "_", type, ".RData", sep="")
 disc <- getobj(discfile)
+
+if (is.na(config["out_summary_prefix"])) {
+  outfile <- paste(config["out_prefix"], "_", type, "_summary.RData", sep="")
+} else {
+  outfile <- paste(config["out_summary_prefix"], "_", type, "_summary.RData", sep="")
+}
+
 if (type == "senspec") {
   snp.disc <- disc
-  metric <- c("sensitivity", "specificity")
-  if (is.na(config["out_summary_prefix"])) {
-    outfile <- paste(config["out_prefix"], "_", c("sens","spec"), "_summary.RData", sep="")
-  } else {
-    outfile <- paste(config["out_summary_prefix"], "_", c("sens","spec"), "_summary.RData", sep="")
-  }
+  metric <- names(disc)[-1]
 } else {
   snp.disc <- disc$discordance.by.snp
   # metric to summarize = concordance rate
   snp.disc$conc.rate <- 1 - snp.disc$discord.rate
   metric <- "conc.rate"
-  if (is.na(config["out_summary_prefix"])) {
-    outfile <- paste(config["out_prefix"], "_", type, "_summary.RData", sep="")
-  } else {
-    outfile <- paste(config["out_summary_prefix"], "_", type, "_summary.RData", sep="")
-  }
 }
-stopifnot(length(metric) == length(outfile))
-names(outfile) <- metric
 snp.id <- row.names(snp.disc)
 
 snpAnnot1 <- getobj(config["annot_snp_file_1"])
@@ -80,6 +75,7 @@ maf.bins <- as.numeric(unlist(strsplit(config["bins_maf"], " ", fixed=TRUE), use
 sep.bins <- as.numeric(unlist(strsplit(config["bins_clustSep"], " ", fixed=TRUE), use.names=FALSE))
 
 # loop over metrics in file
+out <- list()
 for (m in metric) {
   res <- matrix(NA, nrow=length(sep.bins), ncol=length(maf.bins), dimnames=list(
                   c(paste("clust.sep", sep.bins[1:(length(sep.bins)-1)], "-",
@@ -105,6 +101,7 @@ for (m in metric) {
   res["all","all"] <- mean(snp[,m], na.rm=TRUE)
   nsnp["all","all"] <- sum(snp$npair > 0)
 
-  out <- list("metric"=res, "counts"=nsnp)
-  save(out, file=outfile[m])
+  out[[m]] <- list("metric"=res, "counts"=nsnp)
 }
+if (length(out) == 1) out <- out[[1]]
+save(out, file=outfile)

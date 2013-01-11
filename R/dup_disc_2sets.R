@@ -135,7 +135,7 @@ if (func.name == "duplicateDiscordanceAcrossDatasets") {
     scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
     snp.include=snp.include)
 } else if (func.name == "minorAlleleSensitivitySpecificity") {
-  disc <- minorAlleleSensitivitySpecificity(genoData1, genoData2,
+  disc <- minorAlleleDetectionAccuracy(genoData1, genoData2,
     subjName.cols=config[c("annot_scan_subjCol_1","annot_scan_subjCol_2")],
     snpName.cols=config[c("annot_snp_snpCol_1", "annot_snp_snpCol_2")],
     scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
