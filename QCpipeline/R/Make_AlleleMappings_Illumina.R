@@ -1,6 +1,8 @@
 ## Function to take Illumina build 37 SNP annotation data file and make an Allele Mappings table
 ## Sarah Nelson, UWGCC, May 25, 2011
 ## Updated March 7, 2012, to allow for indel records where IlmnStrand != SourceStrand
+## UPdated January 31, 2013 to allow for non-verbose indel mapping (where SourceStrand is not available, print out "I" and "D," respectively, to represent insertion and deletion allele
+
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -26,10 +28,12 @@
 
 ################################# USAGE
 ## Requires as input:
-# "snp.dat", the name of an data frame made from SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following fields:
+# -- "snp.dat", the name of an data frame made from SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following fields:
 #  "IlmnID"                "Name"                  "IlmnStrand"           
 #  "SNP"                   "GenomeBuild"          "SourceStrand"                      
-#  "SourceSeq" "TopGenomicSeq"         "RefStrand"             
+#  "SourceSeq"          "RefStrand"             
+
+# -- "indel.verbose" - a T/F field that defaults to TRUE;  when FALSE, prints I" and "D" characters, respectively, to represent insertion and deletion allele; when TRUE, will parse full nucleotide sequence if alleles from the SourceSeq column
 
 ## Returns as output: R data frame object with columns ("snp", "alle.AB", "alle.design", "alle.top", "alle.fwd", "alle.plus"
 
@@ -46,10 +50,12 @@
 
 ################################# FUNCTION
 
-make.allele.mappings <- function(snp.dat)
+make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 {
 
   options(stringsAsFactors = FALSE)
+
+  snp.dat.orig.names <- names(snp.dat)
 
   ## Report total number of SNPs and indels
   cat("\tTotal number of probes:", length(snp.dat$Name),"\n")
@@ -66,7 +72,7 @@ make.allele.mappings <- function(snp.dat)
   names(map) <- "snp"
   snp.dat$order <- 1:length(snp.dat$Name)
   
-  ## reorder data frame to match SNP annotation
+  ## re-order data frame to match SNP annotation
   map$order <- snp.dat$order[match(map$snp, snp.dat$Name)]
   map <- map[order(map$order),]
   
@@ -90,9 +96,8 @@ make.allele.mappings <- function(snp.dat)
   ### Make conditional on presence of indels
   if(length(indels)>0){
   cat("\tCreating mappings for insertion/deletion probes\n")
-  	## extract the map data frame
-	indels.map <- map[is.element(map$snp, indels),]
-
+  
+  if(indels.verbose) {
 	## get alleles from the SourceSeq column; makes a list
 	sourceseq.start <- strsplit(indels.dat$SourceSeq,"[",fixed=TRUE)
 
@@ -162,6 +167,26 @@ make.allele.mappings <- function(snp.dat)
 	indels.dat$design.A <- indels.dat$alle1
 	indels.dat$design.B <- indels.dat$alle2
 
+      }
+
+  if(!indels.verbose) {
+    ## write out simpler version of indel mapping
+    del.first <- indels.dat[indels.dat$SNP=="[D/I]",]
+    ins.first <- indels.dat[indels.dat$SNP=="[I/D]",]
+
+    del.first$top.A <- del.first$design.A <- "D"
+    del.first$top.B <- del.first$design.B <- "I"
+    ins.first$top.A <- ins.first$design.A <- "I"
+    ins.first$top.B <- ins.first$design.B <- "D"
+
+    ## Need to define alle1 and alle2 revcomp -- PICK UP HERE ON FRIDAY 2/1/2013
+    
+    indels.dat <- rbind(del.first, ins.first)
+    indels.dat$alle1.revcomp <- indels.dat$design.A
+    indels.dat$alle2.revcomp <- indels.dat$design.B
+
+  }
+
   }
   
   #### exit indels, return to snp.dat
@@ -188,13 +213,14 @@ make.allele.mappings <- function(snp.dat)
   snp.dat$top.B[is.element(snp.dat$IlmnStrand,c("BOT","M"))] <- snp.dat$alle2.revcomp[is.element(snp.dat$IlmnStrand,c("BOT","M"))]
   
   ## now that design and TOP alleles are defined, rejoin indels with main SNP annotation, keeping select columns
-  cols.keep <- c("IlmnID","Name","IlmnStrand","SNP","SourceStrand","RefStrand",
+  cols.keep <- c("IlmnID","Name","IlmnStrand","SNP","RefStrand",
                  "design.A","design.B","alle1.revcomp","alle2.revcomp","top.A","top.B","order")
   
   ## allow for arrays with no indels - in those cases, just keep main snp.dat object with selected columns
   if (length(indels)>0)  {
-    comb <- rbind(snp.dat[,cols.keep], indels.dat[,cols.keep]) } 
-  else   {comb <- snp.dat[,cols.keep]  }
+    comb <- rbind(snp.dat[,cols.keep], indels.dat[,cols.keep])} 
+
+  if (length(indels)==0) comb <- snp.dat[,cols.keep] 
 
   ## restore original order, rename to snp.dat
   snp.dat <- comb[order(comb$order),]
