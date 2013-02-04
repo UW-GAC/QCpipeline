@@ -4,15 +4,16 @@
 \title{Make allele mapping file}
 \description{Function to take Illumina build 37 SNP annotation data file and make an Allele Mappings table}
 \usage{
-make.allele.mappings(snp.dat)
+make.allele.mappings(snp.dat, indels.verbose=TRUE)
 
 make.allele.annotation(map, alleles=c("top", "design", "fwd", "plus"))
 }
 \arguments{
   \item{snp.dat}{a data frame made from SNP Illumina
     annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following
-    fields: "IlmnID", "Name", "IlmnStrand", "SNP", "GenomeBuild", "SourceStrand",                      
+    fields: "IlmnID", "Name", "IlmnStrand", "SNP", "GenomeBuild", "SourceStrand",
     "SourceSeq", "TopGenomicSeq", "RefStrand"   }
+  \item{indels.verbose}{if \code{FALSE}, alleles for indels will be written out as 'I' and 'D,' rather than parsing the full nucleotide sequence of indel alleles from the SourceSeq column}
   \item{map}{a data frame with allele mappings (output of
     \code{make.allele.mappings}), with following fields: "snp",
     "alle.AB", "alle.design", "alle.top", "alle.fwd", "alle.plus"}
