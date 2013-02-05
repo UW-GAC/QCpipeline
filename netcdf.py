@@ -4,6 +4,7 @@
 
 import sys
 import os
+import subprocess
 from optparse import OptionParser
 
 usage = """%prog [options] config
@@ -21,6 +22,9 @@ nc_bl_file       output BAF/LRR netCDF file
 nc_xy_file       output XY intensity netCDF file (quality score optional)
 nc_geno_file     output genotype netCDF file
 gds_geno_file    output genotype GDS file
+
+Required for "checkPlink" option:
+plink_prefix     prefix of PLINK file to check
 
 Optional config parameters [default]:
 annot_scan_fileCol    [file]                 column of raw data file in scan annotation
@@ -47,7 +51,8 @@ nc_bl_diagFile        [nc_bl_diag.RData]     output file for BAF/LRR netCDF crea
 nc_geno_checkFile     [nc_geno_check.RData]  output file for genotype netCDF check
 nc_geno_diagFile      [nc_geno_diag.RData]   output file for genotype netCDF creation
 nc_xy_checkFile       [nc_xy_check.RData]    output file for XY netCDF check
-nc_xy_diagFile        [nc_xy_diag.RData]     output file for XY netCDF creation"""
+nc_xy_diagFile        [nc_xy_diag.RData]     output file for XY netCDF creation
+out_plink_logfile     [plink_check.log]      output file for PLINK check"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
@@ -62,6 +67,9 @@ parser.add_option("-t", "--test", dest="test",
 parser.add_option("-o", "--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
+parser.add_option("--checkPlink", dest="plink",
+                  action="store_true", default=False,
+                  help="check AB-coded PLINK file")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -73,6 +81,7 @@ email = options.email
 test = options.test
 overwrite = options.overwrite
 qname = options.qname
+plink = options.plink
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -82,8 +91,9 @@ if test:
 else:
     testStr = ""
 
+configdict = QCpipeline.readConfig(config)
+
 if not overwrite:
-    configdict = QCpipeline.readConfig(config)
     for file in (configdict['nc_geno_file'], configdict['nc_xy_file'],
                  configdict['nc_bl_file'], configdict['gds_geno_file']):
         if os.path.exists(file):
@@ -92,7 +102,8 @@ if not overwrite:
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-for job in ["ncdf_geno", "ncdf_xy", "ncdf_bl"]:
+#for job in ["ncdf_geno", "ncdf_xy", "ncdf_bl"]:
+for job in ["ncdf_geno"]:
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
     
@@ -101,3 +112,20 @@ if not test:
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ncdf_geno']], queue=qname, email=email)
     
+    if plink:
+        holdid = [jobid['ncdf_geno']]
+
+        # convert bed to ped
+        prefix = configdict['plink_prefix']
+        if not os.path.exists(prefix + ".ped"):
+            subprocess.call(["mv", prefix+".fam", prefix+".fam.orig"])
+            subprocess.call(["mv", prefix+".fam.unr", prefix+".fam"])
+            job = "plink_bed2ped"
+            arglist = ["--noweb", "--bfile", prefix, "--recode", "--out", prefix]
+            jobid[job] = QCpipeline.submitJob(job, "plink", arglist, options="-b y -j y -cwd", queue=qname, email=email)
+            holdid.append(jobid['plink_bed2ped'])
+
+        job = "plink_check"
+        rscript = os.path.join(pipeline, "R", job + ".R")
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, "ABcoding"], holdid=holdid, queue=qname, email=email)
+        
