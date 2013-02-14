@@ -31,7 +31,7 @@ nc_geno_file          genotype netCDF file (filtered subject-level recommended)
 study_unrelated_file  vector of scanID for PCA and LD pruning (no hapmaps)
 out_corr_file         output file of PC-SNP correlations
 out_pca_file          output file of PCA results
-out_pruned_file       output file of pruned snps
+out_pruned_file       output file of pruned snps (if file exists, pruning step is skipped)
 
 Required for "combined" option:
 ext_annot_scan_file      external dataset scan annotation file

@@ -16,13 +16,13 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("gds_geno_file")
 optional <- c("ld_r_threshold", "ld_win_size", "maf_threshold",
-              "out_snp_file", "scan_ibd_include_file")
+              "out_snp_file", "scan_pruning_include_file")
 default <- c(0.32, 10, 0.05, "ibd_snp_sel.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-if (!is.na(config["scan_ibd_include_file"])) {
-  scan.ids <- getobj(config["scan_ibd_include_file"])
+if (!is.na(config["scan_pruning_include_file"])) {
+  scan.ids <- getobj(config["scan_pruning_include_file"])
 } else {
   # if scan.ids=NULL for IBD functions, all scans are used
   scan.ids <- NULL
