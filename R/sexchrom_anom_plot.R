@@ -28,6 +28,8 @@ for (a in anomlist) {
   anom.ind <- c(anom.ind, grep(a, comment))
 }
 anom.ind <- unique(anom.ind)
+# get normal samples for comparison
+norm.ind <- setdiff(1:nrow(scanAnnot), anom.ind)
 # take out XY/XO
 xyxo <- grep("XY/XO", comment)
 anom.ind <- setdiff(anom.ind, xyxo)
@@ -44,13 +46,11 @@ if (!is.na(config["annot_snp_IntensityOnlyCol"])) {
 }
 
 if (length(anom.ind) > 0) {
-  scanID <- getScanID(scanAnnot)
-  anom.id <- scanID[anom.ind]
-
+  anom.id <- getScanID(scanAnnot)[anom.ind]
   localID <- getVariable(scanAnnot, config["annot_scan_localIDCol"])[anom.ind]
   sex <- getVariable(scanAnnot, config["annot_scan_sexCol"])[anom.ind]
-  comment <- comment[anom.ind]
-  main <- paste("Scan", anom.id, "- Local", localID, "- Sex", sex, "- Chrom X\n", comment)
+  anom.comment <- comment[anom.ind]
+  main <- paste("Scan", anom.id, "- Local", localID, "- Sex", sex, "- Chrom X\n", anom.comment)
   
   bl.file <- config["nc_bl_file"]
   blnc <- NcdfIntensityReader(bl.file)
@@ -59,6 +59,24 @@ if (length(anom.ind) > 0) {
   png.file <- file.path(paste(config["out_sexchrom_prefix"], "_%003d.png", sep=""))
   png(png.file, width=720, height=720)
   pseudoautoIntensityPlot(blData, scan.ids=anom.id, main=main, hg.build=config["build"],
+                          snp.exclude=snp.excl)
+  dev.off()
+
+  # normal samples - 3 of each sex
+  sex <- getVariable(scanAnnot, config["annot_scan_sexCol"])
+  m.ind <- sample(intersect(norm.ind, which(sex == "M")), 3)
+  f.ind <- sample(intersect(norm.ind, which(sex == "F")), 3)
+  samp.ind <- c(f.ind, m.ind)
+  sex <- sex[samp.ind]
+  
+  norm.id <- getScanID(scanAnnot)[samp.ind]
+  localID <- getVariable(scanAnnot, config["annot_scan_localIDCol"])[samp.ind]
+  norm.comment <- comment[samp.ind]
+  main <- paste("Scan", anom.id, "- Local", localID, "- Sex", sex, "- Chrom X\n", norm.comment)
+  
+  png.file <- file.path(paste(config["out_sexchrom_prefix"], "_norm_%003d.png", sep=""))
+  png(png.file, width=720, height=720)
+  pseudoautoIntensityPlot(blData, scan.ids=norm.id, main=main, hg.build=config["build"],
                           snp.exclude=snp.excl)
   dev.off()
   
