@@ -1,5 +1,5 @@
 
-defineFamilies <- function(ibd, KC.threshold=0.1, start.fam.id=1) {
+defineFamilies <- function(ibd, KC.threshold=0.09833927, start.fam.id=1) {
   # keep only pairs for which KC > KC.threshold
   dat <- ibd[ibd$KC > KC.threshold,]
 
