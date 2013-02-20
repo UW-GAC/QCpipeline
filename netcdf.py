@@ -102,8 +102,7 @@ if not overwrite:
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-#for job in ["ncdf_geno", "ncdf_xy", "ncdf_bl"]:
-for job in ["ncdf_geno"]:
+for job in ["ncdf_geno", "ncdf_xy", "ncdf_bl"]:
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
     
