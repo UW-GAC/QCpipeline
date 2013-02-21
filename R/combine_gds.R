@@ -5,7 +5,6 @@
 
 library(GWASTools)
 library(QCpipeline)
-library(SNPRelate)
 sessionInfo()
 
 # read configuration
@@ -28,7 +27,7 @@ print(config)
 scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)
 # this might be a subject-level netCDF file, so subset annotation
 nc <- NcdfGenotypeReader(config["nc_geno_file"])
-scanAnnot <- scanAnnot[scanAnnot$scanID %in% getScanID(nc),]; dim(scanAnnot)
+scanAnnot <- scanAnnot[match(getScanID(nc), getScanID(scanAnnot)),]; dim(scanAnnot)
 close(nc)
 
 ext.scanAnnot <- getobj(config["ext_annot_scan_file"]); dim(ext.scanAnnot)
