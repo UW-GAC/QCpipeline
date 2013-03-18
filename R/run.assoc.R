@@ -14,8 +14,8 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "covar.list", "covars_as_factor", "gene_action", "model_type", "nc_geno_file", "outcome")
-optional <- c("out_assoc_prefix", "scan_chrom_filter", "scan_exclude")
-default <- c("assoc", NA, NA)
+optional <- c("out_assoc_prefix", "scan_chrom_filter", "scan_exclude", "robust")
+default <- c("assoc", NA, NA, FALSE)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -108,13 +108,14 @@ if (!is.na(config["scan_exclude"]))
 
 genoData <- GenotypeData(nc,scanAnnot=scanAnnot)
 
-assocTestRegression(			 genoData,
-					 outcome = outcome, 
-					 covar.list = covar.list, 
-					 model.type = model.type,
-                                         scan.exclude = scan.exclude,
-                                         gene.action.list = gene.action.list,
-					 scan.chromosome.filter = filt,
-					 chromosome.set = chromosome.set, 
-                                         outfile = outfile
+assocTestRegression(genoData,
+		    outcome = outcome, 
+		    covar.list = covar.list, 
+		    model.type = model.type,
+                    scan.exclude = scan.exclude,
+                    gene.action.list = gene.action.list,
+		    scan.chromosome.filter = filt,
+		    chromosome.set = chromosome.set, 
+                    outfile = outfile,
+                    robust = as.logical(config["robust"])
 )

@@ -32,6 +32,7 @@ annot_snp_filtCol  [quality.filter]  column for quality filter (T/F) in snp anno
 annot_snp_rsIDCol  [rsID]            column for rsID in snp annotation
 maf.filter         [0.02]            MAF filter threshold to apply to plots
 plot_chroms        [NA]              integer vector of chromosomes to plot (NA=all)
+robust             [FALSE]           set to TRUE for robust standard errors
 scan_chrom_filter  [NA]              scan-chromosome filter matrix
 scan_exclude       [NA]              vector of scanID to exclude
 signif_line        [5e-08]           genome-wide significance level for manhattan plot
