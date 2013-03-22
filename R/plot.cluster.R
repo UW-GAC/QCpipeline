@@ -16,8 +16,8 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "out_assoc_prefix", "covar.list",
               "gene_action", "model_type", "nc_samp_geno_file", "nc_samp_xy_file",
               "outcome")
-optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "plot_chroms", "out_plot_prefix")
-default <- c("quality.filter", "rsID", NA, "assoc")
+optional <- c("annot_snp_rsIDCol", "plot_chroms", "out_plot_prefix")
+default <- c("rsID", NA, "assoc")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

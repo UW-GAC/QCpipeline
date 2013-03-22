@@ -15,8 +15,9 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_snp_file", "out_assoc_prefix", "covar.list", "gene_action",
               "model_type", "outcome")
-optional <- c("maf.filter", "plot_chroms", "out_plot_prefix", "signif_line")
-default <- c(0.02, NA, "assoc", 5e-8)
+optional <- c("plot_chroms", "out_plot_prefix", "signif_line", "maf.filter.type",
+              "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold")
+default <- c(NA, "assoc", 5e-8, "snp.specific", 0.02, 30, 50)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -25,19 +26,16 @@ snpAnnot <- getobj(config["annot_snp_file"])
 snpID <- getSnpID(snpAnnot)
 pathprefix <- config["out_assoc_prefix"]
 pathprefix
-actions <-  config["gene_action"]
-actions <- unlist(strsplit(actions," "))
+actions <- unlist(strsplit(config["gene_action"]," "))
 actions
 qqfname <- config["out_plot_prefix"]
 qqfname
-outcome <- config["outcome"]
-outcome <- unlist(strsplit(outcome," "))
+outcome <- unlist(strsplit(config["outcome"]," "))
 outcome
 covar.list <- getobj(config["covar.list"])
 covar.list
-model.type <- config["model_type"]
-model.type <- unlist(strsplit(model.type," "))
-stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
+model.type <- unlist(strsplit(config["model_type"]," "))
+stopifnot(all(model.type %in% c("logistic", "linear")))
 model.type
 if (!is.na(config["plot_chroms"])) {
   plotchroms <- getobj(config["plot_chroms"])
@@ -57,6 +55,13 @@ for (i in 1:length(actions))
     sub <- combined$snpID %in% snpID[getChromosome(snpAnnot) %in% plotchroms]
     combined <- combined[sub,]
   }
+
+  maf.thresh <- switch(model.type[i],
+                       linear=config["maf.linear.threshold"],
+                       logistic=config["maf.logistic.threshold"])
+  maf.text <- switch(config["maf.filter.type"],
+                     absolute=paste("MAF >", config["maf.absolute.threshold"]),
+                     snp.specific=paste("2*MAF*(1-MAF)*N >", maf.thresh))
   
   for (type in c("LR", "Wald")) { 
     # QQ plots
@@ -68,21 +73,21 @@ for (i in 1:length(actions))
 
     # QQ plots - unfiltered plot, subsetted with plotchroms
     pvaln <- pval[!is.na(pval)]
-    title <- paste("no filter\nN =", length(pvaln))
+    title <- paste("no filter\n", length(pvaln), "SNPs")
     lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
 
     # QQ plots - filtered, subsetted with plotchroms
     pvaln <- pval[combined$quality.filter & (!is.na(pval))]
-    title <- paste("quality filter\nN =", length(pvaln))
+    title <- paste("quality filter\n", length(pvaln), "SNPs")
     lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
 
     # QQ plots - maf filtered, subsetted with plotchroms
     pvaln <- pval[combined$qual.maf.filter & (!is.na(pval))]
-    title <- paste("quality filter + MAF >",config["maf.filter"],"\nN =", length(pvaln))
+    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs")
     lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
@@ -102,21 +107,21 @@ for (i in 1:length(actions))
     par(mfrow=c(3,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
     pvaln <- pval[(!is.na(pval))]
     chromosome <- getChromosome(snpAnnot, index=match(combined$snpID[(!is.na(pval))],snpID), char=TRUE)
-    title <- paste("no filter\nN =", length(pvaln))
+    title <- paste("no filter\n", length(pvaln), "SNPs")
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - filtered, subsetted with plotchroms
     pvaln <- pval[combined$quality.filter & (!is.na(pval))]
     chromosome <- combined$chromosome[combined$quality.filter & (!is.na(pval))]
-    title <- paste("quality filter\nN =", length(pvaln))
+    title <- paste("quality filter\n", length(pvaln), "SNPs")
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - maf filtered, subsetted with plotchroms
     pvaln <- pval[combined$qual.maf.filter & (!is.na(pval))]
     chromosome <- combined$chromosome[combined$qual.maf.filter & (!is.na(pval))]
-    title <- paste("quality filter + MAF >",config["maf.filter"],"\nN =", length(pvaln))
+    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs")
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
     dev.off()

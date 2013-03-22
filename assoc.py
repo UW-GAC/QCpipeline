@@ -28,16 +28,19 @@ nc_samp_geno_file  sample-level genotype netCDF file for plots
 nc_samp_xy_file    sample-level XY intensity netCDF file for plots
 
 Optional config parameters [default]:    
-annot_snp_filtCol  [quality.filter]  column for quality filter (T/F) in snp annotation
-annot_snp_rsIDCol  [rsID]            column for rsID in snp annotation
-maf.filter         [0.02]            MAF filter threshold to apply to plots
-plot_chroms        [NA]              integer vector of chromosomes to plot (NA=all)
-robust             [FALSE]           set to TRUE for robust standard errors
-scan_chrom_filter  [NA]              scan-chromosome filter matrix
-scan_exclude       [NA]              vector of scanID to exclude
-signif_line        [5e-08]           genome-wide significance level for manhattan plot
-out_assoc_prefix   [assoc]           output prefix for association results       
-out_plot_prefix    [assoc]           output prefix for plots"""
+annot_snp_filtCol       [quality.filter]  column for quality filter (T/F) in snp annotation
+annot_snp_rsIDCol       [rsID]            column for rsID in snp annotation
+maf.filter.type         [snp.specific]    type of MAF filter to apply ("absolute" or "snp.specific")
+maf.absolute.threshold  [0.02]            absolute MAF filter threshold to apply to plots: MAF > x
+maf.linear.threshold    [30]              linear regression snp.specific filter threshold: 2*MAF*(1-MAF)*N > x
+maf.logistic.threshold  [50]              logistic regression snp.specific filter threshold: 2*MAF*(1-MAF)*N > x
+plot_chroms             [NA]              integer vector of chromosomes to plot (NA=all)
+robust                  [FALSE]           set to TRUE for robust standard errors
+scan_chrom_filter       [NA]              scan-chromosome filter matrix
+scan_exclude            [NA]              vector of scanID to exclude
+signif_line             [5e-08]           genome-wide significance level for manhattan plot
+out_assoc_prefix        [assoc]           output prefix for association results       
+out_plot_prefix         [assoc]           output prefix for plots"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",

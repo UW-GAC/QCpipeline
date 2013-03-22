@@ -13,9 +13,10 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "out_assoc_prefix", "gene_action")
-optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "maf.filter")
-default <- c("quality.filter", "rsID", 0.02)
+required <- c("annot_snp_file", "out_assoc_prefix", "model_type", "gene_action")
+optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "maf.filter.type",
+              "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold")
+default <- c("quality.filter", "rsID", "snp.specific", 0.02, 30, 50)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -27,8 +28,8 @@ end <- as.integer(args[3])
 # merge output 
 # output file name example: study.model.1.additive.chr.24_24.RData
 pathprefix <- config["out_assoc_prefix"]
-actions <-  config["gene_action"]
-actions <- unlist(strsplit(actions," "))
+actions <- unlist(strsplit(config["gene_action"]," "))
+model.type <- unlist(strsplit(config["model_type"]," "))
 
 
 for (i in 1:length(actions))
@@ -76,7 +77,17 @@ for (i in 1:length(actions))
   combined$rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"], index=index)
   combined$chromosome <- getChromosome(snpAnnot, char=TRUE, index=index)
   combined$quality.filter <- getVariable(snpAnnot, config["annot_snp_filtCol"], index=index)
-  combined$qual.maf.filter <- combined$quality.filter & (!is.na(combined$minor.allele)) & combined$MAF>as.numeric(config["maf.filter"])
+
+  # MAF filter
+  maf.thresh <- switch(model.type[i],
+                       linear=as.numeric(config["maf.linear.threshold"]),
+                       logistic=as.numeric(config["maf.logistic.threshold"]))
+  maf.filt <- switch(config["maf.filter.type"],
+                     absolute=(!is.na(combined$MAF) &
+                               combined$MAF > as.numeric(config["maf.absolute.threshold"])),
+                     snp.specific=(!is.na(combined$MAF) & !is.na(combined$n) &
+                                   2*combined$MAF*(1-combined$MAF)*combined$n > maf.thresh))
+  combined$qual.maf.filter <- combined$quality.filter & maf.filt
   
   print(dim(combined))
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")

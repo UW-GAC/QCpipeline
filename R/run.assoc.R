@@ -6,7 +6,6 @@
 library(GWASTools)
 library(QCpipeline)
 sessionInfo()
-
 # read configuration
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
@@ -34,8 +33,7 @@ stopifnot(all(scanAnnot$scanID==sid))
 
 
 # set categorical variables in association models as factor 
-factors <- config["covars_as_factor"]
-factors <- unlist(strsplit(factors," ", fixed=TRUE))
+factors <- unlist(strsplit(config["covars_as_factor"]," ", fixed=TRUE))
 idx <- which(varLabels(scanAnnot) %in% factors)
 for (i in idx)
 {
@@ -54,8 +52,7 @@ if (!is.na(config["scan_chrom_filter"])) {
 
 # chromosomes to run analysis on
 # outcome variables
-outcome <- config["outcome"]
-outcome <- unlist(strsplit(outcome," "))
+outcome <- unlist(strsplit(config["outcome"]," "))
 outcome
 
 # covariates for each model
@@ -75,14 +72,12 @@ if (chromosome.set == 25)
 covar.list
 
 # model types
-model.type <- config["model_type"]
-model.type <- unlist(strsplit(model.type," "))
+model.type <- unlist(strsplit(config["model_type"]," "))
 stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
 model.type
 
 # gene actions
-gene.action <- config["gene_action"]
-gene.action <- unlist(strsplit(gene.action," "))
+gene.action <- unlist(strsplit(config["gene_action"]," "))
 gene.action.list <- list()
 for (i in 1:length(gene.action))
 {
