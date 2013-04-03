@@ -114,8 +114,9 @@ if not test:
         # convert bed to ped
         prefix = configdict['plink_prefix']
         if not os.path.exists(prefix + ".ped"):
-            subprocess.call(["mv", prefix+".fam", prefix+".fam.orig"])
-            subprocess.call(["mv", prefix+".fam.unr", prefix+".fam"])
+            if os.path.exists(prefix+".fam"):
+                subprocess.call(["mv", prefix+".fam", prefix+".fam.orig"])
+            subprocess.call(["cp", prefix+".fam.unr", prefix+".fam"])
             job = "plink_bed2ped"
             arglist = ["--noweb", "--bfile", prefix, "--recode", "--out", prefix]
             jobid[job] = QCpipeline.submitJob(job, "plink", arglist, options="-b y -j y -cwd", queue=qname, email=email)
