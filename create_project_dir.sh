@@ -1,16 +1,16 @@
-#! /bin/bash
+#! /bin/tcsh
 
 # Create directory for project
 echo "Usage: create_project_dir.sh project user"
 
-proj=$1 # project name is first argument
-user=$2 # user is second argument
+set proj=$1 # project name is first argument
+set user=$2 # user is second argument
 
-umask 007 # set file permissions
+#umask 007 # set file permissions
 
 mkdir $proj
-chgrp geneva $proj
-chmod g+s $proj
+#chgrp geneva $proj
+#chmod g+s $proj
 
 cd $proj
 mkdir netCDF
