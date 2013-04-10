@@ -72,7 +72,7 @@ if (length(anom.ind) > 0) {
   norm.id <- getScanID(scanAnnot)[samp.ind]
   localID <- getVariable(scanAnnot, config["annot_scan_localIDCol"])[samp.ind]
   norm.comment <- comment[samp.ind]
-  main <- paste("Scan", anom.id, "- Local", localID, "- Sex", sex, "- Chrom X\n", norm.comment)
+  main <- paste("Scan", norm.id, "- Local", localID, "- Sex", sex, "- Chrom X\n", norm.comment)
   
   png.file <- file.path(paste(config["out_sexchrom_prefix"], "_norm_%003d.png", sep=""))
   png(png.file, width=720, height=720)
