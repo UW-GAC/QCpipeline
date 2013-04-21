@@ -25,8 +25,9 @@ gdsfile <- config["gds_geno_file"]
 snpAnnot <- getobj(config["annot_snp_file"])
 scanAnnot <- getobj(config["annot_scan_file"])
 # take subset of annotation to match netCDF
+nc <- NcdfGenotypeReader(ncfile)
 scanAnnot <- scanAnnot[match(getScanID(nc), getScanID(scanAnnot)),]
-
+close(nc)
 
 convertNcdfGds(ncfile, gdsfile, sample.annot=scanAnnot, snp.annot=snpAnnot)
 if (!checkNcdfGds(ncfile, gdsfile)) stop("check failed")
