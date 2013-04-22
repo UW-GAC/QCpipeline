@@ -89,7 +89,7 @@ names(FileList) <- proj
 # save annotation files
 samp.info.all <- ScanAnnotationDataFrame(rbind(samp.info1, samp.info2))
 save(samp.info.all, file=config["out_comb_annot_scan_file"])
-snp.info.all <- SnpAnnotationDataFrame(snp.info[,c("snpID", "rsID", "chromosome", "position")])
+snp.info.all <- SnpAnnotationDataFrame(snp.info[,c("snpID", "rsID", "chromosome", "position", "alleleA", "alleleB")])
 save(snp.info.all, file=config["out_comb_annot_snp_file"])
 
 
@@ -177,6 +177,29 @@ for (pro in names(FileList))
 closefn.gds(gfile1)
 
 # check
+## check annotation
 gds <- GdsGenotypeReader(config["out_comb_gds_geno_file"])
 (gData <- GenotypeData(gds, snpAnnot=snp.info.all, scanAnnot=samp.info.all))
+
+## check genotypes
+nc1 <- NcdfGenotypeReader(config["nc_geno_file"])
+nc2 <- NcdfGenotypeReader(config["ext_nc_geno_file"])
+
+scanID <- getScanID(gData)
+scan1 <- getScanID(nc1)
+scan2 <- getScanID(nc2)
+snp.flag1 <- match(snp.info$rsID, snp.info.list[["study"]]$rsID)
+snp.flag2 <- match(snp.info$rsID, snp.info.list[["ext"]]$rsID)
+for (i in 1:length(scanID)) {
+  geno <- getGenotype(gData, snp=c(1,-1), scan=c(i,1))
+  if (scanID[i] %in% scan1) {
+    geno.orig <- getGenotype(nc1, snp=c(1,-1), scan=c(which(scan1 == scanID[i]), 1))[snp.flag1]
+  } else {
+    geno.orig <- getGenotype(nc2, snp=c(1,-1), scan=c(which(scan2 == scanID[i]), 1))[snp.flag2]
+  }
+  stopifnot(allequal(geno, geno.orig))
+}
+
 close(gData)
+close(nc1)
+close(nc2)
