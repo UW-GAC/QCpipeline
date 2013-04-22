@@ -17,7 +17,7 @@ required <- c("annot_scan_file", "annot_snp_file", "ext_annot_scan_file",
               "ext_annot_snp_file", "ext_nc_geno_file", "nc_geno_file")
 optional <- c("annot_scan_subjectCol", "annot_snp_rsIDCol",
               "comb_scan_exclude_file", "comb_snp_exclude_file",
-              "ext_annot_scan_subjectCol","ext_annot_snp_rsIDCol",
+              "ext_annot_scan_subjectCol", "ext_annot_snp_rsIDCol",
               "out_comb_annot_scan_file", "out_comb_annot_snp_file", "out_comb_gds_geno_file")
 default <- c("subjectID", "rsID", NA, NA, "subjectID", "rsID",
              "comb_scan_annot.RData", "comb_snp_annot.RData", "comb_geno.gds")
@@ -31,6 +31,10 @@ scanAnnot <- scanAnnot[match(getScanID(nc), getScanID(scanAnnot)),]; dim(scanAnn
 close(nc)
 
 ext.scanAnnot <- getobj(config["ext_annot_scan_file"]); dim(ext.scanAnnot)
+# this might be a subject-level netCDF file, so subset annotation
+nc <- NcdfGenotypeReader(config["ext_nc_geno_file"])
+ext.scanAnnot <- ext.scanAnnot[match(getScanID(nc), getScanID(ext.scanAnnot)),]; dim(ext.scanAnnot)
+close(nc)
 dupids <- intersect(scanAnnot$scanID, ext.scanAnnot$scanID)
 if (length(dupids) > 0) {
   stop("scan IDs are not unique - files cannot be combined")
@@ -49,7 +53,8 @@ proj <- c("study", "ext")
 
 # SNP information
 snpAnnot <- getobj(config["annot_snp_file"])
-snp.info1 <- getVariable(snpAnnot, c("snpID", "chromosome", "position", config["annot_snp_rsIDCol"]))
+snp.info1 <- getVariable(snpAnnot, c("snpID", "chromosome", "position", config["annot_snp_rsIDCol"],
+                                     "alleleA", "alleleB"))
 names(snp.info1)[4] <- "rsID"
 ext.snpAnnot <- getobj(config["ext_annot_snp_file"])
 snp.info2 <- getVariable(ext.snpAnnot, c("snpID", "chromosome", "position", config["ext_annot_snp_rsIDCol"]))
@@ -120,6 +125,9 @@ add.gdsn(gfile1, "snp.position", as.integer(snp.info$position), compress="ZIP.ma
 
 # add "chromosome"
 add.gdsn(gfile1, "snp.chromosome", snp.info$chromosome, storage="uint8", compress="ZIP.max", closezip=TRUE)
+
+# add "allele"
+add.gdsn(gfile1, "snp.allele", paste(snp.info$alleleA, snp.info$alleleB, sep="/"), compress="ZIP.max", closezip=TRUE)
 
 # sync GDS files
 sync.gds(gfile1)
