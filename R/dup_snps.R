@@ -16,7 +16,7 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
 optional <- c("annot_snp_dupSnpCol", "annot_snp_rsIDCol", "dupsnp_scan_exclude_file",
               "out_dupsnp_file")
-default <- c("dup.any.id", "rsID", NA, "dup_snps.RData")
+default <- c("dup.pos.id", "rsID", NA, "dup_snps.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

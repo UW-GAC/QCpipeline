@@ -29,6 +29,19 @@ print(config)
 ibd <- getobj(config["out_ibd_kc32_file"])
 dim(ibd)
 
+## if ibd has > 5000 rows, make png instead of pdf
+if (nrow(ibd) > 5000) {
+  plotfile <- function(filename, ...) {
+    file <- sub("pdf$", "png", filename)
+    png(file, width=650, height=650, ...)
+    par(cex=1.5)
+  }
+} else {
+  plotfile <- function(filename, ...) {
+    pdf(filename, width=6, height=6)
+  }
+}
+
 (scanAnnot <- getobj(config["annot_scan_file"]))
 scanID <- getScanID(scanAnnot)
 samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"]))
@@ -71,7 +84,7 @@ ibd$exp.rel[ibd$Individ1 == ibd$Individ2] <- "Dup"
 ibd$exp.rel[is.na(ibd$exp.rel)] <- "U"
 table(ibd$exp.rel)
 
-pdf(config["out_ibd_exp_plot"], width=6, height=6)
+plotfile(config["out_ibd_exp_plot"])
 ibdPlot(ibd$k0, ibd$k1, relation=ibd$exp.rel, main="IBD - expected")
 dev.off()
 
@@ -79,7 +92,7 @@ dev.off()
 ibd$obs.rel <- ibdAssignRelatedness(ibd$k0, ibd$k1)
 table(ibd$obs.rel)
 
-pdf(config["out_ibd_obs_plot"], width=6, height=6)
+plotfile(config["out_ibd_obs_plot"])
 ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")
 dev.off()
 
@@ -87,7 +100,7 @@ dev.off()
 unexp <- ibd$exp.rel != ibd$obs.rel & ibd$KC > 0.1
 table(ibd$obs.rel[unexp])
 
-pdf(config["out_ibd_unexp_plot"], width=6, height=6)
+plotfile(config["out_ibd_unexp_plot"])
 psym <- rep(1, nrow(ibd))
 psym[unexp] <- 2
 # make our own color code so we can modify the plot legend
@@ -158,7 +171,7 @@ uniqsamp <- unique(allsamp)
 con <- rep(NA, n)
 for(i in 1:n) con[i] <- sum(allsamp %in% uniqsamp[i])
 
-pdf(config["out_ibd_con_plot"], width=6, height=6)
+plotfile(config["out_ibd_con_plot"])
 plot(sort(con), xlab="rank", ylab="sample connectivity", main=paste(npr, "pairs with KC > 1/32"))
 dev.off()
 
