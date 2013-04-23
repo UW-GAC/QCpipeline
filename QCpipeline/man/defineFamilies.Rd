@@ -3,7 +3,7 @@
 \title{Define families}
 \description{Define families based on kinship coefficients}
 \usage{
-defineFamilies(ibd, KC.threshold=0.1, start.fam.id=1)
+defineFamilies(ibd, KC.threshold=0.09833927, start.fam.id=1)
 }
 \arguments{
   \item{ibd}{Data frame with columns "sample1", "sample2", "KC"}

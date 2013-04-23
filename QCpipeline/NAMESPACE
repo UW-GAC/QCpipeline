@@ -4,9 +4,10 @@ import(grid)
 import(gridBase)
 import(hexbin)
 import(Biostrings)
+import(tools)
 
 export(readConfig, writeConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
        dbgapScanAnnotation, dbgapSnpAnnotation,
        make.allele.mappings, make.allele.annotation,
-       defineFamilies, igvBatch)
+       defineFamilies, igvBatch, GenotypeReader)
