@@ -15,7 +15,7 @@ HapMaps are always excluded.
 Required config parameters:
 annot_scan_file     scan annotation file
 annot_scan_raceCol  column of race in scan annotation
-nc_geno_file        genotype netCDF file
+nc_geno_file        genotype netCDF or GDS file
 inten_file          mean intensity file (created by gender_check.py)
 
 Optional config parameters [default]:

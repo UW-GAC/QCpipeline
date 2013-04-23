@@ -39,9 +39,8 @@ snpID <- getSnpID(snpAnnot)
 snp.sel <- which(!is.na(getVariable(snpAnnot, config["annot_snp_dupSnpCol"])))
 length(snp.sel)
 
-ncfile <- config["nc_geno_file"]
-nc <- NcdfGenotypeReader(ncfile)
-genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+data <- GenotypeReader(config["nc_geno_file"])
+genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 ## match up SNPs into pairs
 snpset <- pData(snpAnnot)[snp.sel, c("snpID", config["annot_snp_rsIDCol"], config["annot_snp_dupSnpCol"])]

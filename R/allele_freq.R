@@ -31,8 +31,8 @@ if (!is.na(config["scan_exclude_file"])) {
 }
 length(scan.exclude)
 
-nc <- NcdfGenotypeReader(config["nc_geno_file"])
-genoData <- GenotypeData(nc, scanAnnot=scanAnnot)
+data <- GenotypeReader(config["nc_geno_file"])
+genoData <- GenotypeData(data, scanAnnot=scanAnnot)
 
 afreq <- alleleFrequency(genoData, scan.exclude=scan.exclude)
 save(afreq, file=config["out_afreq_file"])

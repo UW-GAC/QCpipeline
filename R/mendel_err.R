@@ -27,9 +27,8 @@ scanID <- getScanID(scanAnnot)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
-ncfile <- config["nc_geno_file"]
-nc <- NcdfGenotypeReader(ncfile)
-genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+data <- GenotypeReader(config["nc_geno_file"])
+genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # are there any scans to exclude?
 if (!is.na(config["mend_scan_exclude_file"])) {

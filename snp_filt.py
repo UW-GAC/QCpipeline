@@ -22,7 +22,7 @@ SNP filters:
 Required config parameters:
 annot_scan_file  scan annotation file
 annot_snp_file   snp annotation file
-nc_geno_file     genotype netCDF file
+nc_geno_file     genotype netCDF or GDS file
 
 Required for "mendClust" option:
 nc_xy_file      XY intensity netCDF file

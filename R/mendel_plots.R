@@ -50,7 +50,7 @@ bins
 
 xyNC <- NcdfIntensityReader(config["nc_xy_file"])
 xyData <- IntensityData(xyNC, snpAnnot=snpAnnot)
-genoNC <- NcdfGenotypeReader(config["nc_geno_file"])
+genoNC <- GenotypeReader(config["nc_geno_file"])
 genoData <- GenotypeData(genoNC, snpAnnot=snpAnnot)
 
 for(j in 1:3){  # independent sets of samples, each in a different png file

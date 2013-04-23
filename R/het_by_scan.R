@@ -19,9 +19,8 @@ default <- c("het_by_scan.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-ncfile <- config["nc_geno_file"]
-nc <- NcdfGenotypeReader(ncfile)
-genoData <- GenotypeData(nc)
+data <- GenotypeReader(config["nc_geno_file"])
+genoData <- GenotypeData(data)
 
 het <- hetByScanChrom(genoData)
 

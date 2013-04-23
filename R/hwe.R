@@ -19,11 +19,11 @@ default <- c("hwe", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-nc <- NcdfGenotypeReader(config["nc_geno_file"])
+data <- GenotypeReader(config["nc_geno_file"])
 scanAnnot <- getobj(config["annot_scan_file"])
 # take subset of annotation to match netCDF
-scanAnnot <- scanAnnot[match(getScanID(nc), getScanID(scanAnnot)),]
-genoData <- GenotypeData(nc, scanAnnot=scanAnnot)
+scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)),]
+genoData <- GenotypeData(data, scanAnnot=scanAnnot)
 scanID <- getScanID(genoData)
 chrom <- getChromosome(genoData)
 

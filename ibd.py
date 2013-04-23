@@ -20,7 +20,6 @@ Required config parameters:
 annot_scan_file  scan annotation file
 annot_snp_file   snp annotation file
 gds_geno_file    genotype GDS file
-nc_geno_file     genotype netCDF file
 
 Optional config parameters [default]:
 annot_scan_subjectCol      [subjectID]               column of subjectID in scan annotation
