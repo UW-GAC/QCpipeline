@@ -130,8 +130,11 @@ if (sum(any.chk) > 0) {
   lc2 <- long.chk[is.element(psl,psl[w]),]
   long.chk <- rbind(lc1, lc2)
   n <- nrow(long.chk)
-  
-  datx <- data.frame("scanID"=long.chk$scanID,"chromosome"=long.chk$chromosome, "anom.id"=long.chk$anom.id,"plot.num"=1:n, filter="", "comment"="", stringsAsFactors=FALSE)
+
+  datx <- data.frame("scanID"=long.chk$scanID, "chromosome"=long.chk$chromosome,
+                     "anom.id"=long.chk$anom.id, "plot.num"=1:n, "real.anom"="",
+                     "filter"="", "whole.chrom"="", "comment"="", 
+                     stringsAsFactors=FALSE)
   csv.file <- file.path(config["out_plot_dir"], paste(config["out_plot_prefix"], ".csv", sep=""))
   write.csv(datx, file=csv.file, quote=FALSE, row.names=FALSE)
 
