@@ -6,6 +6,7 @@
 library(GWASTools)
 library(QCpipeline)
 sessionInfo()
+
 # read configuration
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
@@ -26,8 +27,8 @@ chromosome.set
 # make genotypedata
 scanAnnot <- getobj(config["annot_scan_file"])
 
-nc <- NcdfGenotypeReader(config["nc_geno_file"])
-sid <- getScanID(nc)
+data <- GenotypeReader(config["nc_geno_file"])
+sid <- getScanID(data)
 scanAnnot <- scanAnnot[scanAnnot$scanID %in% sid,] 
 stopifnot(all(scanAnnot$scanID==sid))
 
@@ -101,7 +102,7 @@ if (!is.na(config["scan_exclude"]))
   scan.exclude <- getobj(config["scan_exclude"])
 }
 
-genoData <- GenotypeData(nc,scanAnnot=scanAnnot)
+genoData <- GenotypeData(data, scanAnnot=scanAnnot)
 
 assocTestRegression(genoData,
 		    outcome = outcome, 

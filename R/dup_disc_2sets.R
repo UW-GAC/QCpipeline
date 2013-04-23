@@ -6,7 +6,6 @@
 
 library(GWASTools)
 library(QCpipeline)
-library(tools) # for file_ext
 sessionInfo()
 
 # read configuration
@@ -67,15 +66,7 @@ if (type == "all") {
 # dataset 1
 scanAnnot <- getobj(config["annot_scan_file_1"])
 snpAnnot <- getobj(config["annot_snp_file_1"])
-datafile <- config["geno_file_1"]
-ext <- file_ext(datafile)
-if (ext == "gds") {
-  data <- GdsGenotypeReader(datafile)
-} else if (ext == "nc") {
-  data <- NcdfGenotypeReader(datafile)
-} else {
-  stop("geno_file_1 must end in '.gds' or '.nc'")
-}
+data <- GenotypeReader(config["geno_file_1"])
 genoData1 <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 genoData1
 
@@ -96,15 +87,7 @@ scanID <- getScanID(scanAnnot)
 snpAnnot <- getobj(config["annot_snp_file_2"])
 snpID <- getSnpID(snpAnnot)
 
-datafile <- config["geno_file_2"]
-ext <- file_ext(datafile)
-if (ext == "gds") {
-  data <- GdsGenotypeReader(datafile)
-} else if (ext == "nc") {
-  data <- NcdfGenotypeReader(datafile)
-} else {
-  stop("geno_file_2 must end in '.gds' or '.nc'")
-}
+data <- GenotypeReader(config["geno_file_2"])
 genoData2 <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 genoData2
 
