@@ -15,7 +15,8 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", 
               "annot_snp_file", "nc_subj_geno_file", "out_plink_prefix", "out_log_prefix")
-optional <- c("annot_scan_subjectCol", "annot_snp_alleleACol", "annot_snp_alleleBCol", "annot_snp_rsIDCol")
+optional <- c("annot_scan_subjectCol", "annot_snp_alleleACol", "annot_snp_alleleBCol",
+              "annot_snp_rsIDCol")
 default <- c("subjectID", "alleleA", "alleleB", "rsID")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
@@ -27,8 +28,8 @@ snpAnnot <- getobj(config["annot_snp_file"])
 snpAnnot <- SnpAnnotationDataFrame(pData(snpAnnot),
                                    alleleACol=config["annot_snp_alleleACol"],
                                    alleleBCol=config["annot_snp_alleleBCol"])
-nc <- NcdfGenotypeReader(config["nc_subj_geno_file"])
-genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+data <- GenotypeReader(config["nc_subj_geno_file"])
+genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 ped <- paste(config["out_plink_prefix"], "_filtered", sep="")
 plinkWrite(genoData, pedFile=ped,

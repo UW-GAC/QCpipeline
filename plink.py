@@ -21,12 +21,12 @@ from the subject-level netCDF.
 Required config parameters:
 annot_scan_file       scan annotation file (with columns subj.plink, family, father, mother)
 annot_snp_file        snp annotation file
-nc_samp_geno_file     sample-level genotype netCDF file
+nc_samp_geno_file     sample-level genotype netCDF or GDS file
 out_log_prefix        output prefix for log files
 out_plink_prefix      output prefix for plink files
 
 Required for "filtered" option:
-nc_subj_geno_file     subject-level genotype netCDF file
+nc_subj_geno_file     subject-level genotype netCDF or GDS file
 
 Optional config parameters [default]:
 annot_scan_subjectCol  [subjectID]  column of subjectID in scan annotation
