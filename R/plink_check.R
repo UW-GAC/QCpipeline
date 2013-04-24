@@ -39,8 +39,8 @@ if (length(args) > 1 & args[2] == "ABcoding") {
   snpAnnot[[config["annot_snp_alleleBCol"]]] <- "B"
 }
 
-nc <- NcdfGenotypeReader(config["nc_geno_file"])
-genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+data <- GenotypeReader(config["nc_geno_file"])
+genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 res <- plinkCheck(genoData,
                   pedFile=config["plink_prefix"],
