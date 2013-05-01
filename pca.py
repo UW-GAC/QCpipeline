@@ -27,17 +27,21 @@ annot_scan_raceCol    column of race in scan annotation
 annot_snp_file        snp annotation file
 build                 genome build (hg18 or hg19)
 gds_geno_file         genotype GDS file (filtered subject-level recommended)
-nc_geno_file          genotype netCDF file (filtered subject-level recommended)
 study_unrelated_file  vector of scanID for PCA and LD pruning (no hapmaps)
 out_corr_file         output file of PC-SNP correlations
 out_pca_file          output file of PCA results
 out_pruned_file       output file of pruned snps (if file exists, pruning step is skipped)
 
 Required for "combined" option:
-ext_annot_scan_file      external dataset scan annotation file
-ext_annot_snp_file       external dataset snp annotation file
-ext_nc_geno_file         external dataset genotype netCDF file
-study_unduplicated_file  vector of scanID from study for combined PCA
+ext_annot_scan_file       external dataset scan annotation file
+ext_annot_snp_file        external dataset snp annotation file
+ext_nc_geno_file          external dataset genotype netCDF file
+nc_geno_file              genotype netCDF file (filtered subject-level recommended)
+study_unduplicated_file   vector of scanID from study for combined PCA
+out_comb_scan_annot_file  output combined scan annotation
+out_comb_snp_annot_file   output combined snp annotation
+out_comb_gds_geno_file    output combined GDS file
+out_disc_file             output duplicate discordance file
 
 Optional config parameters [default]:
 annot_scan_ethnCol           [NA]                     column of ethnicity in scan annotation
@@ -54,13 +58,9 @@ ext_annot_snp_rsIDCol        [rsID]                   column of rsID in external
 ld_r_threshold               [0.32]                   r threshold for LD pruning (0.32 = sqrt(0.1))
 ld_win_size                  [10]                     size of sliding window for LD pruning (in Mb)
 num_evs_to_plot              [12]                     number of eigenvectors for correlation and scree plots
-out_comb_scan_annot_file     [comb_scan_annot.RData]  output combined scan annotation
-out_comb_snp_annot_file      [comb_snp_annot.RData]   output combined snp annotation
-out_comb_gds_geno_file       [comb_geno.gds]          output combined GDS file
 out_corr_plot_prefix         [pca_corr]               output prefix for correlation plots (all SNPs)
 out_corr_pruned_plot_prefix  [NA]                     output prefix for correlation plots (pruned SNPs only)
 out_dens_plot                [pca_dens.pdf]           output plot of EV2 vs EV1 with density sidebars
-out_disc_file                [dup_disc_ext.RData]     output duplicate discordance file
 out_disc_plot                [dup_disc_ext.pdf]       output duplicate discordance plot
 out_ev12_plot                [pca_ev12.pdf]           output plot of EV2 vs EV1
 out_pairs_plot               [pca_pairs.png]          output pairs plot of EV 1-4
