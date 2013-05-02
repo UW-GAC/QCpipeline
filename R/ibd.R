@@ -36,6 +36,8 @@ if (config["ibd_method"] == "MoM") {
   ibd <- snpgdsIBDMoM(gdsobj, sample.id=scan.ids, snp.id=snp.ids)
 } else if (config["ibd_method"] == "MLE") {
   ibd <- snpgdsIBDMLE(gdsobj, sample.id=scan.ids, snp.id=snp.ids, method="EM")
+} else if (config["ibd_method"] == "KING") {
+  ibd <- snpgdsIBDKING(gdsobj, sample.id=scan.ids, snp.id=snp.ids)
 } else {
   stop("ibd method not recognized")
 }
