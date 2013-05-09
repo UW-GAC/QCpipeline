@@ -18,13 +18,12 @@ Identity by Descent with the following steps:
 
 Required config parameters:
 annot_scan_file    scan annotation file
-annot_snp_file     snp annotation file
 gds_geno_file      genotype GDS file
 out_ibd_kc32_file  output file with data frame of pairs with KC > 1/32
+out_snp_file       output file of pruned snps  (if file exists, pruning step is skipped)
 
 Optional config parameters [default]:
 annot_scan_subjectCol      [subjectID]               column of subjectID in scan annotation
-annot_snp_missingCol       [missing.n1]              column of missing call rate in snp annotation
 exp_rel_file               [NA]                      file with data frame of expected relationships
 ibd_method                 [MoM]                     IBD method (MoM, MLE, or KING)
 ld_r_threshold             [0.32]                    r threshold for LD pruning (0.32 = sqrt(0.1))
@@ -32,6 +31,7 @@ ld_win_size                [10]                      size of sliding window for 
 maf_threshold              [0.05]                    minimum MAF for non-monomorphic SNPs to consider in LD pruning
 scan_ibd_include_file      [NA]                      vector of scanID to include in IBD (NA=all)
 scan_pruning_include_file  [NA]                      vector of scanID to include in LD pruning (NA=all)
+snp_pruning_include_file   [NA]                      vector of snpID to include in LD pruning (NA=all)
 out_ibd_con_file           [ibd_connectivity.RData]  output connectivity data file
 out_ibd_con_plot           [ibd_connectivity.pdf]    output connectivity plot
 out_ibd_exp_plot           [ibd_expected.pdf]        output IBD plot color-coded by expected relationships
@@ -41,8 +41,7 @@ out_ibd_rel_file           [ibd_obsrel.RData]        output file of observed rel
 out_ibd_unexp_plot         [ibd_unexpected.pdf]      output IBD plot color-coded by expected relationships, and different symbols for unexpected with KC > 0.1
 out_ibd_unobs_dup_file     [ibd_unobs_dup.RData]     output file of expected but unobserved duplicates
 out_ibd_unobs_rel_file     [ibd_unobs_rel.RData]     output file of expected but unobserved relationships
-out_inbrd_file             [inbreed_coeff.RData]     output file of inbreeding coefficients
-out_snp_file               [ibd_snp_sel.RData]       output file of pruned snps  (if file exists, pruning step is skipped)"""
+out_inbrd_file             [inbreed_coeff.RData]     output file of inbreeding coefficients"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",

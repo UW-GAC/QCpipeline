@@ -16,8 +16,9 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("gds_geno_file")
 optional <- c("ld_r_threshold", "ld_win_size", "maf_threshold",
-              "out_snp_file", "scan_pruning_include_file")
-default <- c(0.32, 10, 0.05, "ibd_snp_sel.RData", NA)
+              "out_snp_file", "scan_pruning_include_file",
+              "snp_pruning_include_file")
+default <- c(0.32, 10, 0.05, "ibd_snp_sel.RData", NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -29,12 +30,20 @@ if (!is.na(config["scan_pruning_include_file"])) {
 }
 length(scan.ids)
 
+if (!is.na(config["snp_pruning_include_file"])) {
+  snp.ids <- getobj(config["snp_pruning_include_file"])
+} else {
+  # if snp.ids=NULL for IBD functions, all snps are used
+  snp.ids <- NULL
+}
+length(snp.ids)
+
 maf <- as.numeric(config["maf_threshold"])
 r <- as.numeric(config["ld_r_threshold"])
 win <- as.numeric(config["ld_win_size"]) * 1e6
 
 gdsobj <- openfn.gds(config["gds_geno_file"])
-snpset <- snpgdsLDpruning(gdsobj, sample.id=scan.ids,
+snpset <- snpgdsLDpruning(gdsobj, sample.id=scan.ids, snp.id=snp.ids,
                           autosome.only=TRUE, maf=maf, missing.rate=0.05,
                           method="corr", slide.max.bp=win, ld.threshold=r)
 closefn.gds(gdsobj)

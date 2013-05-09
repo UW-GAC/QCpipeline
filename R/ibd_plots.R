@@ -104,13 +104,15 @@ plotfile(config["out_ibd_unexp_plot"])
 psym <- rep(1, nrow(ibd))
 psym[unexp] <- 2
 # make our own color code so we can modify the plot legend
+prel <- ibd$exp.rel
+prel[prel %in% c("HS", "Av", "GpGc")] <- "Deg2"
 pcol <- rep("black", nrow(ibd))
-pcol[ibd$exp.rel == "Dup"] <- "magenta"
-pcol[ibd$exp.rel == "PO"] <- "cyan"
-pcol[ibd$exp.rel == "FS"] <- "red"
-pcol[ibd$exp.rel == "HS"] <- "blue"
-ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym, rel.draw=c("FS", "HS"))
-rel <- unique(ibd$exp.rel)
+pcol[prel == "Dup"] <- "magenta"
+pcol[prel == "PO"] <- "cyan"
+pcol[prel == "FS"] <- "red"
+pcol[prel == "Deg2"] <- "blue"
+ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym, rel.draw=c("FS", "Deg2"))
+rel <- unique(prel)
 col <- unique(pcol)
 sym <- c(rep(1, length(rel)), 2)
 ord <- order(rel)
