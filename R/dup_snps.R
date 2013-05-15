@@ -14,9 +14,9 @@ config <- readConfig(args[1])
 
 ## check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
-optional <- c("annot_snp_dupSnpCol", "annot_snp_rsIDCol", "dupsnp_scan_exclude_file",
-              "out_dupsnp_file")
-default <- c("dup.pos.id", "rsID", NA, "dup_snps.RData")
+optional <- c("annot_snp_dupSnpCol", "annot_snp_missingCol", "annot_snp_rsIDCol",
+              "dupsnp_scan_exclude_file", "out_dupsnp_file")
+default <- c("dup.pos.id", "missing.n1", "rsID", NA, "dup_snps.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -128,7 +128,7 @@ snpset2 <- snpset2[c("dupID", "snpID.1", "rsID.1", "snpID.2", "rsID.2",
 
 ## probability of discordance for various error rates
 N <- max(snpset2$disc.sampsize, na.rm=TRUE)
-max.disc <- 20
+max.disc <- 100
 prob.disc <- duplicateDiscordanceProbability(N, max.disc=max.disc)
 
 ## find out how  many snps fall into each category of discordance
@@ -138,5 +138,34 @@ discordant <- snpset2$disc.count
 for(i in 1:ncat) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
 prob.tbl <- cbind(prob.disc, num)
 
-disc <- list("disc"=snpset2, "probability"=prob.tbl)
+## choose threshold as min # disc where error=0.01 is <0.99
+threshold <- which(prob.tbl[,"error=0.01"] < 0.99)[1] - 1
+message("filter pairs with >= ", threshold, " discordances")
+
+
+## for the snp pairs with <threshold discordant calls, filter out one member of each pair,
+## the one with highest mcr
+
+# bring in missing call rate
+snp.mcr <- pData(snpAnnot)[,c("snpID", config["annot_snp_missingCol"])]
+names(snp.mcr)[2] <- "mcr"
+snpset3 <- merge(snpset2, snp.mcr, by.x="snpID.1", by.y="snpID")
+snpset3 <- merge(snpset3, snp.mcr, by.x="snpID.2", by.y="snpID", suffixes=c(".1",".2"))
+
+# snpIDs to filter out
+filt <- snpset3[snpset3$disc.count < threshold,]; dim(filt)
+filt$out <- ifelse(filt$mcr.1 > filt$mcr.2, 1, 2)
+snpID.out <- c(filt$snpID.1[filt$out==1], filt$snpID.2[filt$out==2])
+snp.mcr$redundant <- snp.mcr$snpID %in% snpID.out
+table(snp.mcr$redundant)
+
+# indicate the snps with at least one discordant duplicate
+filt <- snpset3[snpset3$disc.count >= threshold,]; dim(filt)
+disc.rm <- unique(c(filt$snpID.1, filt$snpID.2))
+snp.mcr$dup.probe.disc <- snp.mcr$snpID %in% disc.rm
+table(snp.mcr$dup.probe.disc)
+
+table(snp.mcr$redundant, snp.mcr$dup.probe.disc, useNA="ifany")
+
+disc <- list("disc"=snpset2, "probability"=prob.tbl, "snp.annot"=snp.mcr)
 save(disc, file=config["out_dupsnp_file"])
