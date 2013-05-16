@@ -97,7 +97,13 @@ ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")
 dev.off()
 
 # plot of unexpected relationships (KC > 0.1)
-unexp <- ibd$exp.rel != ibd$obs.rel & ibd$KC > 0.1
+unexp <- ibd$exp.rel != ibd$obs.rel & ibd$KC > 0.09833927
+# check for Deg2 and Deg3
+deg2.rel <-  c("HS", "HSr", "HSFC", "Av", "GpGc", "DFC")
+deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
+deg3.rel <- c("FC", "HAv", "OAv", "OC")
+deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
+unexp <- unexp & !deg2 & !deg3
 table(ibd$obs.rel[unexp])
 
 plotfile(config["out_ibd_unexp_plot"])
@@ -105,7 +111,7 @@ psym <- rep(1, nrow(ibd))
 psym[unexp] <- 2
 # make our own color code so we can modify the plot legend
 prel <- ibd$exp.rel
-prel[prel %in% c("HS", "Av", "GpGc")] <- "Deg2"
+prel[prel %in% deg2.rel] <- "Deg2"
 pcol <- rep("black", nrow(ibd))
 pcol[prel == "Dup"] <- "magenta"
 pcol[prel == "PO"] <- "cyan"
