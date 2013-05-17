@@ -32,7 +32,7 @@ mend.bin.end    end for error bins, e.g., "1 5 10"
 Optional config parameters [default]:
 annot_scan_hapmapCol      [geno.cntl]           column of hapmap (0/1) in scan annotation
 annot_scan_subjectCol     [subjectID]           column of subjectID in scan annotation
-annot_snp_dupSnpCol       [dup.any.id]          column of dup snp id in snp annotation
+annot_snp_dupSnpCol       [dup.pos.id]          column of dup snp id in snp annotation
 annot_snp_missingCol      [missing.n1]          column of missing call rate in snp annotation
 annot_snp_rsIDCol         [rsID]                column of rsID in snp annotation
 corr.by.snp               [FALSE]               compute correlation by SNP? (slow)
