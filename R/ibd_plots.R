@@ -45,7 +45,7 @@ if (nrow(ibd) > 5000) {
 (scanAnnot <- getobj(config["annot_scan_file"]))
 scanID <- getScanID(scanAnnot)
 samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"]))
-names(samp) <- c("scanID", "subjectID")
+names(samp) <- c("scanID", "Individ")
 # keep only scans used in IBD
 if (!is.na(config["scan_ibd_include_file"])) {
   scan.ids <- getobj(config["scan_ibd_include_file"])
@@ -54,28 +54,21 @@ if (!is.na(config["scan_ibd_include_file"])) {
 dim(samp)
 
 # add subjectID so that we can bring in expected relation
-ibd <- merge(ibd, samp, by.x="sample1", by.y="scanID")
-names(ibd)[names(ibd) == "subjectID"] <- "Individ1"
-ibd <- merge(ibd, samp, by.x="sample2", by.y="scanID")
-names(ibd)[names(ibd) == "subjectID"] <- "Individ2"
-ibd <- ibd[,c("sample1", "sample2", "Individ1", "Individ2", "k0", "k1", "KC")]
-ibd$ii <- paste(ibd$Individ1, ibd$Individ2)
+ibd <- merge(ibd, samp, by.x="ID1", by.y="scanID")
+ibd <- merge(ibd, samp, by.x="ID2", by.y="scanID", suffixes=c("1","2"))
+ibd <- ibd[,c("ID1", "ID2", "Individ1", "Individ2", "k0", "k1", "kinship")]
+ibd$ii <- paste(pmin(ibd$Individ1, ibd$Individ2),
+                pmax(ibd$Individ1, ibd$Individ2))
 
 if (!is.na(config["exp_rel_file"])) {
   relprs <- getobj(config["exp_rel_file"])
   print(table(relprs$relation))
-  relprs$i12 <- paste(relprs$Individ1, relprs$Individ2)
-  relprs$i21 <- paste(relprs$Individ2, relprs$Individ1)
+  relprs$ii <- paste(pmin(relprs$Individ1, relprs$Individ2),
+                     pmax(relprs$Individ1, relprs$Individ2))
 
-  ibd <- merge(ibd, relprs[,c("i12","relation")], by.x="ii", by.y="i12", all.x=TRUE)
-  names(ibd)[names(ibd) == "relation"] <- "rel"
-  ibd <- merge(ibd, relprs[,c("i21","relation")], by.x="ii", by.y="i21", all.x=TRUE)
-  names(ibd)[names(ibd) == "relation"] <- "rel2"
-  ibd$exp.rel <- ibd$rel
-  ibd$exp.rel[is.na(ibd$exp.rel)] <- ibd$rel2[is.na(ibd$exp.rel)]
+  ibd <- merge(ibd, relprs[,c("ii","relation")], all.x=TRUE)
+  names(ibd)[names(ibd) == "relation"] <- "exp.rel"
   print(table(ibd$exp.rel, useNA="ifany"))
-  ibd$rel <- NULL
-  ibd$rel2 <- NULL
 } else {
   ibd$exp.rel <- NA
 }
@@ -96,8 +89,8 @@ plotfile(config["out_ibd_obs_plot"])
 ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")
 dev.off()
 
-# plot of unexpected relationships (KC > 0.1)
-unexp <- ibd$exp.rel != ibd$obs.rel & ibd$KC > 0.09833927
+# plot of unexpected relationships (kinship > 0.1)
+unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > 0.09833927
 # check for Deg2 and Deg3
 deg2.rel <-  c("HS", "HSr", "HSFC", "Av", "GpGc", "DFC")
 deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
@@ -133,12 +126,11 @@ dev.off()
 # check for expected relationships not observed
 if (!is.na(config["exp_rel_file"])) {
   relprs <- relprs[relprs$relation != "U",]
-  unobs.sel <- !(relprs$i12 %in% ibd$ii | relprs$i21 %in% ibd$ii)
+  unobs.sel <- !(relprs$ii %in% ibd$ii)
   if (sum(unobs.sel) > 0) {
     message(paste(sum(unobs.sel), "relative pairs not observed"))
     unobs.rel <- relprs[unobs.sel,]
-    unobs.rel$i12 <- NULL
-    unobs.rel$i21 <- NULL
+    unobs.rel$ii <- NULL
     save(unobs.rel, file=config["out_ibd_unobs_rel_file"])
   } else {
     message("all expected relatives observed")
@@ -150,7 +142,7 @@ unobs.dup <- list()
 for (d in dupsubj) {
   exp.scans <- samp$scanID[samp$subjectID == d]
   this.subj <- ibd$Individ1 == d & ibd$exp.rel == "Dup"
-  obs.set <- c(ibd$sample1[this.subj], ibd$sample2[this.subj])
+  obs.set <- c(ibd$ID1[this.subj], ibd$ID2[this.subj])
   unobs.scans <- setdiff(exp.scans, obs.set)
   if (length(unobs.scans) > 0) {
     unobs.dup[[as.character(d)]] <- unobs.scans
@@ -168,12 +160,12 @@ save(ibd, file=config["out_ibd_rel_file"])
 
 
 # IBD connectivity
-dupids <- ibd$sample2[ibd$obs.rel == "Dup"]
+dupids <- ibd$ID2[ibd$obs.rel == "Dup"]
 length(dupids)
-ibd.nodup <- ibd[!(ibd$sample1 %in% dupids) & !(ibd$sample2 %in% dupids),]
+ibd.nodup <- ibd[!(ibd$ID1 %in% dupids) & !(ibd$ID2 %in% dupids),]
 (npr <- nrow(ibd.nodup))
 
-allsamp <- c(ibd.nodup$sample1, ibd.nodup$sample2)
+allsamp <- c(ibd.nodup$ID1, ibd.nodup$ID2)
 uniqsamp <- unique(allsamp)
 (n <- length(uniqsamp))
 con <- rep(NA, n)

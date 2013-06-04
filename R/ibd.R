@@ -47,5 +47,4 @@ save(ibd, file=config["out_ibd_file"])
 
 # save only pairs where KC > 1/32
 ibd <- snpgdsIBDSelection(ibd, kinship.cutoff=1/32)
-names(ibd)[names(ibd) == "kinshipcoeff"] <- "KC"
 save(ibd, file=config["out_ibd_kc32_file"])
