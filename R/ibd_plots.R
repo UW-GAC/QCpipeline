@@ -7,12 +7,12 @@ library(GWASTools)
 library(QCpipeline)
 sessionInfo()
 
-# read configuration
+## read configuration
 args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
-# check config and set defaults
+## check config and set defaults
 required <- c("annot_scan_file", "out_ibd_kc32_file")
 optional <- c("annot_scan_subjectCol", "exp_rel_file", "out_ibd_con_file",
               "out_ibd_con_plot", "out_ibd_exp_plot", "out_ibd_obs_plot",
@@ -46,17 +46,22 @@ if (nrow(ibd) > 5000) {
 scanID <- getScanID(scanAnnot)
 samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"]))
 names(samp) <- c("scanID", "Individ")
-# keep only scans used in IBD
+## keep only scans used in IBD
 if (!is.na(config["scan_ibd_include_file"])) {
   scan.ids <- getobj(config["scan_ibd_include_file"])
   samp <- samp[samp$scanID %in% scan.ids,]
 }
 dim(samp)
 
-# add subjectID so that we can bring in expected relation
+## add subjectID so that we can bring in expected relation
 ibd <- merge(ibd, samp, by.x="ID1", by.y="scanID")
 ibd <- merge(ibd, samp, by.x="ID2", by.y="scanID", suffixes=c("1","2"))
-ibd <- ibd[,c("ID1", "ID2", "Individ1", "Individ2", "k0", "k1", "kinship")]
+if (config["ibd_method"] == "KING") {
+  cols <- c("IBS0", "kinship")
+} else {
+  cols <- c("k0", "k1", "kinship")
+}
+ibd <- ibd[,c("ID1", "ID2", "Individ1", "Individ2", cols)]
 ibd$ii <- paste(pmin(ibd$Individ1, ibd$Individ2),
                 pmax(ibd$Individ1, ibd$Individ2))
 
@@ -77,53 +82,66 @@ ibd$exp.rel[ibd$Individ1 == ibd$Individ2] <- "Dup"
 ibd$exp.rel[is.na(ibd$exp.rel)] <- "U"
 table(ibd$exp.rel)
 
-plotfile(config["out_ibd_exp_plot"])
-ibdPlot(ibd$k0, ibd$k1, relation=ibd$exp.rel, main="IBD - expected")
-dev.off()
 
-# assign observed relationships
-ibd$obs.rel <- ibdAssignRelatedness(ibd$k0, ibd$k1)
-table(ibd$obs.rel)
-
-plotfile(config["out_ibd_obs_plot"])
-ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")
-dev.off()
-
-# plot of unexpected relationships (kinship > 0.1)
-unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > 0.09833927
-# check for Deg2 and Deg3
+## make our own color code so we can modify the plot legend
 deg2.rel <-  c("HS", "HSr", "HSFC", "Av", "GpGc", "DFC")
-deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
 deg3.rel <- c("FC", "HAv", "OAv", "OC")
-deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
-unexp <- unexp & !deg2 & !deg3
-table(ibd$obs.rel[unexp])
-
-plotfile(config["out_ibd_unexp_plot"])
-psym <- rep(1, nrow(ibd))
-psym[unexp] <- 2
-# make our own color code so we can modify the plot legend
 prel <- ibd$exp.rel
 prel[prel %in% deg2.rel] <- "Deg2"
-pcol <- rep("black", nrow(ibd))
-pcol[prel == "Dup"] <- "magenta"
-pcol[prel == "PO"] <- "cyan"
-pcol[prel == "FS"] <- "red"
-pcol[prel == "Deg2"] <- "blue"
-ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym, rel.draw=c("FS", "Deg2"))
-rel <- unique(prel)
-col <- unique(pcol)
-sym <- c(rep(1, length(rel)), 2)
-ord <- order(rel)
-rel[rel == "U"] <- "Unrel"
-rel <- paste("Exp", rel)
-rel <- c(rel[ord], "Unexp")
-col <- c(col[ord], "black")
-legend("topright", legend=rel, col=col, pch=sym)
-dev.off()
+rels <- c("Dup", "PO", "FS", "Deg2", "Deg3", "Q", "U")
+cols <- c("magenta", "cyan", "red", "blue", "lightgreen", "darkgreen", "black")
+names(cols) <- rels
+pcol <- cols[prel]
+
+if (config["ibd_method"] == "KING") {
+  plotfile(config["out_ibd_exp_plot"])
+  plot(ibd$IBS0, ibd$kinship, col=pcol, main="IBD - expected",
+       xlab="Fraction of IBS=0", ylab="Kinship coefficient")
+  abline(h=c(0.5,0.25,0.125), col="gray")
+  rel <- rels[rels %in% unique(prel)]
+  col <- cols[rel]
+  legend("topright", legend=rel, col=col, pch=1)
+  dev.off()
+} else {
+  plotfile(config["out_ibd_exp_plot"])
+  ibdPlot(ibd$k0, ibd$k1, relation=ibd$exp.rel, main="IBD - expected")
+  dev.off()
+
+  ## assign observed relationships
+  ibd$obs.rel <- ibdAssignRelatedness(ibd$k0, ibd$k1)
+  print(table(ibd$obs.rel))
+
+  plotfile(config["out_ibd_obs_plot"])
+  ibdPlot(ibd$k0, ibd$k1, relation=ibd$obs.rel, main="IBD - observed")
+  dev.off()
+
+  ## plot of unexpected relationships (kinship > 0.1)
+  unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > 0.09833927
+  ## check for Deg2 and Deg3
+  deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
+  deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
+  unexp <- unexp & !deg2 & !deg3
+  print(table(ibd$obs.rel[unexp]))
+
+  plotfile(config["out_ibd_unexp_plot"])
+  psym <- rep(1, nrow(ibd))
+  psym[unexp] <- 2
+  cols[c("Deg3", "Q", "U")] <- "black"
+  pcol <- cols[prel]
+  ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym, rel.draw=c("FS", "Deg2"))
+  rel <- rels[rels %in% unique(prel)]
+  col <- cols[rel]
+  sym <- c(rep(1, length(col)), 2)
+  rel[rel == "U"] <- "Unrel"
+  rel <- paste("Exp", rel)
+  rel <- c(rel, "Unexp")
+  col <- c(col, "black")
+  legend("topright", legend=rel, col=col, pch=sym)
+  dev.off()
+}
 
 
-# check for expected relationships not observed
+## check for expected relationships not observed
 if (!is.na(config["exp_rel_file"])) {
   relprs <- relprs[relprs$relation != "U",]
   unobs.sel <- !(relprs$ii %in% ibd$ii)
@@ -136,7 +154,8 @@ if (!is.na(config["exp_rel_file"])) {
     message("all expected relatives observed")
   }
 }
-# check for expected duplicates not observed
+
+## check for expected duplicates not observed
 dupsubj <- unique(samp$subjectID[duplicated(samp$subjectID)])
 unobs.dup <- list()
 for (d in dupsubj) {
@@ -159,7 +178,7 @@ ibd$ii <- NULL
 save(ibd, file=config["out_ibd_rel_file"])
 
 
-# IBD connectivity
+## IBD connectivity
 dupids <- ibd$ID2[ibd$obs.rel == "Dup"]
 length(dupids)
 ibd.nodup <- ibd[!(ibd$ID1 %in% dupids) & !(ibd$ID2 %in% dupids),]
