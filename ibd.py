@@ -23,6 +23,7 @@ out_ibd_kc32_file  output file with data frame of pairs with KC > 1/32
 out_snp_file       output file of pruned snps  (if file exists, pruning step is skipped)
 
 Optional config parameters [default]:
+annot_scan_familyCol       [NA]                      column of familyID in scan annotation; if not NA, used when ibd_method="KING" to calculate kinship coefficients within families differently
 annot_scan_subjectCol      [subjectID]               column of subjectID in scan annotation
 exp_rel_file               [NA]                      file with data frame of expected relationships
 ibd_method                 [MoM]                     IBD method (MoM, MLE, or KING)
