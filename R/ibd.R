@@ -35,6 +35,9 @@ length(scan.ids)
 if (!is.na(config["annot_scan_familyCol"])) {
   scanAnnot <- getobj(config["annot_scan_file"])
   family <- getVariable(scanAnnot, config["annot_scan_familyCol"])
+  if (!is.null(scan.ids)) {
+    family <- family[getScanID(scanAnnot) %in% scan.ids]
+  }
 } else {
   family <- NULL
 }
