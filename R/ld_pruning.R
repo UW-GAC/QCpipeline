@@ -15,8 +15,9 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "build", "gds_geno_file", "study_unrelated_file")
-optional <- c("annot_snp_rsIDCol", "ld_r_threshold", "ld_win_size", "out_disc_file", "out_pruned_file")
-default <- c("rsID", 0.32, 10, NA, "snps_pruned.RData")
+optional <- c("annot_snp_rsIDCol", "ld_r_threshold", "ld_win_size",
+              "snp_pruning_include_file", "out_disc_file", "out_pruned_file")
+default <- c("rsID", 0.32, 10, NA, NA, "snps_pruned.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -30,15 +31,20 @@ length(scan.sel)
 # select initial SNPs
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
+if (!is.na(config["snp_pruning_include_file"])) {
+  snp.sel <- getobj(config["snp_pruning_include_file"])
+} else {
+  snp.sel <- snpID
+}
+length(snp.sel)
 
 # if duplicate discordance has been run, select only concordant SNPs
 if (!is.na(config["out_disc_file"])) {
   discord <- getobj(config["out_disc_file"])
   disc <- discord$discordance.by.snp
-  snp.sel <- disc$snpID[disc$discordant == 0]
+  snp.sel <- intersect(snp.sel, disc$snpID[disc$discordant == 0])
 } else {
   message("no discordance file specified; using all SNPs")
-  snp.sel <- snpID
 }
 length(snp.sel)
 

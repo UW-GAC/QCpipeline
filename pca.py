@@ -58,6 +58,7 @@ ext_annot_snp_rsIDCol        [rsID]                   column of rsID in external
 ld_r_threshold               [0.32]                   r threshold for LD pruning (0.32 = sqrt(0.1))
 ld_win_size                  [10]                     size of sliding window for LD pruning (in Mb)
 num_evs_to_plot              [12]                     number of eigenvectors for correlation and scree plots
+snp_pruning_include_file     [NA]                     vector of snpID to include in LD pruning (NA=all)
 out_corr_plot_prefix         [pca_corr]               output prefix for correlation plots (all SNPs)
 out_corr_pruned_plot_prefix  [NA]                     output prefix for correlation plots (pruned SNPs only)
 out_dens_plot                [pca_dens.pdf]           output plot of EV2 vs EV1 with density sidebars
