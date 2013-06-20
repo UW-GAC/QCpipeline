@@ -106,21 +106,21 @@ for (i in 1:length(actions))
     png(paste(qqfname,"_model_", i, "_",actions[i],"_manh_",type,".png",sep=""), width=720, height=720)
     par(mfrow=c(3,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
     pvaln <- pval[(!is.na(pval))]
-    chromosome <- getChromosome(snpAnnot, index=match(combined$snpID[(!is.na(pval))],snpID), char=TRUE)
+    chromosome <- combined$chromosome[!is.na(pval)]
     title <- paste("no filter\n", length(pvaln), "SNPs")
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - filtered, subsetted with plotchroms
     pvaln <- pval[combined$quality.filter & (!is.na(pval))]
-    chromosome <- combined$chromosome[combined$quality.filter & (!is.na(pval))]
+    chromosome <- combined$chromosome[combined$quality.filter & !is.na(pval)]
     title <- paste("quality filter\n", length(pvaln), "SNPs")
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - maf filtered, subsetted with plotchroms
     pvaln <- pval[combined$qual.maf.filter & (!is.na(pval))]
-    chromosome <- combined$chromosome[combined$qual.maf.filter & (!is.na(pval))]
+    chromosome <- combined$chromosome[combined$qual.maf.filter & !is.na(pval)]
     title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs")
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
