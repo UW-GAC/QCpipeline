@@ -77,12 +77,12 @@ for (i in 1:length(actions))
   combined$rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"], index=index)
   #combined$chromosome <- getChromosome(snpAnnot, char=TRUE, index=index)
   combined$chromosome <- getChromosome(snpAnnot, index=index)
-  combined$chromsosome[combined$chromosome == 23] <- "X"
-  combined$chromsosome[combined$chromosome == 24] <- "XY"
-  combined$chromsosome[combined$chromosome == 25] <- "Y"
-  combined$chromsosome[combined$chromosome == 26] <- "M"
-  combined$chromsosome[combined$chromosome == 27] <- "U"
-  combined$chromsosome[combined$chromosome == 28] <- "XYY"
+  combined$chromosome[combined$chromosome == 23] <- "X"
+  combined$chromosome[combined$chromosome == 24] <- "XY"
+  combined$chromosome[combined$chromosome == 25] <- "Y"
+  combined$chromosome[combined$chromosome == 26] <- "M"
+  combined$chromosome[combined$chromosome == 27] <- "U"
+  combined$chromosome[combined$chromosome == 28] <- "XYY"
   combined$quality.filter <- getVariable(snpAnnot, config["annot_snp_filtCol"], index=index)
 
   # MAF filter
