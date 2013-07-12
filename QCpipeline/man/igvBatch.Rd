@@ -4,14 +4,15 @@
 \description{Generate batch file for IGV to make snapshots of reads from
 a BAM file.}
 \usage{
-igvBatch(chromosome, position, bam, outdir="./",
+igvBatch(chromosome, position, bam, outdir="./", prefix="igv",
          file="batch.igv", genome="hg19", collapse=FALSE)
 }
 \arguments{
   \item{chromosome}{Vector of chromosomes}
   \item{position}{Vector of positions}
-  \item{bam}{BAM file to load}
+  \item{bam}{Vector of BAM files to load}
   \item{outdir}{Output directory for snapshot png files}
+  \item{prefix}{Prefix for snapshot png files}
   \item{file}{Output batch file}
   \item{genome}{Genome to load}
   \item{collapse}{Logical for whether to collapse the reads}
