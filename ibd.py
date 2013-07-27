@@ -52,7 +52,7 @@ parser.add_option("-e", "--email", dest="email", default=None,
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
                   help="cluster queue name [default %default]")
 parser.add_option("-m", "--multithread", dest="multithread", default=None,
-                  help="number of cores to use; either a number (e.g, 1) or a range of numbers (e.g., 1-4) [default 1]")
+                  help="number of cores to use; either a number (e.g, 1) or a range of numbers (e.g., 1-4) [default 1 core]")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
