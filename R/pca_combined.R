@@ -24,6 +24,11 @@ default <- c("geno.cntl", "subjectID", "unrelated",
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
+# multithreading on pearson?
+nSlots <- Sys.getenv("NSLOTS")
+nThreads <- ifelse(is.na(strtoi(nSlots) >= 1), 1, strtoi(nSlots))
+print(paste("Running with", nThreads,"thread(s)."))
+
 # pruned SNPs
 snp.ids <- getobj(config["out_pruned_file"])
 length(snp.ids)
@@ -79,11 +84,11 @@ undup.scans <- setdiff(comb.scan.ids, dups)
 length(undup.scans)
 
 gdsobj <- openfn.gds(config["out_comb_gds_geno_file"])
-pca <- snpgdsPCA(gdsobj, sample.id=undup.scans, snp.id=snp.ids)
+pca <- snpgdsPCA(gdsobj, sample.id=undup.scans, snp.id=snp.ids, num.thread=nThreads)
 save(pca, file=config["out_pca_file"])
 
 nev <- as.integer(config["num_evs_to_plot"])
-pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:nev)
+pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:nev, num.thread=nThreads)
 save(pca.corr, file=config["out_corr_file"])
 
 closefn.gds(gdsobj)

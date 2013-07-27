@@ -86,6 +86,8 @@ parser.add_option("-q", "--queue", dest="qname", default="gcc.q",
 parser.add_option("-c", "--combined", dest="combined",
                   action="store_true", default=False,
                   help="make combined dataset")
+parser.add_option("-m", "--multithread", dest="multithread", default=None,
+                  help="number of cores to use; either a number (e.g, 1) or a range of numbers (e.g., 1-4) [default 1 core]")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -96,6 +98,8 @@ pipeline = options.pipeline
 email = options.email
 combined = options.combined
 qname = options.qname
+multithread = options.multithread
+
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -105,6 +109,13 @@ configdict = QCpipeline.readConfig(config)
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
+
+
+if multithread is not None:
+    optionsMulti = "-pe local " + multithread
+else:
+    optionsMulti = ""
+
 
 if combined:
     job = "combine_gds"
@@ -135,7 +146,7 @@ if combined:
     holdid = [jobid['dup_disc_ext'], jobid['combine_gds']]
     if waitLD:
         holdid.append(jobid['ld_pruning'])
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
 
     job = "pca_plots"
     rscript = os.path.join(pipeline, "R", job + ".R")
@@ -148,7 +159,7 @@ else:
         holdid = [jobid['ld_pruning']]
     else:
         holdid = None
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
 
     job = "pca_plots"
     rscript = os.path.join(pipeline, "R", job + ".R")
