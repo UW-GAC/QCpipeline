@@ -51,6 +51,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
                   help="cluster queue name [default %default]")
+parser.add_option("-m", "--multithread", dest="multithread", default=None,
+                  help="number of cores to use; either a number (e.g, 1) or a range of numbers (e.g., 1-4) [default 1 core]")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -60,6 +62,7 @@ config = args[0]
 pipeline = options.pipeline
 email = options.email
 qname = options.qname
+multithread = options.multithread
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -70,7 +73,15 @@ driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
 
+
+if multithread is not None:
+    optionsMulti = "-pe local " + multithread
+else:
+    optionsMulti = ""
+
+
 # skip LD if file already exists
+# multithreading not implemented in SNPRelate code for snpgdsLDpruning, so don't pass optionsMulti
 waitLD = False
 if os.path.exists(configdict['out_snp_file']):
     print "using SNPs in " + configdict['out_snp_file']
@@ -86,7 +97,7 @@ if waitLD:
 else:
     holdid = None
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
 
 job = "ibd_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")

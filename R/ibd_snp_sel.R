@@ -22,6 +22,15 @@ default <- c(0.32, 10, 0.05, "ibd_snp_sel.RData", NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
+
+# multithreading on pearson?
+# num.thread is not implemented in LD pruning, but uncomment these when it is
+##nSlots <- Sys.getenv("NSLOTS")
+##nThreads <- ifelse(is.na(strtoi(nSlots) >= 1), 1, strtoi(nSlots))
+##print(paste("Running with", nThreads,"thread(s)."))
+nThreads <- 1
+
+
 if (!is.na(config["scan_pruning_include_file"])) {
   scan.ids <- getobj(config["scan_pruning_include_file"])
 } else {
@@ -45,7 +54,8 @@ win <- as.numeric(config["ld_win_size"]) * 1e6
 gdsobj <- openfn.gds(config["gds_geno_file"])
 snpset <- snpgdsLDpruning(gdsobj, sample.id=scan.ids, snp.id=snp.ids,
                           autosome.only=TRUE, maf=maf, missing.rate=0.05,
-                          method="corr", slide.max.bp=win, ld.threshold=r)
+                          method="corr", slide.max.bp=win, ld.threshold=r, 
+                          num.thread=nThreads)
 closefn.gds(gdsobj)
 
 snps.ibd <- unlist(snpset, use.names=FALSE)

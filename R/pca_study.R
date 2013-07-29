@@ -20,6 +20,12 @@ default <- c(12, "pca_corr.RData", "pca.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
+# multithreading on pearson?
+nSlots <- Sys.getenv("NSLOTS")
+nThreads <- ifelse(is.na(strtoi(nSlots) >= 1), 1, strtoi(nSlots))
+print(paste("Running with", nThreads,"thread(s)."))
+
+
 snp.ids <- getobj(config["out_pruned_file"])
 length(snp.ids)
 
@@ -27,11 +33,11 @@ scan.ids <- getobj(config["study_unrelated_file"])
 length(scan.ids)
 
 gdsobj <- openfn.gds(config["gds_geno_file"])
-pca <- snpgdsPCA(gdsobj, sample.id=scan.ids, snp.id=snp.ids)
+pca <- snpgdsPCA(gdsobj, sample.id=scan.ids, snp.id=snp.ids, num.thread=nThreads)
 save(pca, file=config["out_pca_file"])
 
 nev <- as.integer(config["num_evs_to_plot"])
-pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:nev)
+pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:nev, num.thread=nThreads)
 save(pca.corr, file=config["out_corr_file"])
 
 closefn.gds(gdsobj)
