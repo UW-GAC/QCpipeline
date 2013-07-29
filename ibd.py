@@ -81,6 +81,7 @@ else:
 
 
 # skip LD if file already exists
+# multithreading not implemented in SNPRelate code for snpgdsLDpruning, so don't pass optionsMulti
 waitLD = False
 if os.path.exists(configdict['out_snp_file']):
     print "using SNPs in " + configdict['out_snp_file']

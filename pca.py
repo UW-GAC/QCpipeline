@@ -127,6 +127,7 @@ if combined:
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['combine_gds']], queue=qname, email=email)
 
 # skip LD if file already exists
+# multithreading not implemented in SNPRelate code for snpgdsLDpruning, so don't pass optionsMulti
 waitLD = False
 if os.path.exists(configdict['out_pruned_file']):
     print "using LD pruned file " + configdict['out_pruned_file']
