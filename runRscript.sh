@@ -3,6 +3,7 @@
 #$ -cwd
 #$ -S /bin/bash
 #$ -j y
+#$ -o $JOB_NAME.o$JOB_ID
 
 args=("$@") # all arguments
 unset args[0] # remove first argument (R script name)
