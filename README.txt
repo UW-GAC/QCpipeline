@@ -78,7 +78,7 @@ will be created.
 If you would like to use multithreading when available, add the
 "--multithread" option when calling ibd.py. "--multithread 1-4" will
 use the maximum number of cores available (between 1-4), and 
-"--multithread 4" will request 4 cores.
+"--multithread 4" will request 4 cores. Do not request more than 8 cores.
 
 
 28) Sample quality check
@@ -112,8 +112,8 @@ The LD pruning file will be used if it already exists, otherwise it
 will be created.
 If you would like to use multithreading when available, add the
 "--multithread" option when calling pca.py. "--multithread 1-4" will
-use the maximum number of cores available (between 1-4), and 
-"--multithread 4" will request 4 cores.
+use the maximum number of cores available (between 1-4), and
+"--multithread 4" will request 4 cores. Do not request more than 8 cores.
 
 
 42a)
