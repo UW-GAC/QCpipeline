@@ -75,6 +75,11 @@ For Fisher test:
 SNPs for IBD are selected with LD pruning.
 The LD pruning file will be used if it already exists, otherwise it
 will be created.
+If you would like to use multithreading when available, add the
+"--multithread" option when calling ibd.py. "--multithread 1-4" will
+use the maximum number of cores available (between 1-4), and 
+"--multithread 4" will request 4 cores.
+
 
 28) Sample quality check
 > sample_qualty.py --email user@uw.edu sample_quality.config
@@ -105,6 +110,10 @@ For subsequent runs with individual ethnic groups, make a new
 
 The LD pruning file will be used if it already exists, otherwise it
 will be created.
+If you would like to use multithreading when available, add the
+"--multithread" option when calling pca.py. "--multithread 1-4" will
+use the maximum number of cores available (between 1-4), and 
+"--multithread 4" will request 4 cores.
 
 
 42a)
