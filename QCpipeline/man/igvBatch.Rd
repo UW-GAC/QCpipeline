@@ -4,12 +4,13 @@
 \description{Generate batch file for IGV to make snapshots of reads from
 a BAM file.}
 \usage{
-igvBatch(chromosome, position, bam, outdir="./", prefix="igv",
+igvBatch(chromosome, position, window=10, bam, outdir="./", prefix="igv",
          file="batch.igv", genome="hg19", collapse=FALSE)
 }
 \arguments{
   \item{chromosome}{Vector of chromosomes}
   \item{position}{Vector of positions}
+  \item{window}{Integer of number of bases to display on either side of \code{position}}
   \item{bam}{Vector of BAM files to load}
   \item{outdir}{Output directory for snapshot png files}
   \item{prefix}{Prefix for snapshot png files}
@@ -32,7 +33,7 @@ outdir <- tempdir()
 outfile <- tempfile()
 chrom <- c(1, 1)
 pos <- c(155265446, 224804891)
-igvBatch(chrom, pos, bamfile, outdir, file=outfile,
+igvBatch(chrom, pos, bam=bamfile, outdir=outdir, file=outfile,
          genome="hg19", collapse=TRUE)
 readLines(outfile)
 file.remove(outfile)

@@ -1,4 +1,5 @@
-igvBatch <- function(chromosome, position, bam, outdir="./", prefix="igv",
+igvBatch <- function(chromosome, position, window=10,
+                     bam, outdir="./", prefix="igv",
                      file="batch.igv", genome="hg19", collapse=FALSE) {
   stopifnot(length(chromosome) == length(position))
 
@@ -10,7 +11,8 @@ igvBatch <- function(chromosome, position, bam, outdir="./", prefix="igv",
   writeLines(out, con)
 
   for (i in 1:length(chromosome)) {
-    out <- c(paste("goto chr", chromosome[i], ":", position[i], sep=""),
+    out <- c(paste("goto chr", chromosome[i], ":", position[i]-window,
+                   position[i]+window, sep=""),
              "sort position")
     if (collapse) out <- c(out, "collapse")
     out <- c(out, paste("snapshot ", prefix, "_chr", chromosome[i], "_",
