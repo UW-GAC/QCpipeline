@@ -16,11 +16,11 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "array_build", "array_name",
               "nc_geno_file", "raw_path")
 optional <- c("annot_scan_fileCol", "annot_scan_nameCol", "annot_snp_nameCol",
-              "nc_geno_checkFile", "nc_geno_diagFile", "raw_a1Col", "raw_a2Col",
+              "nc_geno_checkFile", "nc_geno_diagFile", "raw_a1Col", "raw_a2Col","raw_genoCol",
               "raw_colTotal", "raw_sampleCol", "raw_scanNameInFile", "raw_sepType",
               "raw_skipNum", "raw_snpCol")
 default <- c("file", "Sample.Name", "rsID", "nc_geno_check.RData",
-             "nc_geno_diag.RData", 10, 11, 19, 2, 1, ",", 11, 1)
+             "nc_geno_diag.RData", 10, 11, NA, 19, 2, 1, ",", 11, 1)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -72,23 +72,36 @@ names(snpdf) <- c("snpID", "snpName")
 scandf <- getVariable(scanAnnot, c("scanID", config["annot_scan_nameCol"], config["annot_scan_fileCol"]))
 names(scandf) <- c("scanID","scanName" ,"file")
 
-col.nums <- as.integer(c(config["raw_snpCol"], config["raw_a1Col"], config["raw_a2Col"]))
-names(col.nums) <- c("snp", "a1", "a2")
-if (config["raw_scanNameInFile"] == 1) {
-  col.nums <- append(col.nums, as.integer(config["raw_sampleCol"]), after=1)
-  names(col.nums)[2] <- "sample"
-}
 skip.num <- as.integer(config["raw_skipNum"])
 col.total <- as.integer(config["raw_colTotal"])
 scan.name.in.file <- as.integer(config["raw_scanNameInFile"])
 
+## if alleles are in separate columns
+if (is.na(config["raw_genoCol"])) {
+	col.nums <- as.integer(c(config["raw_snpCol"], config["raw_a1Col"], config["raw_a2Col"]))
+	names(col.nums) <- c("snp", "a1", "a2")
+	
+## if alleles are in the same column
+} else {
+	col.nums <- as.integer(c(config["raw_snpCol"], config["raw_genoCol"]))
+	names(col.nums) <- c("snp", "geno")
+	
+	# in test mode - print out col.nums argument
+	print(col.nums)
+}
+	
+if (config["raw_scanNameInFile"] == 1) {
+  col.nums <- append(col.nums, as.integer(config["raw_sampleCol"]), after=1)
+  names(col.nums)[2] <- "sample"
+}
+
 system.time({
   res <- ncdfAddData(path = config["raw_path"], ncdf.filename = ncfile,
-                     snp.annotation = snpdf, scan.annotation = scandf,
-                     sep.type=config["raw_sepType"], skip.num=skip.num,
-                     col.total=col.total,
-                     col.nums=col.nums, scan.name.in.file=scan.name.in.file,
-                     diagnostics.filename=config["nc_geno_diagFile"])
+					 snp.annotation = snpdf, scan.annotation = scandf,
+					 sep.type=config["raw_sepType"], skip.num=skip.num,
+					 col.total=col.total,
+					 col.nums=col.nums, scan.name.in.file=scan.name.in.file,
+					 diagnostics.filename=config["nc_geno_diagFile"])
 })
 
 ########################################
