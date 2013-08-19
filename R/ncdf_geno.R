@@ -105,19 +105,19 @@ system.time({
 # MANUAL REVIEW - DIAGNOSTICS
 ########################################
 names(res)
-table(res$read.file, exclude=NULL)
+table(res$read.file, useNA="ifany")
 stopifnot(all(res$read.file == 1))
 
-table(res$row.num, exclude=NULL)
+table(res$row.num, useNA="ifany")
 stopifnot(all(res$row.num == nrow(snpAnnot)))
 
-table(unlist(lapply(res$samples, length)),exclude=NULL)  
-table(res$sample.match, exclude=NULL)
+table(unlist(lapply(res$samples, length)),useNA="ifany")  
+table(res$sample.match, useNA="ifany")
 
-table(unlist(lapply(res$missg, length)), exclude=NULL) 
+table(unlist(lapply(res$missg, length)), useNA="ifany") 
 unique(unlist(res$missg))
 
-table(res$snp.chk, exclude=NULL)
+table(res$snp.chk, useNA="ifany")
 stopifnot(all(res$snp.chk == 1))
 
 ########################################
@@ -133,7 +133,7 @@ geno <- getGenotype(data, snp=c(1,-1), scan=c(n,5))
 dim(geno) #snp by sample
 nsnp <- nrow(snpAnnot)
 stopifnot(dim(geno) == c(nsnp, 5))
-table(geno[,1], exclude=NULL)
+table(geno[,1], useNA="ifany")
 geno[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
 geno[(nsnp-4):nsnp,] # last 5 snps
 close(data)
@@ -156,28 +156,28 @@ system.time({
 # MANUAL REVIEW - DIAGNOSTICS
 ########################################
 table(res$geno.chk[1:nsamp])
-table(res$read.file, exclude=NULL)
+table(res$read.file, useNA="ifany")
 stopifnot(all(res$read.file == 1))
 
-table(res$row.num, exclude=NULL)
+table(res$row.num, useNA="ifany")
 stopifnot(all(res$row.num == nrow(snpAnnot)))
 
-table(unlist(lapply(res$sample.names, length)),exclude=NULL)
-table(res$sample.match, exclude=NULL)
+table(unlist(lapply(res$sample.names, length)),useNA="ifany")
+table(res$sample.match, useNA="ifany")
 
-table(unlist(lapply(res$missg, length)), exclude=NULL) 
+table(unlist(lapply(res$missg, length)), useNA="ifany") 
 unique(unlist(res$missg))
 
-table(res$snp.chk, exclude=NULL)
+table(res$snp.chk, useNA="ifany")
 stopifnot(all(res$snp.chk == 1))
 
-table(res$chk, exclude=NULL)
+table(res$chk, useNA="ifany")
 stopifnot(all(res$chk == 1))
 
-table(res$snp.order, exclude=NULL)
+table(res$snp.order, useNA="ifany")
 stopifnot(all(res$snp.order == 1))
 
-table(res$geno.chk, exclude=NULL)
+table(res$geno.chk, useNA="ifany")
 stopifnot(all(res$geno.chk == 1))
 
 

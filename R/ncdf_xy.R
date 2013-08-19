@@ -102,22 +102,22 @@ system.time({
 # MANUAL REVIEW - DIAGNOSTICS
 ########################################
 names(res)
-table(res$read.file, exclude=NULL)
+table(res$read.file, useNA="ifany")
 stopifnot(all(res$read.file == 1))
 
-table(res$row.num, exclude=NULL)
+table(res$row.num, useNA="ifany")
 stopifnot(all(res$row.num == nrow(snpAnnot)))
 
-table(unlist(lapply(res$samples, length)),exclude=NULL)  
-table(res$sample.match, exclude=NULL)
+table(unlist(lapply(res$samples, length)),useNA="ifany")  
+table(res$sample.match, useNA="ifany")
 
-table(unlist(lapply(res$missg, length)), exclude=NULL) 
+table(unlist(lapply(res$missg, length)), useNA="ifany") 
 unique(unlist(res$missg))
 
-table(res$snp.chk, exclude=NULL)
+table(res$snp.chk, useNA="ifany")
 stopifnot(all(res$snp.chk == 1))
 
-table(res$chk, exclude=NULL)
+table(res$chk, useNA="ifany")
 stopifnot(all(res$chk == 1))
 
 ########################################
@@ -171,33 +171,33 @@ system.time({
 ########################################
 # MANUAL REVIEW - DIAGNOSTICS
 ########################################
-table(res$read.file, exclude=NULL)
+table(res$read.file, useNA="ifany")
 stopifnot(all(res$read.file == 1))
 
-table(res$row.num, exclude=NULL)
+table(res$row.num, useNA="ifany")
 stopifnot(all(res$row.num == nrow(snpAnnot)))
 
-table(unlist(lapply(res$sample.names, length)),exclude=NULL)
-table(res$sample.match, exclude=NULL)
+table(unlist(lapply(res$sample.names, length)),useNA="ifany")
+table(res$sample.match, useNA="ifany")
 
-table(res$snp.chk, exclude=NULL)
+table(res$snp.chk, useNA="ifany")
 stopifnot(all(res$snp.chk == 1))
 
-table(res$chk, exclude=NULL)
+table(res$chk, useNA="ifany")
 stopifnot(all(res$chk == 1))
 
-table(res$snp.order, exclude=NULL)
+table(res$snp.order, useNA="ifany")
 stopifnot(all(res$snp.order == 1))
 
 if (getqual) { 
-  print(table(res$qs.chk, exclude=NULL))
+  print(table(res$qs.chk, useNA="ifany"))
   stopifnot(all(res$chk == 1))
 }
 
-table(res$inten.chk$x, exclude=NULL)
+table(res$inten.chk$x, useNA="ifany")
 stopifnot(all(res$inten.chk$x == 1))
 
-table(res$inten.chk$y, exclude=NULL)
+table(res$inten.chk$y, useNA="ifany")
 stopifnot(all(res$inten.chk$y == 1))
 
 
