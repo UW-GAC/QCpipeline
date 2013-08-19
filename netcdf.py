@@ -38,7 +38,7 @@ raw_snpCol            [1]                    column number with snp name
 raw_sampleCol         [2]                    column number with scan name
 raw_a1Col             [10]                   column number with allele 1
 raw_a2Col             [11]                   column number with allele 2
-raw_genoCol			  [NA]					 column number with diploid genotype of allele1 and alelle2
+raw_genoCol           [NA]                   column number with diploid genotype of allele1 and alelle2
 raw_qCol              [NA]                   column number with quality score (NA to omit)
 raw_xCol              [14]                   column number with X intensity
 raw_yCol              [15]                   column number with Y intensity

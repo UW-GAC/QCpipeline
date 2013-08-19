@@ -16,7 +16,7 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "array_build", "array_name",
               "nc_geno_file", "raw_path")
 optional <- c("annot_scan_fileCol", "annot_scan_nameCol", "annot_snp_nameCol",
-              "nc_geno_checkFile", "nc_geno_diagFile", "raw_a1Col", "raw_a2Col","raw_genoCol",
+              "nc_geno_checkFile", "nc_geno_diagFile", "raw_a1Col", "raw_a2Col", "raw_genoCol",
               "raw_colTotal", "raw_sampleCol", "raw_scanNameInFile", "raw_sepType",
               "raw_skipNum", "raw_snpCol")
 default <- c("file", "Sample.Name", "rsID", "nc_geno_check.RData",
@@ -78,16 +78,13 @@ scan.name.in.file <- as.integer(config["raw_scanNameInFile"])
 
 ## if alleles are in separate columns
 if (is.na(config["raw_genoCol"])) {
-	col.nums <- as.integer(c(config["raw_snpCol"], config["raw_a1Col"], config["raw_a2Col"]))
-	names(col.nums) <- c("snp", "a1", "a2")
+  col.nums <- as.integer(c(config["raw_snpCol"], config["raw_a1Col"], config["raw_a2Col"]))
+  names(col.nums) <- c("snp", "a1", "a2")
 	
 ## if alleles are in the same column
 } else {
-	col.nums <- as.integer(c(config["raw_snpCol"], config["raw_genoCol"]))
-	names(col.nums) <- c("snp", "geno")
-	
-	# in test mode - print out col.nums argument
-	print(col.nums)
+  col.nums <- as.integer(c(config["raw_snpCol"], config["raw_genoCol"]))
+  names(col.nums) <- c("snp", "geno")
 }
 	
 if (config["raw_scanNameInFile"] == 1) {
@@ -97,11 +94,11 @@ if (config["raw_scanNameInFile"] == 1) {
 
 system.time({
   res <- ncdfAddData(path = config["raw_path"], ncdf.filename = ncfile,
-					 snp.annotation = snpdf, scan.annotation = scandf,
-					 sep.type=config["raw_sepType"], skip.num=skip.num,
-					 col.total=col.total,
-					 col.nums=col.nums, scan.name.in.file=scan.name.in.file,
-					 diagnostics.filename=config["nc_geno_diagFile"])
+                     snp.annotation = snpdf, scan.annotation = scandf,
+                     sep.type=config["raw_sepType"], skip.num=skip.num,
+                     col.total=col.total,
+                     col.nums=col.nums, scan.name.in.file=scan.name.in.file,
+                     diagnostics.filename=config["nc_geno_diagFile"])
 })
 
 ########################################
