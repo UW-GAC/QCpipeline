@@ -14,8 +14,8 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "out_het_file", "out_inten_file")
-optional <- c("annot_scan_sexCol", "out_pdf")
-default <- c("sex", "sex_check.pdf")
+optional <- c("annot_scan_sexCol", "out_pdf", "out_autosome_prefix")
+default <- c("sex", "sex_check.pdf", "autosome")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -82,3 +82,28 @@ sel <- sex == "F"
 plot(het[sel,"A"], het[sel,"X"], col="red", xlab="Autosomal heterozygosity", ylab="X heterozygosity")
 points(het[(sel & anom),"A"], het[(sel & anom),"X"], col=plotcol[sel & anom])
 dev.off()
+
+
+# plot autosome intensities
+autoPrefix <- config["out_autosome_prefix"]
+# just plot one for now
+i <- 1
+
+autosomes <- intersect(unique(chr), as.character(1:22))
+for (autosome in autosomes){
+  ni <- sum(chr %in% autosome)
+  ylab <- paste("Chr ", autosome, " intensity (", ni, " probes)", sep="")
+  
+  png(paste(autoPrefix, "_", autosome, ".png", sep=""), width=600, height=600)
+  
+  plot(mninten[, "X"], mninten[, autosome], col=plotcol, xlab=xlab, ylab=ylab, cex.lab=1.5)
+  points(mninten[anom, "X"], mninten[anom, autosome], col=plotcol[anom])
+  
+  if (any(is.na(sex))) {
+    legend("top", c("M","F","NA"), col=c("blue","red","black"), pch=c(1,1,1))
+  } else {
+    legend("top", c("M","F"), col=c("blue","red"), pch=c(1,1))
+  }
+  
+  dev.off()
+}
