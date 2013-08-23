@@ -30,7 +30,8 @@ annot_snp_IntensityOnlyCol  [NA]                 column of intensity-only in snp
 out_het_file                [het_by_scan.RData]  output heterozygosity by scan and chromosome
 out_inten_file              [mean_inten.RData]   output mean intensity by scan and chromosome
 out_pdf                     [sex_check.pdf]      output sex check plot
-out_sexchrom_prefix         [sexchrom_anom]      output prefix for sex chrom anomaly plots"""
+out_sexchrom_prefix         [sexchrom_anom]      output prefix for sex chrom anomaly plots
+out_autosome_prefix         [autosome]           output prefix for mean autosome intensity plots"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
