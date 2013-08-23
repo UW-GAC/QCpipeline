@@ -13,15 +13,18 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "covar.list", "covars_as_factor", "gene_action", "model_type", "nc_geno_file", "outcome")
-optional <- c("out_assoc_prefix", "scan_chrom_filter", "scan_exclude", "robust")
-default <- c("assoc", NA, NA, FALSE)
+required <- c("annot_scan_file", "covar.list", "covars_as_factor",
+              "gene_action", "model_type", "nc_geno_file", "outcome")
+optional <- c("ivar.list", "out_assoc_prefix",
+              "scan_chrom_filter", "scan_exclude", "robust")
+default <- c(NA, "assoc", NA, NA, FALSE)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 # read chromosome
 if (length(args) < 2) stop("missing chromosome")
-chromosome.set <- as.numeric(args[2])  # this sets chromosome numbers given in args on the command line
+# set chromosome numbers given in args on the command line
+chromosome.set <- as.numeric(args[2])  
 chromosome.set
 
 # make genotypedata
@@ -34,10 +37,9 @@ stopifnot(all(scanAnnot$scanID==sid))
 
 
 # set categorical variables in association models as factor 
-factors <- unlist(strsplit(config["covars_as_factor"]," ", fixed=TRUE))
+factors <- unlist(strsplit(config["covars_as_factor"], " ", fixed=TRUE))
 idx <- which(varLabels(scanAnnot) %in% factors)
-for (i in idx)
-{
+for (i in idx) {
   pData(scanAnnot)[,i] <- as.factor(pData(scanAnnot)[,i])
 }
   
@@ -59,11 +61,9 @@ outcome
 # covariates for each model
 covar.list <- getobj(config["covar.list"])
 # for Y when sex needs to be taken out of model
-if (chromosome.set == 25)
-{
+if (chromosome.set == 25) {
   idx <- sapply(covar.list, function(x) which(x %in% "sex"))
-  for (i in 1:length(idx))
-  {
+  for (i in 1:length(idx)) {
     if (length(idx[[i]]) > 0) {
       covar.list[[i]] <- covar.list[[i]][-idx[[i]]]
       if (length(covar.list[[i]]) == 0) covar.list[[i]] <- ""
@@ -71,6 +71,24 @@ if (chromosome.set == 25)
   }
 }
 covar.list
+
+# interaction variables for each model
+if (!is.na(config["ivar.list"])) {
+  ivar.list <- getobj(config["ivar.list"])
+  # for Y when sex needs to be taken out of model
+  if (chromosome.set == 25) {
+    idx <- sapply(ivar.list, function(x) which(x %in% "sex"))
+    for (i in 1:length(idx)) {
+      if (length(idx[[i]]) > 0) {
+        ivar.list[[i]] <- ivar.list[[i]][-idx[[i]]]
+        if (length(ivar.list[[i]]) == 0) ivar.list[[i]] <- ""
+      }
+    }
+  }
+} else {
+  ivar.list <- NULL
+}
+ivar.list
 
 # model types
 model.type <- unlist(strsplit(config["model_type"]," "))
@@ -80,8 +98,7 @@ model.type
 # gene actions
 gene.action <- unlist(strsplit(config["gene_action"]," "))
 gene.action.list <- list()
-for (i in 1:length(gene.action))
-{
+for (i in 1:length(gene.action)) {
   gene.action.list [[i]] <- gene.action[i]
 }
 gene.action.list
@@ -97,21 +114,20 @@ outfile <- config["out_assoc_prefix"]
 
 # scan.exclude
 scan.exclude <- NULL
-if (!is.na(config["scan_exclude"]))
-{
+if (!is.na(config["scan_exclude"])) {
   scan.exclude <- getobj(config["scan_exclude"])
 }
 
 genoData <- GenotypeData(data, scanAnnot=scanAnnot)
 
 assocTestRegression(genoData,
-		    outcome = outcome, 
-		    covar.list = covar.list, 
-		    model.type = model.type,
+                    outcome = outcome, 
+                    covar.list = covar.list, 
+                    ivar.list = ivar.list,
+                    model.type = model.type,
                     scan.exclude = scan.exclude,
                     gene.action.list = gene.action.list,
-		    scan.chromosome.filter = filt,
-		    chromosome.set = chromosome.set, 
+                    scan.chromosome.filter = filt,
+                    chromosome.set = chromosome.set, 
                     outfile = outfile,
-                    robust = as.logical(config["robust"])
-)
+                    robust = as.logical(config["robust"]))

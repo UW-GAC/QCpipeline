@@ -42,16 +42,14 @@ if (!is.na(config["plot_chroms"])) {
   plotchroms
 }
 
-for (i in 1:length(actions))
-{
+for (i in 1:length(actions)) {
   test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "-", model.type[i])
   print(test)
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
   print(fname)
   combined <- getobj(fname)
   # only keep chroms in plotchroms
-  if (!is.na(config["plot_chroms"]))
-  {
+  if (!is.na(config["plot_chroms"])) {
     sub <- combined$snpID %in% snpID[getChromosome(snpAnnot) %in% plotchroms]
     combined <- combined[sub,]
   }
@@ -64,11 +62,14 @@ for (i in 1:length(actions))
                      snp.specific=paste("2*MAF*(1-MAF)*N >", maf.thresh))
   
   for (type in c("LR", "Wald")) { 
+    varp <- paste(type,"pval", sep=".")    
+    ## no LR test for models with interactions
+    if (!(varp %in% names(combined))) next
+    
     # QQ plots
     png(paste(qqfname,"_model_", i, "_",actions[i],"_qq_",type,".png",sep=""), width=720, height=720)
     par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
-        cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
-    varp <- paste(type,"pval", sep=".")
+        cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)    
     pval <- combined[,varp]
 
     # QQ plots - unfiltered plot, subsetted with plotchroms
@@ -126,7 +127,6 @@ for (i in 1:length(actions))
                   main=title, signif=as.numeric(config["signif_line"]))
     dev.off()
   }
-
 }
 
 

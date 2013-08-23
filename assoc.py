@@ -30,6 +30,7 @@ nc_samp_xy_file    sample-level XY intensity netCDF file for plots
 Optional config parameters [default]:    
 annot_snp_filtCol       [quality.filter]  column for quality filter (T/F) in snp annotation
 annot_snp_rsIDCol       [rsID]            column for rsID in snp annotation
+ivar.list               [NA]              file with list of interaction variables for each model
 maf.filter.type         [snp.specific]    type of MAF filter to apply ("absolute" or "snp.specific")
 maf.absolute.threshold  [0.02]            absolute MAF filter threshold to apply to plots: MAF > x
 maf.linear.threshold    [30]              linear regression snp.specific filter threshold: 2*MAF*(1-MAF)*N > x

@@ -32,16 +32,13 @@ actions <- unlist(strsplit(config["gene_action"]," "))
 model.type <- unlist(strsplit(config["model_type"]," "))
 
 
-for (i in 1:length(actions))
-{
+for (i in 1:length(actions)) {
   cnt <- NULL
   tmp <- list()
-  for (j in start:end)
-  {
+  for (j in start:end) {
     fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".chr.",j,"_",j,".RData", sep="")
     dat <- NULL
-    if (file.exists(fname))
-    {
+    if (file.exists(fname)) {
       cnt <- c(cnt, j)
       dat <- getobj(fname)
     }
@@ -54,7 +51,7 @@ for (i in 1:length(actions))
   mono <- combined[[warncol]] %in% c(0,1)
   print(paste(sum(mono), "SNPs monomorphic in either cases or controls"))
   if (sum(mono) > 0) {
-    cat("Running Fisher exact test")
+    message("Running Fisher exact test")
     fish <- assocTestFisherExact(combined[mono,])
     snpID <- combined$snpID
     # add only new columns

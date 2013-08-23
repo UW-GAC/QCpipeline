@@ -143,13 +143,13 @@ close(data)
 # Check ncdf file
 ##########
 system.time({
-  res <-ncdfCheckGenotype(path = config["raw_path"], ncdf.filename = ncfile,
-                          snp.annotation = snpdf, scan.annotation = scandf,
-                          sep.type=config["raw_sepType"], skip.num=skip.num,
-                          col.total=col.total,
-                          col.nums=col.nums, scan.name.in.file=scan.name.in.file,
-                          check.scan.index=1:nsamp, n.scans.loaded=nsamp,
-                          diagnostics.filename=config["nc_geno_checkFile"])
+  res <- ncdfCheckGenotype(path = config["raw_path"], ncdf.filename = ncfile,
+                           snp.annotation = snpdf, scan.annotation = scandf,
+                           sep.type=config["raw_sepType"], skip.num=skip.num,
+                           col.total=col.total,
+                           col.nums=col.nums, scan.name.in.file=scan.name.in.file,
+                           check.scan.index=1:nsamp, n.scans.loaded=nsamp,
+                           diagnostics.filename=config["nc_geno_checkFile"])
 })
 
 ########################################

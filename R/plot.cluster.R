@@ -56,21 +56,22 @@ xync <- NcdfIntensityReader(config["nc_samp_xy_file"])
 (xyData <- IntensityData(xync, scanAnnot=scanAnnot, snpAnnot=snpAnnot))
 
 
-for (i in 1:length(actions))
-{
+for (i in 1:length(actions)) {
       test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "-", model.type[i])
       print(test)
       fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
       print(fname)
       combined <- getobj(fname)
-      if (!is.na(config["plot_chroms"]))
-      {
+      if (!is.na(config["plot_chroms"])) {
          sub <- combined$snpID %in% snpID[chrom %in% plotchroms]
          combined <- combined[sub,]
       }
       combined <- combined[combined$quality.filter,]
       
       varp <- "LR.pval"
+      ## no LR test for models with interactions
+      if (!(varp %in% names(combined))) next
+      
       combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
       snp.intid <- combined.intid[1:27,]
       
@@ -89,7 +90,6 @@ for (i in 1:length(actions))
       par(mfrow=c(3,3), mar=c(5,5,4,2)+0.1, lwd=1.5,
           cex.axis=1.5, cex.lab=1.5, cex.main=1.5)
       genoClusterPlot(xyData,genoData, plot.type="RTheta", snp.intid$snpID[1:9], mtxt[1:9])
-      dev.off()
-      
+      dev.off()      
 }
 
