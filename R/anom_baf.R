@@ -47,8 +47,8 @@ blnc <- NcdfIntensityReader(bl.file)
 blData <-  IntensityData(blnc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 geno.file <- config["nc_geno_file"]
-genonc <- NcdfGenotypeReader(geno.file)
-genoData <-  GenotypeData(genonc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+geno_ncgds <- GenotypeReader(geno.file)
+genoData <-  GenotypeData(geno_ncgds, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # select SNPs
 chrom <- getChromosome(snpAnnot, char=TRUE)

@@ -26,8 +26,8 @@ print(config)
 snpID <- getSnpID(snpAnnot)
 
 ncfile <- config["nc_geno_file"]
-nc <- NcdfGenotypeReader(ncfile)
-genoData <- GenotypeData(nc, snpAnnot=snpAnnot)
+ncgds <- GenotypeReader(ncfile)
+genoData <- GenotypeData(ncgds, snpAnnot=snpAnnot)
 
 blfile <- config["nc_bl_file"]
 blnc <- NcdfIntensityReader(blfile)
