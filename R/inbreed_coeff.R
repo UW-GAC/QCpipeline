@@ -15,16 +15,23 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("gds_geno_file", "out_snp_file")
-optional <- c("out_inbrd_file")
-default <- c("inbreed_coeff.RData")
+optional <- c("out_inbrd_file", "scan_ibd_include_file")
+default <- c("inbreed_coeff.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 snp.sel <- getobj(config["out_snp_file"])
 length(snp.sel)
 
+if (!is.na(config["scan_ibd_include_file"])) {
+  scan.sel <- getobj(config["scan_ibd_include_file"])
+} else {
+  scan.sel <- NULL
+}
+length(scan.sel)
+
 gdsobj <- openfn.gds(config["gds_geno_file"])
-inbrd.coeff <- snpgdsIndInb(gdsobj, snp.id=snp.sel)
+inbrd.coeff <- snpgdsIndInb(gdsobj, snp.id=snp.sel, sample.id=scan.sel)
 closefn.gds(gdsobj)
 
 save(inbrd.coeff, file=config["out_inbrd_file"])
