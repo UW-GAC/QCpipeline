@@ -19,13 +19,15 @@ optional <- c("annot_scan_batchCol", "annot_scan_missAutoCol", "annot_scan_redoC
               "out_lambda_race_plot", "out_mcr_plot", "out_meanchisq_nscan_plot",
               "out_meanchisq_race_plot", "out_meanmcr_meanchisq_plot",
               "out_meanmcr_meanor_plot", "out_meanmcr_nscan_plot",
-              "out_meanor_nscan_plot", "out_meanor_race_plot")
+              "out_meanor_nscan_plot", "out_meanor_race_plot",
+              "scan_exclude_file")
 default <- c("Sample.Plate", "miss.e1.auto", "Redo.Processing.Plate", "batch_chisq",
              "batch_fisher", "batch_nscan_hist.pdf", "batch_chr1inten.pdf",
              "batch_lambda_race.pdf", "batch_mcr.pdf", "batch_meanchisq_nscan.pdf",
              "batch_meanchisq_race.pdf", "batch_meanmcr_meanchisq.pdf",
              "batch_meanmcr_meanor.pdf", "batch_meanmcr_nscan.pdf",
-             "batch_meanor_nscan.pdf", "batch_meanor_race.pdf")
+             "batch_meanor_nscan.pdf", "batch_meanor_race.pdf",
+             NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -35,6 +37,28 @@ type <- args[2]
   
 (scanAnnot <- getobj(config["annot_scan_file"]))
 
+# check for scans to exclude
+if (!is.na(config["scan_exclude_file"])) {
+  scan.exclude <- getobj(config["scan_exclude_file"])
+  stopifnot(all(scan.exclude %in% scanAnnot$scanID))
+} else {
+	scan.exclude <- NULL
+}
+length(scan.exclude)
+
+# exclude hapmaps from plots
+if (!is.na(config["annot_scan_hapmapCol"])) {
+  hapmap <- getVariable(scanAnnot, config["annot_scan_hapmapCol"])
+  hm.ids <- getScanID(scanAnnot)[hapmap == 1]
+  scan.exclude <- union(scan.exclude, hm.ids)
+}
+length(scan.exclude)
+
+scan.index <- !(scanAnnot$scanID %in% scan.exclude)
+stopifnot(all(!(getScanID(scanAnnot, index=scan.index) %in% scan.exclude)))
+sum(scan.index)
+
+
 if (type == "chisq") {
   batch.res <- getobj(paste(config["out_chisq_file"], "RData", sep="."))
 } else if (type == "fisher") {
@@ -43,10 +67,11 @@ if (type == "chisq") {
   stop("test type must be chisq or fisher")
 }
 
+
 batches <- names(batch.res$lambda)
 n <- length(batches)
-batch <- getVariable(scanAnnot, config["annot_scan_batchCol"])
-race <- getVariable(scanAnnot, config["annot_scan_raceCol"])
+batch <- getVariable(scanAnnot, config["annot_scan_batchCol"], index=scan.index)
+race <- getVariable(scanAnnot, config["annot_scan_raceCol"], index=scan.index)
 racetbl <- table(race)
 majority <- names(racetbl)[racetbl == max(racetbl)]
 racefrac <- rep(NA, n); names(racefrac) <- batches
@@ -58,7 +83,7 @@ for (i in 1:n) {
 
 pcol <- rep("black", length(batches))
 bpcol <- rep("black", length(batches))
-redo <- getVariable(scanAnnot, config["annot_scan_redoCol"])
+redo <- getVariable(scanAnnot, config["annot_scan_redoCol"], index=scan.index)
 if (!is.null(redo)) {
   redobatches <- unique(batch[redo %in% c("Y", "Yes", "yes", "YES", TRUE)])
   pcol[batches %in% redobatches] <- "red"
@@ -107,7 +132,7 @@ dev.off()
 
 
 # mean autosomal missing call rate per batch
-missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"])
+missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"], index=scan.index)
 bmiss <- rep(NA,n); names(bmiss) <- batches
 bn <- rep(NA,n); names(bn) <- batches
 for(i in 1:n) {
@@ -154,9 +179,9 @@ if (type == "chisq") {
 
 # batch effect on missing call rate
 # make plate names shorter for plotting
-batch <- getVariable(scanAnnot, config["annot_scan_batchCol"])
+batch <- getVariable(scanAnnot, config["annot_scan_batchCol"], index=scan.index)
 batchLabel <- vapply(strsplit(as.character(batch), "-"), function(x) x[[1]][1], "a")
-missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"])
+missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"], index=scan.index)
 model <- log10(missing) ~ as.factor(batchLabel)
 lm.result <- lm(model)
 anova(lm.result)
@@ -169,7 +194,8 @@ dev.off()
 # chromosome 1 intensity by batch
 mninten <- getobj(config["inten_file"])
 mninten <- mninten[[1]]
+stopifnot(all(!(names(mninten[scan.index, "1"]) %in% scan.exclude)))
 pdf(config["out_inten_plot"], width=6, height=6)
 par(mar=c(6, 4, 4, 2) + 0.1)
-boxplot(mninten[,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"], border=bpcol)
+boxplot(mninten[scan.index,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"], border=bpcol)
 dev.off()
