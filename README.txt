@@ -13,6 +13,9 @@ and "group" is geneva/olga/cidr/etc.)
 2-8) Create scan and snp annotation files
 (save as ScanAnnotationDataFrame and SnpAnnotationDataFrame)
 
+3e) Check that the Sample ID - file mapping is correct using the
+netcdf config file:
+> R -q --vanilla --args ncdf.config outfile < sample_id_from_files.R
 
 9-10) Create NetCDF and GDS files
 test 5 samples first:

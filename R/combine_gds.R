@@ -26,13 +26,13 @@ print(config)
 
 scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)
 # this might be a subject-level netCDF file, so subset annotation
-nc <- NcdfGenotypeReader(config["nc_geno_file"])
+nc <- GenotypeReader(config["nc_geno_file"])
 scanAnnot <- scanAnnot[match(getScanID(nc), getScanID(scanAnnot)),]; dim(scanAnnot)
 close(nc)
 
 ext.scanAnnot <- getobj(config["ext_annot_scan_file"]); dim(ext.scanAnnot)
 # this might be a subject-level netCDF file, so subset annotation
-nc <- NcdfGenotypeReader(config["ext_nc_geno_file"])
+nc <- GenotypeReader(config["ext_nc_geno_file"])
 ext.scanAnnot <- ext.scanAnnot[match(getScanID(nc), getScanID(ext.scanAnnot)),]; dim(ext.scanAnnot)
 close(nc)
 dupids <- intersect(scanAnnot$scanID, ext.scanAnnot$scanID)
@@ -182,8 +182,8 @@ gds <- GdsGenotypeReader(config["out_comb_gds_geno_file"])
 (gData <- GenotypeData(gds, snpAnnot=snp.info.all, scanAnnot=samp.info.all))
 
 ## check genotypes
-nc1 <- NcdfGenotypeReader(config["nc_geno_file"])
-nc2 <- NcdfGenotypeReader(config["ext_nc_geno_file"])
+nc1 <- GenotypeReader(config["nc_geno_file"])
+nc2 <- GenotypeReader(config["ext_nc_geno_file"])
 
 scanID <- getScanID(gData)
 scan1 <- getScanID(nc1)
