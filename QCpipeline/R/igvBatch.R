@@ -11,7 +11,7 @@ igvBatch <- function(chromosome, position, window=10,
   writeLines(out, con)
 
   for (i in 1:length(chromosome)) {
-    out <- c(paste("goto chr", chromosome[i], ":", position[i]-window,
+    out <- c(paste("goto chr", chromosome[i], ":", position[i]-window, "-",
                    position[i]+window, sep=""),
              "sort position")
     if (collapse) out <- c(out, "collapse")
