@@ -102,6 +102,11 @@ if (config["ibd_method"] == "KING") {
   col <- cols[rel]
   legend("topright", legend=rel, col=col, pch=1)
   dev.off()
+
+  ## assign observed relationships (duplicates)
+  ## TO-DO: all relationships for KING
+  ibd$obs.rel <- NA
+  ibd$obs.rel[ibd$kinship > 0.45] <- "Dup"
 } else {
   plotfile(config["out_ibd_exp_plot"])
   ibdPlot(ibd$k0, ibd$k1, relation=ibd$exp.rel, main="IBD - expected")
@@ -179,7 +184,7 @@ save(ibd, file=config["out_ibd_rel_file"])
 
 
 ## IBD connectivity
-dupids <- ibd$ID2[ibd$obs.rel == "Dup"]
+dupids <- ibd$ID2[ibd$obs.rel %in% "Dup"]
 length(dupids)
 ibd.nodup <- ibd[!(ibd$ID1 %in% dupids) & !(ibd$ID2 %in% dupids),]
 (npr <- nrow(ibd.nodup))
