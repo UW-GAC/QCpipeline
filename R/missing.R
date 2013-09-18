@@ -16,10 +16,10 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
 optional <- c("annot_snp_IntensityOnlyCol", "out_e1_file", "out_e1_hist",
               "out_e2_file", "out_e2_hist", "out_n1_file", "out_n2_file",
-              "out_snp_summary", "round2", "scan_exclude_file")
+              "out_snp_summary", "round2", "scan_exclude_file", "snp_exclude_file")
 default <- c(NA, "missing.e1.RData", "missing_e1.pdf", "missing.e2.RData",
              "missing_e2.pdf", "missing.n1.RData", "missing.n2.RData",
-             "snp_summary.RData", TRUE, NA)
+             "snp_summary.RData", TRUE, NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -32,7 +32,7 @@ snpID <- getSnpID(snpAnnot)
 data <- GenotypeReader(config["nc_geno_file"])
 genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
-# are there any scans to exclude?
+# are there any scans to exclude in missing.n1 and missing.n2?
 if (!is.na(config["scan_exclude_file"])) {
   scan.exclude <- getobj(config["scan_exclude_file"])
   stopifnot(all(scan.exclude %in% scanID))
@@ -40,6 +40,17 @@ if (!is.na(config["scan_exclude_file"])) {
   scan.exclude <- NULL
 }
 length(scan.exclude)
+
+
+# area there any SNPs to exclude in missing.e1 and missing.e2?
+if (!is.na(config["snp_exclude_file"])) {
+  snp.exclude <- getobj(config["snp_exclude_file"])
+  stopifnot(all(snp.exclude %in% snpID))
+} else {
+  snp.exclude <- NULL
+}
+length(snp.exclude)
+
 
 # missing.n1
 miss.by.snp <- missingGenotypeBySnpSex(genoData, scan.exclude=scan.exclude)
@@ -100,7 +111,8 @@ save(snptbl, file=config["out_snp_summary"])
 
 
 # missing.e1 - snps to exclude
-snp.exclude <- snpID[missing.n1 == 1]
+# exclude specified SNPs as well as those with missing.n1 == 1
+snp.exclude <- union(snp.exclude, snpID[missing.n1 == 1])
 length(snp.exclude)
 
 # missing.e1
@@ -144,7 +156,7 @@ if (as.logical(config["round2"])) {
     missing.n2 <- missing.n1
   }
 
-  snp.exclude <- snpID[missing.n2 >= 0.05]
+  snp.exclude <- union(snp.exclude, snpID[missing.n2 >= 0.05])
   print(length(snp.exclude))
   
   # missing.e2

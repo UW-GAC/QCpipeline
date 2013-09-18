@@ -20,6 +20,7 @@ Optional config parameters [default]:
 annot_snp_IntensityOnlyCol  [NA]                 column of intensity-only in snp annotation
 round2                      [TRUE]               compute e2 and n2 (as well as e1 and n1)?
 scan_exclude_file           [NA]                 vector of scanID to exclude
+snp_exclude_file			[NA]				 vector of snpID to exclude
 out_e1_file                 [missing.e1.RData]   output missing.e1 data file
 out_e1_hist                 [missing_e1.pdf]     output missing.e1 histogram
 out_e2_file                 [missing.e2.RData]   output missing.e2 data file
