@@ -5,7 +5,7 @@
 a BAM file.}
 \usage{
 igvBatch(chromosome, position, window=10, bam, outdir="./", prefix="igv",
-         file="batch.igv", genome="hg19", collapse=FALSE)
+         file="batch.igv", genome="hg19", collapse=c("yes", "no", "both"))
 }
 \arguments{
   \item{chromosome}{Vector of chromosomes}
@@ -16,7 +16,8 @@ igvBatch(chromosome, position, window=10, bam, outdir="./", prefix="igv",
   \item{prefix}{Prefix for snapshot png files}
   \item{file}{Output batch file}
   \item{genome}{Genome to load}
-  \item{collapse}{Logical for whether to collapse the reads}
+  \item{collapse}{"yes"=collapse the reads, "no"=expand the reads,
+    "both"=make two plots, one collapsed and one expanded.}
 }
 \details{
 }
@@ -34,7 +35,7 @@ outfile <- tempfile()
 chrom <- c(1, 1)
 pos <- c(155265446, 224804891)
 igvBatch(chrom, pos, bam=bamfile, outdir=outdir, file=outfile,
-         genome="hg19", collapse=TRUE)
+         genome="hg19", collapse="yes")
 readLines(outfile)
 file.remove(outfile)
 }
