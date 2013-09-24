@@ -41,6 +41,8 @@ study_unduplicated_file   vector of scanID from study for combined PCA
 out_comb_scan_annot_file  output combined scan annotation
 out_comb_snp_annot_file   output combined snp annotation
 out_comb_gds_geno_file    output combined GDS file
+
+Required to check duplicate discordance (unless "nodisc" option is used):
 out_disc_file             output duplicate discordance file
 
 Optional config parameters [default]:
@@ -86,6 +88,9 @@ parser.add_option("-q", "--queue", dest="qname", default="gcc.q",
 parser.add_option("-c", "--combined", dest="combined",
                   action="store_true", default=False,
                   help="make combined dataset")
+parser.add_option("--nodisc", dest="nodisc",
+                  action="store_true", default=False,
+                  help="skip duplicate discordance checking")
 parser.add_option("-m", "--multithread", dest="multithread", default=None,
                   help="number of cores to use; either a number (e.g, 1) or a range of numbers (e.g., 1-4) [default 1 core]")
 (options, args) = parser.parse_args()
@@ -97,6 +102,7 @@ config = args[0]
 pipeline = options.pipeline
 email = options.email
 combined = options.combined
+nodisc = options.nodisc
 qname = options.qname
 multithread = options.multithread
 
@@ -122,6 +128,7 @@ if combined:
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
 
+if combined and not nodisc:
     job = "dup_disc_ext"
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['combine_gds']], queue=qname, email=email)
@@ -133,7 +140,7 @@ if os.path.exists(configdict['out_pruned_file']):
     print "using LD pruned file " + configdict['out_pruned_file']
 else:
     job = "ld_pruning"
-    if combined:
+    if combined and not nodisc:
         holdid = [jobid['dup_disc_ext']]
     else:
         holdid = None
@@ -144,7 +151,9 @@ else:
 if combined:
     job = "pca_combined"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    holdid = [jobid['dup_disc_ext'], jobid['combine_gds']]
+    holdid = [jobid['combine_gds']]
+    if not nodisc:
+        holdid.append(jobid['dup_disc_ext'])
     if waitLD:
         holdid.append(jobid['ld_pruning'])
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
