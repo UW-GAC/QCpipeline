@@ -161,10 +161,10 @@ if (!is.na(config["exp_rel_file"])) {
 }
 
 ## check for expected duplicates not observed
-dupsubj <- unique(samp$subjectID[duplicated(samp$subjectID)])
+dupsubj <- unique(samp$Individ[duplicated(samp$Individ)])
 unobs.dup <- list()
 for (d in dupsubj) {
-  exp.scans <- samp$scanID[samp$subjectID == d]
+  exp.scans <- samp$scanID[samp$Individ == d]
   this.subj <- ibd$Individ1 == d & ibd$exp.rel == "Dup"
   obs.set <- c(ibd$ID1[this.subj], ibd$ID2[this.subj])
   unobs.scans <- setdiff(exp.scans, obs.set)
