@@ -1,6 +1,6 @@
 #! /usr/local/bin/python2.7
 
-"""Subset a NetCDF file"""
+"""Filter and subset a NetCDF or GDS file"""
 
 import sys
 import os
@@ -9,7 +9,7 @@ from optparse import OptionParser
 
 usage = """%prog [options] config
 
-Create subset netCDF and GDS files with chromosome anomalies filtered
+Create subset netCDF or GDS file with chromosome anomalies filtered
 and scans excluded.
 
 Required config parameters:
