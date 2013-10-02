@@ -5,6 +5,7 @@
 
 library(GWASTools)
 library(QCpipeline)
+library(tools)
 sessionInfo()
 
 # read configuration
@@ -13,7 +14,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "nc_geno_file", "nc_file")
+required <- c("annot_scan_file", "in_file", "out_file")
 optional <- c("chrom_anom_file", "filterYinF", "scan_include_file")
 default <- c(NA, TRUE, NA)
 config <- setConfigDefaults(config, required, optional, default)
@@ -71,13 +72,20 @@ if (as.logical(config["filterYinF"])) {
 }
 
 # create a new netCDF with samples in 'scan.include' and anomalies set to missing
-parent.ncdf <- config["nc_file"]
-sub.ncdf <- config["nc_geno_file"]
-ncdfSetMissingGenotypes(parent.ncdf, sub.ncdf, anom, sample.include=scan.include)
+parent.file <- config["in_file"]
+sub.file <- config["out_file"]
+ext <- file_ext(parent.file)
+if (ext == "nc") {
+  ncdfSetMissingGenotypes(parent.file, sub.file, anom, sample.include=scan.include)
+} else if (ext == "gds") {
+  gdsSetMissingGenotypes(parent.file, sub.file, anom, sample.include=scan.include)
+} else {
+  stop("in_file must end in .nc or .gds")
+}
 
 # check it against the source
-nc1 <- NcdfGenotypeReader(parent.ncdf)
-nc2 <- NcdfGenotypeReader(sub.ncdf)
+nc1 <- GenotypeReader(parent.file)
+nc2 <- GenotypeReader(sub.file)
 stopifnot(allequal(getSnpID(nc1), getSnpID(nc2)))
 stopifnot(allequal(getChromosome(nc1), getChromosome(nc2)))
 stopifnot(allequal(getPosition(nc1), getPosition(nc2)))

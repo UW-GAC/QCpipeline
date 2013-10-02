@@ -94,8 +94,8 @@ use the maximum number of cores available (between 1-4), and
 > missing.py --email user@uw.edu missing.config
 
 
-38) Create subject-level NetCDF and GDS genotype files with anomalies filtered
-> netcdf_subset.py --email user@uw.edu ncdf_subset.config
+38) Create subject-level NetCDF or GDS genotype file with anomalies filtered
+> geno_filt_subset.py --email user@uw.edu ncdf_subset.config
 
 
 39) PCA
@@ -180,7 +180,7 @@ start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netI
 dbGaP files:
 3) make PLINK files
 > plink.py  --email user@uw.edu --filtered plink.config
-The unfiltered plink file will be made from the sample-level netCDF
+The unfiltered plink file will be made from the sample-level netCDF/GDS
 using only subj.plink samples.
 If "--filtered" argument is given, the script will ALSO create a
-filtered plink file from the subject-level netCDF.
+filtered plink file from the subject-level netCDF/GDS.

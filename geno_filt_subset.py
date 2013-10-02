@@ -15,9 +15,8 @@ and scans excluded.
 Required config parameters:
 annot_scan_file  scan annotation file
 annot_snp_file   snp annotation file
-nc_file          input genotype netCDF file
-nc_geno_file     output genotype netCDF file
-gds_geno_file    output genotype GDS file
+in_file          input genotype netCDF/GDS file
+out_file         output genotype netCDF/GDS file
 
 Optional config parameters [default]:
 chrom_anom_file       [NA]    data frame of chromosome anomalies, with columns scanID, chromosome, left.base, right.base, whole.chrom, filter
@@ -50,7 +49,3 @@ jobid = dict()
 job = "ncdf_subset"
 rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
-
-job = "gds_geno"
-rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ncdf_subset']], queue=qname, email=email)
