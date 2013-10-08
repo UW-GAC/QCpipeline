@@ -7,9 +7,9 @@ igvBatch <- function(chromosome, position, window=10,
 
   con <- file(file, "w")
   out <-  c("new",
+            paste("genome", genome),
             paste("load", bam),
-            paste("snapshotDirectory", outdir),
-            paste("genome", genome))
+            paste("snapshotDirectory", outdir))
   writeLines(out, con)
 
   for (i in 1:length(chromosome)) {
@@ -28,4 +28,35 @@ igvBatch <- function(chromosome, position, window=10,
     writeLines(out, con)
   }
   close(con)
+}
+
+
+igvPlot <- function(sock, chromosome, position, window=10,
+                     bam, outdir="./", prefix="igv",
+                     genome="hg19",
+                     collapse=c("yes", "no", "both")) {
+  stopifnot(length(chromosome) == length(position))
+  collapse <- match.arg(collapse)
+
+  IGVclear(sock)
+  IGVgenome(sock, genome)
+  IGVload(sock, bam)
+  for (i in 1:length(chromosome)) {
+    IGVgoto(sock, paste("chr", chromosome[i], ":", position[i]-window, "-",
+                        position[i]+window, sep=""))
+    IGVsort(sock, "position")
+    if (collapse %in% c("no", "both")) {
+      IGVsnapshot(sock,
+                  fname=paste(prefix, "_chr", chromosome[i], "_",
+                    position[i], "_expand.png", sep=""),
+                  dirname=outdir)
+    }
+    if (collapse %in% c("yes", "both")) {
+     IGVcollapse(sock)
+     IGVsnapshot(sock,
+                 fname=paste(prefix, "_chr", chromosome[i], "_",
+                   position[i], "_collapse.png", sep=""),
+                 dirname=outdir)
+    }
+  }
 }
