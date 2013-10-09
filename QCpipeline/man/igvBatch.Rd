@@ -47,10 +47,10 @@ readLines(outfile)
 unlink(outfile)
 
 \dontrun{
+library(SRAdb)
 sock <- IGVsocket()
 igvPlot(sock, chrom, pos, bam=bamfile, outdir=outdir,
         genome="hg19", collapse="yes")
-
 }
 unlink(outdir, recursive=TRUE)
 }
