@@ -46,21 +46,21 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
 
     # write the files
     subj <- pData(subj)[, sann]
-    write.csv(subj, file=annotfile, quote=FALSE, row.names=FALSE)
+    write.csv(subj, file=annotfile, quote=FALSE, row.names=FALSE, na="")
     dups <- pData(dups)[, sann]
-    write.csv(dups, file=dupfile, quote=FALSE, row.names=FALSE)
-    write.table(dd, file=ddfile, sep="\t", quote=FALSE, row.names=FALSE)
+    write.csv(dups, file=dupfile, quote=FALSE, row.names=FALSE, na="")
+    write.table(dd, file=ddfile, sep="\t", quote=FALSE, row.names=FALSE, na="")
 
     # Divide samples by consent group
     if (type == "annotation") {
       for (i in 1:length(conslev)) {
         s <- subj[subj[[consentVar]] == conslev[i],]
-        write.csv(s, file=consent.annotfiles[i], quote=FALSE, row.names=FALSE)
+        write.csv(s, file=consent.annotfiles[i], quote=FALSE, row.names=FALSE, na="")
       }
 
       for (i in 1:length(conslev)) {
         s <- dups[dups[[consentVar]] == conslev[i],]
-        write.csv(s, file=consent.dupfiles[i], quote=FALSE, row.names=FALSE)
+        write.csv(s, file=consent.dupfiles[i], quote=FALSE, row.names=FALSE, na="")
       }
     }
   }
@@ -100,7 +100,7 @@ dbgapSnpAnnotation <- function(snpAnnot, dir=".",
     names(dd) <- c("variable", "description", "type")
 
     # write the files
-    write.csv(annot2, file=annotfile, quote=FALSE, row.names=FALSE)
-    write.table(dd, file=ddfile, sep="\t", quote=FALSE, row.names=FALSE)
+    write.csv(annot2, file=annotfile, quote=FALSE, row.names=FALSE, na="")
+    write.table(dd, file=ddfile, sep="\t", quote=FALSE, row.names=FALSE, na="")
   }
 }
