@@ -19,9 +19,11 @@ optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
               "ext_annot_scan_raceCol",
               "num_evs_to_plot", "out_comb_annot_snp_file",
               "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
-              "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot")
+              "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot",
+              "out_ev12_plot_hapmap", "out_ev12_plot_study")
 default <- c(NA, "rsID", NA, "pop.group", 12, NA, "pca_corr", NA, "pca_dens.pdf",
-             "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf")
+             "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
+             "pca_ev12_hapmap.pdf", "pca_ev12_study.pdf")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -115,6 +117,41 @@ legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn)
        col=c(config[race], rep("black", length(ethn))),
        pch=c(rep(1, length(race)), as.integer(config[ethn])))
 dev.off()
+
+if (type == "combined"){
+	# plot hapmaps separately from study subjects
+	pdf(config["out_ev12_plot_hapmap"], width=6, height=6)
+	plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
+	ext.sel <- (samp$scanID %in% ext.scanAnnot$scanID) | (scanAnnot$geno.cntl[match(samp$scanID, scanAnnot$scanID)] %in% 1) # get external or study hapmaps
+	tbl <- table(samp$plotcol[ext.sel])
+	colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
+	ext.race <- as.character(sort(unique(samp$race[ext.sel])))
+	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
+	for (r in colOrd) {
+	  sel <- (samp$plotcol == r) & (ext.sel)
+	  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
+	}
+	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(ext.race, ext.ethn),
+		   col=c(config[ext.race], rep("black", length(ext.ethn))),
+		   pch=c(rep(1, length(ext.race)), as.integer(config[ext.ethn])))
+	dev.off()
+
+	pdf(config["out_ev12_plot_study"], width=6, height=6)
+	plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
+	ext.sel <- (samp$scanID %in% scanAnnot$scanID) & (scanAnnot$geno.cntl[match(samp$scanID, scanAnnot$scanID)] %in% 0) # get only study subjects (not study hapmaps)
+	tbl <- table(samp$plotcol[ext.sel])
+	colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
+	ext.race <- as.character(sort(unique(samp$race[ext.sel])))
+	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
+	for (r in colOrd) {
+	  sel <- (samp$plotcol == r) & (ext.sel)
+	  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
+	}
+	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(ext.race, ext.ethn),
+		   col=c(config[ext.race], rep("black", length(ext.ethn))),
+		   pch=c(rep(1, length(ext.race)), as.integer(config[ext.ethn])))
+	dev.off()
+}
 
 # plot density on sides
 pdf(config["out_dens_plot"], width=7, height=7)

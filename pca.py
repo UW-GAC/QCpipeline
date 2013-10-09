@@ -66,6 +66,8 @@ out_corr_pruned_plot_prefix  [NA]                     output prefix for correlat
 out_dens_plot                [pca_dens.pdf]           output plot of EV2 vs EV1 with density sidebars
 out_disc_plot                [dup_disc_ext.pdf]       output duplicate discordance plot
 out_ev12_plot                [pca_ev12.pdf]           output plot of EV2 vs EV1
+out_ev12_plot_hapmap         [pca_ev12_hapmap.pdf]    output plot of EV2 vs EV1 for hapmaps only (combined only)
+out_ev12_plot_study          [pca_ev12_study.pdf]     output plot of EV2 vs EV1 for study subjects only (combined only)
 out_pairs_plot               [pca_pairs.png]          output pairs plot of EV 1-4
 out_scree_plot               [pca_scree.pdf]          output scree plot
 
