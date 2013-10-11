@@ -1,8 +1,9 @@
-## Function to take Illumina build 37 SNP annotation data file and make an Allele Mappings table
+## Function to take an Illumina SNP annotation data file and make an Allele Mappings table
 ## Sarah Nelson, UWGCC, May 25, 2011
-## Updated March 7, 2012, to allow for indel records where IlmnStrand != SourceStrand
-## UPdated January 31, 2013 to allow for non-verbose indel mapping (where SourceStrand is not available, print out "I" and "D," respectively, to represent insertion and deletion allele
 
+## Updated March 7, 2012, to allow for indel records where IlmnStrand != SourceStrand
+## Updated January 31, 2013 to allow for non-verbose indel mapping (where SourceStrand is not available, print out "I" and "D," respectively, to represent insertion and deletion allele
+## Updated October 10, 2013, to allow for Illumina manifests files lacking the "RefStrand" column
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -11,8 +12,6 @@
 #  rs1000000       B           C        G        C         G
 #  rs1000002       A           A        A        A         T
 #  rs1000002       B           G        G        G         C
-#  rs10000023       A           T        A        T         T
-#  rs10000023       B           G        C        G         G
 
 ## With the following data dictionary:
 #  variable        type    description
@@ -28,25 +27,28 @@
 
 ################################# USAGE
 ## Requires as input:
-# -- "snp.dat", the name of an data frame made from SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following fields:
+# -- "snp.dat", the name of a data frame made from SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following required fields:
 #  "IlmnID"                "Name"                  "IlmnStrand"           
-#  "SNP"                   "GenomeBuild"          "SourceStrand"                      
-#  "SourceSeq"          "RefStrand"             
+#  "SNP"                   "SourceSeq"         
+## optional fields:
+# "SourceStrand"
+# "RefStrand"
 
 # -- "indel.verbose" - a T/F field that defaults to TRUE;  when FALSE, prints I" and "D" characters, respectively, to represent insertion and deletion allele; when TRUE, will parse full nucleotide sequence if alleles from the SourceSeq column
 
-## Returns as output: R data frame object with columns ("snp", "alle.AB", "alle.design", "alle.top", "alle.fwd", "alle.plus"
+## Returns as output: R data frame object with columns "snp", "alle.AB", "alle.design", "alle.top", "alle.fwd", "alle.plus"
+# *Note "alle.plus" will only be returned if the snp.dat input contains "RefStrand" column
 
-#Example of using:
-#  source("/projects/geneva/geneva_sata/GCC_code/Imputation/R_functions/Make_AlleleMappings_Illumina.R")
+## #Example of using:
+## source("/projects/geneva/geneva_sata/GCC_code/Imputation/R_functions/Make_AlleleMappings_Illumina.R")
+## source("/projects/geneva/geneva_sata/sarahcn/svn_revisions/trunk/QCpipeline/R/Make_AlleleMappings_Illumina.R")
 
-##  Load in Illumina annotation
-#  column.select=rep("NULL",times=21)
-#  column.select[c(1:4,9:11,16:18,21)] <- NA  ## only read in select columns    
-#  snp.dat <- read.csv(file="/projects/geneva/geneva_sata/SNP_annotation/Illumina/HumanOmni2.5_4v1/HumanOmni2.5-4v1-Multi-B.csv"),
-#                   skip=7,colClasses=column.select,nrows=2450000)   ## last rows are for control probes
-#  map.final <- make.allele.mappings(snp.dat)
-#	 write.csv(map.final, file="/projects/geneva/geneva_sata/SNP_annotation/Illumina/HumanOmni2.5_4v1/testfn.csv", row.names=FALSE,quote=FALSE))
+## ## Load in Illumina annotation
+##  column.select=rep("NULL",times=21)
+##  column.select[c(1:4,9:11,16:18,21)] <- NA  ## only read in select columns    
+##  snp.dat <- read.csv(file="/projects/geneva/gcc-fs2/SNP_annotation/Illumina/HumanOmniExpress_12v1_H/HumanOmniExpress-12v1_H.csv", skip=7,colClasses=column.select,nrows=7000)   ## last rows are for control probes
+##  map.final <- make.allele.mappings(snp.dat)
+## 	 write.csv(map.final, file="/projects/geneva/geneva_sata/SNP_annotation/Illumina/HumanOmni2.5_4v1/testfn.csv", row.names=FALSE,quote=FALSE))
 
 ################################# FUNCTION
 
@@ -54,8 +56,6 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 {
 
   options(stringsAsFactors = FALSE)
-
-  snp.dat.orig.names <- names(snp.dat)
 
   ## Report total number of SNPs and indels
   cat("\tTotal number of probes:", length(snp.dat$Name),"\n")
@@ -66,6 +66,14 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   {
   	stop(sum(duplicated(snp.dat$Name)), " SNP names are duplicated; need alternate identifier to make Allele Mappings file")
   }
+
+  ## detect if snp.dat contains "RefStrand" - if not, print warning message that plus(+) alleles will not be written out
+  print.plus <- TRUE
+  if(!is.element("RefStrand",names(snp.dat)))
+     {
+       print.plus <- FALSE
+       warning("\tSNP manifest lacks RefStrand column; plus(+) alleles NOT written to output")
+     }
   
   ## set up table template - 2 rows per SNP, first "A", second "B"
   map <- as.data.frame(c(snp.dat$Name, snp.dat$Name))
@@ -184,9 +192,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
     indels.dat <- rbind(del.first, ins.first)
     indels.dat$alle1.revcomp <- indels.dat$design.A
     indels.dat$alle2.revcomp <- indels.dat$design.B
-
   }
-
   }
   
   #### exit indels, return to snp.dat
@@ -213,8 +219,10 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   snp.dat$top.B[is.element(snp.dat$IlmnStrand,c("BOT","M"))] <- snp.dat$alle2.revcomp[is.element(snp.dat$IlmnStrand,c("BOT","M"))]
   
   ## now that design and TOP alleles are defined, rejoin indels with main SNP annotation, keeping select columns
-  cols.keep <- c("IlmnID","Name","IlmnStrand","SNP","RefStrand",
+  cols.keep <- c("IlmnID","Name","IlmnStrand","SNP",
                  "design.A","design.B","alle1.revcomp","alle2.revcomp","top.A","top.B","order")
+
+  if(print.plus) cols.keep <- c("RefStrand",cols.keep)
   
   ## allow for arrays with no indels - in those cases, just keep main snp.dat object with selected columns
   if (length(indels)>0)  {
@@ -236,20 +244,22 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   
   snp.dat$fwd.A[snp.dat$dbSNPStrand.fordesign=="REV"] <- snp.dat$alle1.revcomp[snp.dat$dbSNPStrand.fordesign=="REV"]
   snp.dat$fwd.B[snp.dat$dbSNPStrand.fordesign=="REV"] <- snp.dat$alle2.revcomp[snp.dat$dbSNPStrand.fordesign=="REV"]
-  
-  cat("\tDefining PLUS(+) alleles\n")
-  
-  ## get + alleles, wrt human genome reference sequence
-  ## In Illumina b37, RefStrand is BLAST result of Design Strand
-  ## where RefStrand="+", same as DESIGN alleles
-  ## where RefStrand="-", reverse complement of DESIGN alleles
-  
-  snp.dat$plus.A[is.element(snp.dat$RefStrand,"+")] <- snp.dat$design.A[is.element(snp.dat$RefStrand,"+")]
-  snp.dat$plus.B[is.element(snp.dat$RefStrand,"+")] <- snp.dat$design.B[is.element(snp.dat$RefStrand,"+")]
-  
-  snp.dat$plus.A[is.element(snp.dat$RefStrand,"-")] <-  snp.dat$alle1.revcomp[is.element(snp.dat$RefStrand,"-")]
-  snp.dat$plus.B[is.element(snp.dat$RefStrand,"-")] <-  snp.dat$alle2.revcomp[is.element(snp.dat$RefStrand,"-")]
-  
+
+  if (print.plus){
+      cat("\tDefining PLUS(+) alleles\n")
+
+      ## get + alleles, wrt human genome reference sequence
+      ## In Illumina b37, RefStrand is BLAST result of Design Strand
+      ## where RefStrand="+", same as DESIGN alleles
+      ## where RefStrand="-", reverse complement of DESIGN alleles
+
+      snp.dat$plus.A[is.element(snp.dat$RefStrand,"+")] <- snp.dat$design.A[is.element(snp.dat$RefStrand,"+")]
+      snp.dat$plus.B[is.element(snp.dat$RefStrand,"+")] <- snp.dat$design.B[is.element(snp.dat$RefStrand,"+")]
+
+      snp.dat$plus.A[is.element(snp.dat$RefStrand,"-")] <-  snp.dat$alle1.revcomp[is.element(snp.dat$RefStrand,"-")]
+      snp.dat$plus.B[is.element(snp.dat$RefStrand,"-")] <-  snp.dat$alle2.revcomp[is.element(snp.dat$RefStrand,"-")]
+    }
+
   ## Add allele definitions to the Allele mappings data frame
   
   ## Map design alleles
@@ -263,10 +273,13 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   ## Map fwd alleles
   map$alle.fwd[map$alle.AB=="A"] <- snp.dat$fwd.A[match(map$snp[map$alle.AB=="A"], snp.dat$Name)]
   map$alle.fwd[map$alle.AB=="B"] <- snp.dat$fwd.B[match(map$snp[map$alle.AB=="B"], snp.dat$Name)]
-  
-  ## Map + alleles
-  map$alle.plus[map$alle.AB=="A"] <- snp.dat$plus.A[match(map$snp[map$alle.AB=="A"], snp.dat$Name)]
-  map$alle.plus[map$alle.AB=="B"] <- snp.dat$plus.B[match(map$snp[map$alle.AB=="B"], snp.dat$Name)]
+
+  if(print.plus) {
+      ## Map + alleles
+      map$alle.plus[map$alle.AB=="A"] <- snp.dat$plus.A[match(map$snp[map$alle.AB=="A"], snp.dat$Name)]
+      map$alle.plus[map$alle.AB=="B"] <- snp.dat$plus.B[match(map$snp[map$alle.AB=="B"], snp.dat$Name)]
+    }
+
   
   dim(map);head(map)
 
@@ -275,13 +288,13 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   cat("\tTotal number for probes with NA alleles (probably CNVs): ", length(na.snps), "\n")
   map$alle.top[is.element(map$snp, na.snps)] <- NA
   map$alle.fwd[is.element(map$snp, na.snps)] <- NA
-  map$alle.plus[is.element(map$snp, na.snps)] <- NA
   map$alle.design[is.element(map$snp, na.snps)] <- NA
+  if(print.plus) {map$alle.plus[is.element(map$snp, na.snps)] <- NA}
   
   ## make sure map file is sorted by original order (same as input annotation), delete "order" column, and save to R object
   map.final <- map[order(map$order),-2]
   
-  cat("\tMapping file created; do some spot checking with original annotation to confirm mappings!\n")
+  cat("\tMapping file created; do some spot checking against original annotation to confirm mappings!\n\n")
   
   return(map.final)
   }

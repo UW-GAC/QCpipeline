@@ -2,7 +2,7 @@
 \alias{make.allele.mappings}
 \alias{make.allele.annotation}
 \title{Make allele mapping file}
-\description{Function to take Illumina build 37 SNP annotation data file and make an Allele Mappings table}
+\description{Function to take Illumina SNP annotation data file and make an Allele Mappings table}
 \usage{
 make.allele.mappings(snp.dat, indels.verbose=TRUE)
 
@@ -10,9 +10,9 @@ make.allele.annotation(map, alleles=c("top", "design", "fwd", "plus"))
 }
 \arguments{
   \item{snp.dat}{a data frame made from SNP Illumina
-    annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following
-    fields: "IlmnID", "Name", "IlmnStrand", "SNP", "GenomeBuild", "SourceStrand",
-    "SourceSeq", "TopGenomicSeq", "RefStrand"   }
+    annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with the following
+    required fields: "IlmnID", "Name", "IlmnStrand", "SNP", and "SourceSeq"; 
+	and the following optional fields:"SourceStrand" and "RefStrand"   }
   \item{indels.verbose}{if \code{FALSE}, alleles for indels will be written out as 'I' and 'D,' rather than parsing the full nucleotide sequence of indel alleles from the SourceSeq column}
   \item{map}{a data frame with allele mappings (output of
     \code{make.allele.mappings}), with following fields: "snp",
@@ -28,6 +28,8 @@ make.allele.annotation(map, alleles=c("top", "design", "fwd", "plus"))
   
   Note that "RefStrand" in build 37 annotations from Illumina is result of BLAST search of DESIGN strand.
   In previous strand annotations from Illumina for build 36 arrays, "BlastStrand" held +/- result of  BLAST search of the SOURCE sequence.
+  
+  If input "snp.dat" object does not contain a "RefStrand" column, then "alle.plus" mappings will not be returned. Thus the function is compatible with Illumina annotations lacking the "RefStrand" column (e.g., build 36 manifests).
 }
 \value{
   \code{make.allele.mappings} returns a data frame object with columns
