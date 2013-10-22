@@ -94,19 +94,60 @@ names(cols) <- rels
 pcol <- cols[prel]
 
 if (config["ibd_method"] == "KING") {
+
+  ## thresholds for assigning relationships using kinship coefficients in table 1 of Manichaikul (2010) - KING paper
+  cut.dup <- 1/(2^(3/2))
+  cut.deg1 <- 1/(2^(5/2))
+  cut.deg2 <- 1/(2^(7/2))
+  cut.deg3 <- 1/(2^(9/2))
+  cut.ibs <- 0.003 # should be 0 for PO, but sometimes is greater due to genotyping error. 0.003 works for OLGA, Kittner, and HRS2
+  
   plotfile(config["out_ibd_exp_plot"])
   plot(ibd$IBS0, ibd$kinship, col=pcol, main="IBD - expected",
        xlab="Fraction of IBS=0", ylab="Kinship coefficient")
-  abline(h=c(0.5,0.25,0.125), col="gray")
+  #abline(h=c(0.5,0.25,0.125), col="gray")
+  abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
   rel <- rels[rels %in% unique(prel)]
   col <- cols[rel]
   legend("topright", legend=rel, col=col, pch=1)
   dev.off()
 
   ## assign observed relationships (duplicates)
-  ## TO-DO: all relationships for KING
-  ibd$obs.rel <- NA
-  ibd$obs.rel[ibd$kinship > 0.45] <- "Dup"
+  ibd$obs.rel <- ibdAssignRelatednessKing(ibd$IBS0, ibd$kinship)
+  print(table(ibd$obs.rel, useNA="ifany"))
+  
+  plotfile(config["out_ibd_obs_plot"])
+  obscols <- cols[ibd$obs.rel]
+  # unique relatives
+  urel <- unique(ibd$obs.rel)
+  # ordered colors for legend
+  ucols <- cols[names(cols) %in% urel]
+  plot(ibd$IBS0, ibd$kinship, col=obscols, main="IBD - expected", xlab="Fraction of IBS=0",
+       ylab="Kinship coefficient")
+  abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
+  legend("topright", legend=names(ucols), col=ucols, pch=1)
+  dev.off()
+  
+  unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > 0.09833927 # not sure if this is still the same, but I think it should be.
+  
+  plotfile(config["out_ibd_unexp_plot"])
+  psym <- rep(1, nrow(ibd))
+  psym[unexp] <- 2
+  cols[c("Deg3", "Q", "U")] <- "black"
+  pcol <- cols[prel]
+  plot(ibd$IBS0, ibd$kinship, col=pcol, pch=psym, main="IBD - expected", xlab="Fraction of IBS=0",
+       ylab="Kinship coefficient")
+  abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
+  rels <- rels[rels %in% unique(prel)]
+  col <- cols[rel]
+  sym <- c(rep(1, length(col)), 2)
+  rel[rel == "U"] <- "Unrel"
+  rel <- paste("Exp", rel)
+  rel <- c(rel, "Unexp")
+  col <- c(col, "black")
+  legend("topright", legend=rel, col=col, pch=sym)
+  dev.off()
+  
 } else {
   plotfile(config["out_ibd_exp_plot"])
   ibdPlot(ibd$k0, ibd$k1, relation=ibd$exp.rel, main="IBD - expected")
