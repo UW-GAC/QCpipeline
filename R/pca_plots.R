@@ -5,6 +5,7 @@
 
 library(GWASTools)
 library(QCpipeline)
+library(MASS)
 sessionInfo()
 
 # read configuration
@@ -20,9 +21,11 @@ optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
               "num_evs_to_plot", "out_comb_annot_snp_file",
               "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
               "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot",
+              "out_parcoord_plot",
               "out_ev12_plot_hapmap", "out_ev12_plot_study")
 default <- c(NA, "rsID", NA, "pop.group", 12, NA, "pca_corr", NA, "pca_dens.pdf",
              "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
+             "pca_parcoord.pdf",
              "pca_ev12_hapmap.pdf", "pca_ev12_study.pdf")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
@@ -117,6 +120,19 @@ legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn)
        col=c(config[race], rep("black", length(ethn))),
        pch=c(rep(1, length(race)), as.integer(config[ethn])))
 dev.off()
+
+# parallel coordinates plot
+# should eventually choose alpha more intelligently based on sample size.
+pdf(config["out_parcoord_plot"], width=8, height=6)
+alpha <- ifelse(nrow(samp) < 100, 100,
+                ifelse(nrow(samp) < 1000, 75, 50))
+parcoord(pca$eigenvect[, 1:8],
+  col=rgb(t(col2rgb(samp$plotcol)), alpha=alpha, maxColorValue=255)) # var.label=FALSE heretitle(xlab="Eigenvector")
+title(xlab="Eigenvector")
+legend("topright", legend=c(race, "Unknown"), col=c(config[race], "black"), bg="white", lty=1)
+dev.off()
+## to do: figure out how to plot two different parcoord plots on the same range for combined.
+
 
 if (type == "combined"){
 	# plot hapmaps separately from study subjects
