@@ -124,12 +124,27 @@ dev.off()
 # parallel coordinates plot
 # should eventually choose alpha more intelligently based on sample size.
 pdf(config["out_parcoord_plot"], width=8, height=6)
-alpha <- ifelse(nrow(samp) < 100, 100,
-                ifelse(nrow(samp) < 1000, 75, 50))
-parcoord(pca$eigenvect[, 1:8],
-  col=rgb(t(col2rgb(samp$plotcol)), alpha=alpha, maxColorValue=255)) # var.label=FALSE heretitle(xlab="Eigenvector")
+# plot by order of number of samples in each race
+samp$nrace <- table(samp$race, useNA="ifany")[samp$race]
+samp$nrace[is.na(samp$nrace)] <- sum(is.na(samp$nrace))
+i_ord <- order(-samp$nrace)
+samp$alpha <- ifelse(samp$nrace < 10, 1,
+                     ifelse(samp$nrace < 100, 0.5,
+                            ifelse(samp$nrace < 1000, 0.3, 0.1))) * 255
+# adjust margins so legend can be on the left
+par(mar=c(5.1, 10.1, 3.1, 2.1), xpd=TRUE)
+# need to subset both the eigenvector matrix and the colors here
+parcoord(pca$eigenvect[i_ord, 1:8], bty="L",
+  col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[i_ord])
 title(xlab="Eigenvector")
-legend("topright", legend=c(race, "Unknown"), col=c(config[race], "black"), bg="white", lty=1)
+if(any(is.na(samp$race))) {
+  legendNames <- c(race, "Unknown")
+  legendCols <- c(config[race], "black")
+} else {
+  legendNames <- race
+  legendCols <- config[race]
+}
+legend("left", inset=c(-0.32,0), legend=legendNames, col=legendCols, lty=1, bty="n")
 dev.off()
 ## to do: figure out how to plot two different parcoord plots on the same range for combined.
 
