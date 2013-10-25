@@ -70,6 +70,7 @@ out_ev12_plot_hapmap         [pca_ev12_hapmap.pdf]    output plot of EV2 vs EV1 
 out_ev12_plot_study          [pca_ev12_study.pdf]     output plot of EV2 vs EV1 for study subjects only (combined only)
 out_pairs_plot               [pca_pairs.png]          output pairs plot of EV 1-4
 out_scree_plot               [pca_scree.pdf]          output scree plot
+out_parcoord_plot            [pca_parcoord.pdf]       output parallel coordinates plot of EV 1-8
 
 Additional parameters:
 each value for race should be a parameter with an associated color
