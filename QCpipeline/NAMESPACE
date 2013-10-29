@@ -12,4 +12,5 @@ export(readConfig, writeConfig, setConfigDefaults,
        dbgapScanAnnotation, dbgapSnpAnnotation,
        make.allele.mappings, make.allele.annotation,
        defineFamilies, igvBatch, igvPlot,
-       GenotypeReader)
+       GenotypeReader,
+       plateLayoutPlot)
