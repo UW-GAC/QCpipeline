@@ -9,7 +9,7 @@
 }
 
 \author{
-  Stephanie Gogarten, Sarah Nelson, Jess Shen, Leila Zelnick
+  Stephanie Gogarten, Sarah Nelson, Jess Shen, Adrienne Stilp, Leila Zelnick
   
   Maintainer: Stephanie M. Gogarten \email{sdmorris@u.washington.edu}
 }

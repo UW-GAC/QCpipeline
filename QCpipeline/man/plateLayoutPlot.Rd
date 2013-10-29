@@ -10,7 +10,7 @@ plateLayoutPlot(samples, out.file, nprob)
   \item{out.file}{output plot PDF file}
   \item{nprob}{minimum number of problems required to plot a plate}
   }
-\details{}
+\details{\code{plateLayoutPlot} generates a pdf showing samples with identity issues. Currently only works with arrays that have 96 wells (A-H on one axis and 1-12 on the other).}
 \value{
   
 }

@@ -37,7 +37,7 @@ plateLayoutPlot <- function(samples,out.file,nprob){
   for(i in 1:n){
     plate <- pl[i]
     #plate <- names(pl)[pl==16]
-    mtxt1 <- "fill color=annotated sex (pink=F,blue=M,yellow=U,white=empty), red circle=sex mismatch"
+    mtxt1 <- "fill color=genetic sex (pink=F,blue=M,yellow=U,white=empty), red circle=sex mismatch"
     mtxt2 <- "numbers: black in well=exp & obs dup, red in well=unexp & obs dup, above well=exp & unobs dup"
     chk <- samples[is.element(samples$plate, plate), ]
     plot(wells$samp.col, wells$samp.row.num, xlim=c(0.5,12.5), ylim=c(0.5,8.5),col="gray", cex=m, xlab=mtxt1,sub=mtxt2,ylab="", main=plate, yaxt="n", xaxt="n", cex.sub=0.7, cex.lab=0.7)
@@ -68,4 +68,5 @@ plateLayoutPlot <- function(samples,out.file,nprob){
   }
   dev.off()
   print(paste(n, "plates displayed"))
+  data.frame(plate=pl, page=1:length(pl), stringsAsFactors=F)
 }

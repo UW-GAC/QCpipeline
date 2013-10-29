@@ -13,4 +13,5 @@ export(readConfig, writeConfig, setConfigDefaults,
        make.allele.mappings, make.allele.annotation,
        defineFamilies, igvBatch, igvPlot,
        GenotypeReader,
-       plateLayoutPlot)
+       plateLayoutPlot,
+       findRelSet)
