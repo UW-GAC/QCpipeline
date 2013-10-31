@@ -128,7 +128,7 @@ if (config["ibd_method"] == "KING") {
   legend("topright", legend=names(ucols), col=ucols, pch=1)
   dev.off()
   
-  unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > 0.09833927 # not sure if this is still the same, but I think it should be.
+  unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.deg2 # use degree 2 cutoff in KING paper - ~0.088
   
   plotfile(config["out_ibd_unexp_plot"])
   psym <- rep(1, nrow(ibd))
