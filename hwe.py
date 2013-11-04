@@ -36,7 +36,7 @@ out_maf_plot          [hwe_maf.png]    output plot of MAF vs p value
 out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
+                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")

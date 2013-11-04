@@ -39,7 +39,7 @@ out_meanor_nscan_plot       [batch_meanor_nscan.pdf]       output OR vs nscan pl
 out_meanor_race_plot        [batch_meanor_race.pdf]        output OR vs race frac plot"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
+                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")

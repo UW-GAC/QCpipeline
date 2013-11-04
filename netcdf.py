@@ -53,7 +53,7 @@ nc_xy_diagFile        [nc_xy_diag.RData]     output file for XY netCDF creation
 out_plink_logfile     [plink_check.log]      output file for PLINK check"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
+                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
