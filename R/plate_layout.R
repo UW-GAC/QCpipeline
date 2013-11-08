@@ -29,7 +29,7 @@ default <- c("subjectID",
              "Sample.Plate", "Sample.Well",
              NA,
              1,
-             "scan_annot.RData",
+             "out_scan_annot.RData",
              "plate_layout.pdf",
              "plate_file.pdf")
 config <- setConfigDefaults(config, required, optional, default)
