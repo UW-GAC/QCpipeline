@@ -13,15 +13,15 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "nc_geno_subj_file")
+required <- c("annot_scan_file", "nc_geno_file")
 optional <- c("out_afreq_file", "scan_exclude_file")
 default <- c("allele_freq.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 
-# use subject-level file
-data <- GenotypeReader(config["nc_geno_subj_file"])
+# ncdf could be subject level
+data <- GenotypeReader(config["nc_geno_file"])
 scanAnnot <- getobj(config["annot_scan_file"])
 # take subset of annotation to match netCDF
 scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)), ]
