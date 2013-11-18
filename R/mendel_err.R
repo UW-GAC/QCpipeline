@@ -13,27 +13,29 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
+required <- c("annot_scan_file", "annot_snp_file", "nc_geno_subj_file")
 optional <- c("annot_scan_subjectCol", "annot_snp_missingCol",
               "mend_scan_exclude_file", "out_mend_file")
 default <- c("subjectID", "missing.n1", NA, "mendel_err.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-(scanAnnot <- getobj(config["annot_scan_file"]))
-stopifnot(all(hasVariable(scanAnnot, c("family", "father", "mother", "sex"))))
-scanID <- getScanID(scanAnnot)
-
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
-data <- GenotypeReader(config["nc_geno_file"])
+data <- GenotypeReader(config["nc_geno_subj_file"])
+scanAnnot <- getobj(config["annot_scan_file"])
+stopifnot(all(hasVariable(scanAnnot, c("family", "father", "mother", "sex"))))
+# take subset of annotation to match netCDF
+scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)), ]
 genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+scanID <- getScanID(genoData)
+
 
 # are there any scans to exclude?
 if (!is.na(config["mend_scan_exclude_file"])) {
   scan.exclude <- getobj(config["mend_scan_exclude_file"])
-  stopifnot(all(scan.exclude %in% scanID))
+  #stopifnot(all(scan.exclude %in% scanID))
   scanAnnot <- scanAnnot[!(scanID %in% scan.exclude),]
 }
 nrow(scanAnnot)

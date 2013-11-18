@@ -13,34 +13,39 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 ## check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file")
+required <- c("annot_scan_file", "annot_snp_file", "nc_geno_subj_file")
 optional <- c("annot_snp_dupSnpCol", "annot_snp_missingCol", "annot_snp_rsIDCol",
               "dupsnp_scan_exclude_file", "out_dupsnp_file")
 default <- c("dup.pos.id", "missing.n1", "rsID", NA, "dup_snps.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
+(snpAnnot <- getobj(config["annot_snp_file"]))
+
+data <- GenotypeReader(config["nc_geno_subj_file"])
 (scanAnnot <- getobj(config["annot_scan_file"]))
-scanID <- getScanID(scanAnnot)
+# take subset of annotation to match netCDF
+scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)), ]
+genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+scanID <- getScanID(genoData)
 
 ## are there any scans to exclude?
 if (!is.na(config["dupsnp_scan_exclude_file"])) {
   scan.exclude <- getobj(config["dupsnp_scan_exclude_file"])
-  stopifnot(all(scan.exclude %in% scanID))
+  #stopifnot(all(scan.exclude %in% scanID))
 } else {
   scan.exclude <- NULL
 }
 length(scan.exclude)
 scan.sel <- which(!(scanID %in% scan.exclude))
 
+#stopifnot(all(scan.sel %in% scanID))
+
 ## select snps
-(snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 snp.sel <- which(!is.na(getVariable(snpAnnot, config["annot_snp_dupSnpCol"])))
 length(snp.sel)
 
-data <- GenotypeReader(config["nc_geno_file"])
-genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 ## match up SNPs into pairs
 snpset <- pData(snpAnnot)[snp.sel, c("snpID", config["annot_snp_rsIDCol"], config["annot_snp_dupSnpCol"])]
