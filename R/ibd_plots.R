@@ -129,6 +129,12 @@ if (config["ibd_method"] == "KING") {
   dev.off()
   
   unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.deg2 # use degree 2 cutoff in KING paper - ~0.088
+  ## check for Deg2 and Deg3
+  deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
+  deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
+  unexp <- unexp & !deg2 & !deg3
+  print(table(ibd$obs.rel[unexp]))
+  
   
   plotfile(config["out_ibd_unexp_plot"])
   psym <- rep(1, nrow(ibd))
@@ -137,6 +143,7 @@ if (config["ibd_method"] == "KING") {
   pcol <- cols[prel]
   plot(ibd$IBS0, ibd$kinship, col=pcol, pch=psym, main="IBD - expected", xlab="Fraction of IBS=0",
        ylab="Kinship coefficient")
+  points(ibd$IBS0[unexp], ibd$kinship[unexp], col=pcol[unexp], pch=psym[unexp])
   abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
   rels <- rels[rels %in% unique(prel)]
   col <- cols[rel]
@@ -175,6 +182,7 @@ if (config["ibd_method"] == "KING") {
   cols[c("Deg3", "Q", "U")] <- "black"
   pcol <- cols[prel]
   ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym, rel.draw=c("FS", "Deg2"))
+  points(ibd$k0[unexp], ibd$k1[unexp], color=pcol[unexp], pch=psym[unexp])
   rel <- rels[rels %in% unique(prel)]
   col <- cols[rel]
   sym <- c(rep(1, length(col)), 2)
