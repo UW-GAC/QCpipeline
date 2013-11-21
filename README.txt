@@ -140,6 +140,8 @@ iv-vi) Allele frequency, duplicate discordance and Mendelian errors
 > snp_filt.py --email user@uw.edu snp_filt.config
 use option --MAconc for minor allele concordance 
 
+Allele frequency, mendelian errors, and dupSNP will be run using the filtered subject-level netCDF.
+
 use option --dupSNP for duplicate SNP discordance - snp annotation
 needs a column with integer ids for duplicate SNPs (and NA for
 singletons)
@@ -151,7 +153,7 @@ set corr.by.snp=TRUE in the config file to calculate correlation by
 SNP (this is slow)
 
 
-vii-viii) Allele frequency and heterozygosity by ethnic group and sex
+vii-viii) Allele frequency and heterozygosity by ethnic group and sex. Run using the filtered subject-level netcdf.
 > snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
 (repeat with different config files for mutiple ethnic groups)
 

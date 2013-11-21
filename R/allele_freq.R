@@ -20,7 +20,10 @@ config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 
-# ncdf could be subject level - read in the subject-level if it's given
+# we want to use subject-level netcdf for allele frequency in snp_filters
+# but sometimes allele frequency is run before there is a subject-level (ie chromosome anomalies)
+# and sometimes it is run giving only *one* netcdf (the subject-level)
+# so we need an if statement.
 if (!is.na(config["nc_geno_subj_file"])){
   data <- GenotypeReader(config["nc_geno_subj_file"])
 } else {

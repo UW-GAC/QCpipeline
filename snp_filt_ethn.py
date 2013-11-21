@@ -15,7 +15,7 @@ SNP filters by ethnic group and sex:
 
 Required config parameters:
 annot_scan_file  scan annotation file
-nc_geno_file     genotype netCDF file
+nc_geno_file     subject-level genotype netCDF file
 
 Optional config parameters [default]:
 scan_exclude_file   [NA]                 vector of scanID to exclude (all but one ethnicity)

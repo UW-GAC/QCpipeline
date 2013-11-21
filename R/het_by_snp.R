@@ -19,20 +19,26 @@ default <- c(NA, "het_by_snp.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-(scanAnnot <- getobj(config["annot_scan_file"]))
-scanID <- getScanID(scanAnnot)
+
+# netcdf should be subject-level
+(data <- GenotypeReader(config["nc_geno_file"]))
+scanAnnot <- getobj(config["annot_scan_file"])
+# take subset of annotation to match netCDF
+scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)),]
+genoData <- GenotypeData(data, scanAnnot=scanAnnot)
+scanID <- getScanID(genoData)
+
+
 
 # are there any scans to exclude?
 if (!is.na(config["scan_exclude_file"])) {
   scan.exclude <- getobj(config["scan_exclude_file"])
-  stopifnot(all(scan.exclude %in% scanID))
+  #stopifnot(all(scan.exclude %in% scanID))
 } else {
   scan.exclude <- NULL
 }
 length(scan.exclude)
 
-data <- GenotypeReader(config["nc_geno_file"])
-genoData <- GenotypeData(data, scanAnnot=scanAnnot)
 
 het <- hetBySnpSex(genoData, scan.exclude=scan.exclude)
 
