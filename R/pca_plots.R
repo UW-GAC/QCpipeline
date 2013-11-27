@@ -72,7 +72,7 @@ table(samp$race, samp$ethnicity, useNA="ifany")
 # color by race
 table(samp$race, useNA="ifany")
 Sys.setlocale("LC_COLLATE", "C")
-samp$plotcol <- "black"
+samp$plotcol <- "gray50"
 race <- as.character(sort(unique(samp$race)))
 if (length(race) > 0) {
   stopifnot(all(race %in% names(config)))
@@ -100,54 +100,52 @@ table(samp$plotsym, useNA="ifany")
 (x <- pca$eigenval[1:4]/sum(pca$eigenval))
 lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 
+samp$nrace <- table(samp$race, useNA="ifany")[samp$race]
+samp$nrace[is.na(samp$nrace)] <- sum(is.na(samp$nrace))
+zorder <- order(-samp$nrace)
 # plot the first four PCs
 png(config["out_pairs_plot"], width=720, height=720)
 par(lwd=1.5, cex.axis=1.5)
-pairs(pca$eigenvect[,1:4], labels=lbls, col=samp$plotcol, pch=samp$plotsym)
+pairs(pca$eigenvect[zorder,1:4], labels=lbls, col=samp$plotcol[zorder], pch=samp$plotsym[zorder])
 dev.off()
 
 # plot EV1 vs EV2
 # one group at a time so we don't cover up smaller sample sets
 pdf(config["out_ev12_plot"], width=6, height=6)
-plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
-tbl <- table(samp$plotcol)
-colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
-for (r in colOrd) {
-  sel <- samp$plotcol == r
-  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
-}
+plot(pca$eigenvect[zorder,1], pca$eigenvect[zorder,2], xlab=lbls[1], ylab=lbls[2], col=samp$plotcol[zorder], pch=samp$plotsym[zorder])
+#plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
+#tbl <- table(samp$plotcol)
+#colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
+#for (r in colOrd) {
+#  sel <- samp$plotcol == r
+#  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[se#l])
+#}
 legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn),
        col=c(config[race], rep("black", length(ethn))),
        pch=c(rep(1, length(race)), as.integer(config[ethn])))
 dev.off()
 
 # parallel coordinates plot
-# should eventually choose alpha more intelligently based on sample size.
-pdf(config["out_parcoord_plot"], width=8, height=6)
-# plot by order of number of samples in each race
-samp$nrace <- table(samp$race, useNA="ifany")[samp$race]
-samp$nrace[is.na(samp$nrace)] <- sum(is.na(samp$nrace))
-i_ord <- order(-samp$nrace)
+pdf(config["out_parcoord_plot"], width=12, height=6)
+# try to pick a reasonable alpha for the sample size - maybe do this more intelligently later.
 samp$alpha <- ifelse(samp$nrace < 10, 1,
                      ifelse(samp$nrace < 100, 0.5,
                             ifelse(samp$nrace < 1000, 0.3, 0.1))) * 255
-# adjust margins so legend can be on the left
-par(mar=c(5.1, 10.1, 3.1, 2.1), xpd=TRUE)
-# need to subset both the eigenvector matrix and the colors here
-parcoord(pca$eigenvect[i_ord, 1:8], bty="L",
-  col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[i_ord])
+par(mar = c(4, 2, 7, 2), xpd=TRUE)
+# legend in subplot above parcoord.
+#layout(matrix(c(2,1), nrow=2), heights=c(1,3))
+parcoord(pca$eigenvect[zorder, 1:12], col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[zorder], cex.axis=2)
 title(xlab="Eigenvector")
+#plot(0,0,type="n", axes=F, xlab="", ylab="")
 if(any(is.na(samp$race))) {
   legendNames <- c(race, "Unknown")
-  legendCols <- c(config[race], "black")
+  legendCols <- c(config[race], "gray50")
 } else {
   legendNames <- race
   legendCols <- config[race]
 }
-legend("left", inset=c(-0.32,0), legend=legendNames, col=legendCols, lty=1, bty="n")
+legend("topleft", legendNames, col=legendCols, lty=1, ncol=4, box.col="white", lwd=3, inset=c(0, -0.3))
 dev.off()
-## to do: figure out how to plot two different parcoord plots on the same range for combined.
-
 
 if (type == "combined"){
 	# plot hapmaps separately from study subjects
@@ -186,7 +184,7 @@ if (type == "combined"){
 
 # plot density on sides
 pdf(config["out_dens_plot"], width=7, height=7)
-plot2DwithHist(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], col=samp$plotcol, pch=samp$plotsym)
+plot2DwithHist(pca$eigenvect[zorder,1], pca$eigenvect[zorder,2], xlab=lbls[1], ylab=lbls[2], col=samp$plotcol[zorder], pch=samp$plotsym[zorder])
 dev.off()
 
 #plot SNP-PC correlation
