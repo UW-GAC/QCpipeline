@@ -42,6 +42,12 @@ if (!is.na(config["plot_chroms"])) {
   plotchroms
 }
 
+# function to find effective sample size MAF filter using quadratic equation
+.quadSolveMAF <- function(x, N) {
+  sq <- sqrt(1 - (2 * x / N)) / 2
+  min(0.5 + sq, 0.5 - sq)
+}
+
 for (i in 1:length(actions)) {
   test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "-", model.type[i])
   print(test)
@@ -57,10 +63,25 @@ for (i in 1:length(actions)) {
   maf.thresh <- switch(model.type[i],
                        linear=config["maf.linear.threshold"],
                        logistic=config["maf.logistic.threshold"])
-  maf.text <- switch(config["maf.filter.type"],
-                     absolute=paste("MAF >", config["maf.absolute.threshold"]),
-                     snp.specific=paste("2*MAF*(1-MAF)*N >", maf.thresh))
+  #maf.text <- switch(config["maf.filter.type"],
+  #                   absolute=paste("MAF >", config["maf.absolute.threshold"]),
+  #                   snp.specific=paste("2*MAF*(1-MAF)*N >", maf.thresh))
   
+  # calculate MAF
+  if (config["maf.filter.type"] == "absolute") {
+    maf.text <- paste("MAF >", config["maf.absolute.threshold"])
+    maf.string <- ""
+  } else if (config["maf.filter.type"] == "snp.specific") {
+    N <- switch(model.type[i],
+    			linear=max(combined$n, na.rm=TRUE),
+    			logistic=max( pmin( combined$nAA.cc0 + combined$nAB.cc0 + combined$nBB.cc0,
+    								combined$nAA.cc1 + combined$nAB.cc1 + combined$nBB.cc1), na.rm=TRUE))
+    								
+    maf <- .quadSolveMAF(as.numeric(maf.thresh), N)
+    maf.text <- paste("2*MAF*(1-MAF)*N >", maf.thresh)
+    maf.string <- paste("- MAF > ", round(maf, digits=3), sep="")
+  }
+    
   for (type in c("LR", "Wald")) { 
     varp <- paste(type,"pval", sep=".")    
     ## no LR test for models with interactions
@@ -88,7 +109,7 @@ for (i in 1:length(actions)) {
 
     # QQ plots - maf filtered, subsetted with plotchroms
     pvaln <- pval[combined$qual.maf.filter & (!is.na(pval))]
-    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs")
+    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
     lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
@@ -122,7 +143,8 @@ for (i in 1:length(actions)) {
     # Manhattan plots - maf filtered, subsetted with plotchroms
     pvaln <- pval[combined$qual.maf.filter & (!is.na(pval))]
     chromosome <- combined$chromosome[combined$qual.maf.filter & !is.na(pval)]
-    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs")
+    #title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs")
+    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
     dev.off()
