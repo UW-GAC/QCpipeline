@@ -122,8 +122,8 @@ if (config["ibd_method"] == "KING") {
   urel <- unique(ibd$obs.rel)
   # ordered colors for legend
   ucols <- cols[names(cols) %in% urel]
-  plot(ibd$IBS0, ibd$kinship, col=obscols, main="IBD - expected", xlab="Fraction of IBS=0",
-       ylab="Kinship coefficient")
+  plot(ibd$IBS0, ibd$kinship, col=obscols, main="IBD - observed",
+       xlab="Fraction of IBS=0", ylab="Kinship coefficient")
   abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
   legend("topright", legend=names(ucols), col=ucols, pch=1)
   dev.off()
