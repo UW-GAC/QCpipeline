@@ -35,6 +35,7 @@ annot_snp_missingCol        [missing.n1]                    column of missing ca
 chromXY                     [FALSE]                         find anomalies in pseudoautosomal region?  
 plot.win                    [1]                             size of plot window (multiple of anomaly length)
 scan_exclude_file           [NA]                            vector of scanID to exclude
+snp_exclude_file            [NA]                            vector of snpID to exclude
 thresh.indiv                [5]                             threshold for plotting individual anomalies (Mb)
 thresh.sum                  [10]                            threshold for sum of all anomalies on a chromosome (Mb)  
 out_afreq_file              [allele_freq.RData]             output (or existing) allele frequency file

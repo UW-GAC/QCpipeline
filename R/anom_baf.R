@@ -16,8 +16,8 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "build", "nc_bl_file", "nc_geno_file",
               "out_anom_dir", "out_baf_med_file", "project")
 optional <- c("annot_snp_IntensityOnlyCol", "annot_snp_missingCol", "chromXY",
-              "out_afreq_file", "out_eligible_snps", "scan_exclude_file")
-default <- c(NA, "missing.n1", FALSE, "allele_freq.RData", "snps_eligible.RData", NA)
+              "out_afreq_file", "out_eligible_snps", "scan_exclude_file", "snp_exclude_file")
+default <- c(NA, "missing.n1", FALSE, "allele_freq.RData", "snps_eligible.RData", NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -66,9 +66,18 @@ for (i in 1:nrow(centromeres)) {
 }
 table(chrom, gap)
 
+# any user-specified snps?
+# any to exclude?
+if (!is.na(config["snp_exclude_file"])){
+  snp_exclude <- getobj(config["snp_exclude_file"])
+  usr <- getSnpID(snpAnnot) %in% snp_exclude
+} else {
+  usr <- rep(FALSE, length(getSnpID(snpAnnot)))
+}
+
 #ignore includes intensity-only and failed snps
 ignore <- getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1 
-snp.exclude <- ignore | hla | xtr | gap
+snp.exclude <- ignore | hla | xtr | gap | usr
 table(snp.exclude)
 
 # maf threshold
