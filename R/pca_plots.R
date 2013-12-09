@@ -148,34 +148,26 @@ legend("topleft", legendNames, col=legendCols, lty=1, ncol=4, box.col="white", l
 dev.off()
 
 if (type == "combined"){
-	# plot hapmaps separately from study subjects
+  
+	# plot hapmaps separately from study subjects - study in gray, hm in color
 	pdf(config["out_ev12_plot_hapmap"], width=6, height=6)
-	plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
-	ext.sel <- (samp$scanID %in% ext.scanAnnot$scanID) | (scanAnnot$geno.cntl[match(samp$scanID, scanAnnot$scanID)] %in% 1) # get external or study hapmaps
-	tbl <- table(samp$plotcol[ext.sel])
-	colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
+	plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], col="gray", pch=samp$plotsym)# type="n")
+	# this is an ugly selection command - we want to keep the previous ordering but only have hapmap subjects
+	ext.sel <- zorder[(samp$scanID[zorder] %in% ext.scanAnnot$scanID) | (scanAnnot$geno.cntl[match(samp$scanID[zorder], scanAnnot$scanID)] %in% 1)] # get external or study hapmaps
 	ext.race <- as.character(sort(unique(samp$race[ext.sel])))
 	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
-	for (r in colOrd) {
-	  sel <- (samp$plotcol == r) & (ext.sel)
-	  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
-	}
-	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(ext.race, ext.ethn),
-		   col=c(config[ext.race], rep("black", length(ext.ethn))),
-		   pch=c(rep(1, length(ext.race)), as.integer(config[ext.ethn])))
+  points(pca$eigenvect[ext.sel,1], pca$eigenvect[ext.sel,2], col=samp$plotcol[ext.sel], pch=samp$plotsym[ext.sel])
+	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c("Study", ext.race, ext.ethn),
+		   col=c("gray", config[ext.race], rep("black", length(ext.ethn))),
+		   pch=c(rep(1, length(ext.race)+1), as.integer(config[ext.ethn])))
 	dev.off()
 
 	pdf(config["out_ev12_plot_study"], width=6, height=6)
 	plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
-	ext.sel <- (samp$scanID %in% scanAnnot$scanID) & (scanAnnot$geno.cntl[match(samp$scanID, scanAnnot$scanID)] %in% 0) # get only study subjects (not study hapmaps)
-	tbl <- table(samp$plotcol[ext.sel])
-	colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
+	ext.sel <- zorder[(samp$scanID[zorder] %in% scanAnnot$scanID) & (scanAnnot$geno.cntl[match(samp$scanID[zorder], scanAnnot$scanID)] %in% 0)] # get only study subjects (not study hapmaps)
 	ext.race <- as.character(sort(unique(samp$race[ext.sel])))
 	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
-	for (r in colOrd) {
-	  sel <- (samp$plotcol == r) & (ext.sel)
-	  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[sel])
-	}
+	points(pca$eigenvect[ext.sel,1], pca$eigenvect[ext.sel,2], col=samp$plotcol[ext.sel], pch=samp$plotsym[ext.sel])
 	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(ext.race, ext.ethn),
 		   col=c(config[ext.race], rep("black", length(ext.ethn))),
 		   pch=c(rep(1, length(ext.race)), as.integer(config[ext.ethn])))
