@@ -15,14 +15,16 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", "ibd_obsrel_file")
 optional <- c("annot_scan_subjectCol",
-  "annot_scan_sexCol", "annot_scan_annotSexCol",
+              "annot_scan_sexCol", "annot_scan_annotSexCol",
               "annot_scan_annotSexMale", "annot_scan_annotSexFemale", "annot_scan_annotSexUnknown", 
               "annot_scan_plateCol", "annot_scan_wellCol",
               "ibd_unobs_dup_file",
               "min_num_problems",
               "out_annot_file",
               "out_plate_plot",
-              "out_plate_file")
+              "out_plate_file",
+              "scan_hilite_file",
+              "scan_contaminated_file")
 default <- c("subjectID",
   "sex", "annot.sex",
              "M", "F", NA,
@@ -31,7 +33,9 @@ default <- c("subjectID",
              1,
              "out_scan_annot.RData",
              "plate_layout.pdf",
-             "plate_file.pdf")
+             "plate_file.pdf",
+             NA,
+             NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -92,9 +96,28 @@ if (!is.na(config["ibd_unobs_dup_file"]) & file.exists(config["ibd_unobs_dup_fil
 }
 table(i_unobs_dups, exclude=NULL)
 
+## contaminated samples
+if (!is.na(config["scan_contaminated_file"]) & file.exists(config["scan_contaminated_file"])){
+  contam <- getobj(config["scan_contaminated_file"])
+  i_contam <- scanID %in% contam
+} else {
+  message("No contaminated samples file given or file not found.")
+  i_contam <- rep(FALSE, length(scanID))
+}
+table(i_contam, exclude=NULL)
+
+## user-hilighted samles
+if (!is.na(config["scan_hilite_file"]) & file.exists(config["scan_hilite_file"])){
+  hilite <- getobj(config["scan_hilite_file"])
+  i_hilite <- scanID %in% hilite
+} else {
+  message("No user-highlighted samples file given or file not found.")
+  i_hilite <- rep(FALSE, length(scanID))
+}
+table(i_hilite, exclude=NULL)
 
 # samples with any problems
-i_problems <- i_sex_mismatch | i_unexp_dups | i_unobs_dups
+i_problems <- i_sex_mismatch | i_unexp_dups | i_unobs_dups | i_contam | i_hilite
 table(i_problems, exclude=NULL)
 
 
@@ -130,12 +153,20 @@ if (!is.null(unobs.dups)){
 }
 table(samp$unobsdup.id, exclude=NULL)
 
+## add in contaminated
+samp$contaminated <- i_contam
+
+## add in user highlighted
+samp$hilite <- i_hilite
 
 # annot.sex was updated earlier -- just change NA to U
 samp$annot.sex[samp$annot.sex %in% config["annot_scan_annotSexMale"]] <- "M"
 samp$annot.sex[samp$annot.sex %in% config["annot_scan_annotSexFemale"]] <- "F"
 samp$annot.sex[samp$annot.sex %in% config["annot_scan_annotSexUnknown"]] <- "U"
 table(samp$annot.sex, exclude=NULL)
+
+# id problems per plate
+table(samp$plate, samp$id.prob)
 
 if (sum(samp$id.prob) > 1){
   # now run the plate map code
