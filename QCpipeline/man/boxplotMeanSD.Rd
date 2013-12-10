@@ -12,6 +12,7 @@ boxplotMeanSD(x, y, data=NULL, xlab=NULL, ylab=NULL, nSD=1, ...)
   \item{xlab}{title for x axis (defaults to x if data is not \code{NULL}}
   \item{ylab}{title for y axis (defaults to y if data is not \code{NULL}}
   \item{nSD}{number of standard deviations to plot}
+  \item{showLegend}{show the legend? default is TRUE}
   \item{...}{additional plotting arguments}
 }
 \details{}
