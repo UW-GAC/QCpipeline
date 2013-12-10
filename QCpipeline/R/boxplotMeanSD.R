@@ -1,4 +1,4 @@
-boxplotMeanSD <- function(x, y, data=NULL, xlab=NULL, ylab=NULL, nSD=1, ...)
+boxplotMeanSD <- function(x, y, data=NULL, xlab=NULL, ylab=NULL, nSD=1, showLegend=TRUE, ...)
 {
   # get data
   if (!is.null(data))
@@ -26,6 +26,6 @@ boxplotMeanSD <- function(x, y, data=NULL, xlab=NULL, ylab=NULL, nSD=1, ...)
   # add mean & SD
   par(new=TRUE)
   plotCI(x=means, uiw=stdev, col="red", xlim=c(0.5,nlev + 0.5), ylim=c(miny, maxy), xlab="", ylab="", xaxt="n")
-  legend("top", c(paste("mean +/-", nSD, "SD"), "boxplot"), col = c("red", "black"), lty=c(1,1), lwd=1) 
+  if (showLegend) legend("top", c(paste("mean +/-", nSD, "SD"), "boxplot"), col = c("red", "black"), lty=c(1,1), lwd=1) 
 }
 
