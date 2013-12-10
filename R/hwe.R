@@ -52,3 +52,5 @@ if (!is.na(config["scan_chrom_filter"])) {
 gwasExactHW(genoData, scan.chromosome.filter=scan.filt,
             scan.exclude = scan.exclude, outfile=config["out_hwe_prefix"],
             chromosome.set=chromosome.set)
+
+

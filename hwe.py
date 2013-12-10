@@ -33,7 +33,9 @@ out_clust_prefix      [hwe_clust]      output prefix for cluster plots
 out_hwe_prefix        [hwe]            output prefix for HWE results
 out_inbrd_plot        [hwe_inbrd.pdf]  output histogram of inbreeding coefficients
 out_maf_plot          [hwe_maf.png]    output plot of MAF vs p value
-out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)"""
+out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)
+out_sim_prefix        [hwe_sim]        prefix for simulated HWE results
+nsnp_simulate         [50000]          max number of SNPs to simulate"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
@@ -91,11 +93,18 @@ if split:
     rscript = os.path.join(pipeline, "R", job + ".R")
     jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(start), str(end), str(by)], holdid=jobid['hwe'], queue=qname, email=email)
 
-job = "hwe_plots"
-rscript = os.path.join(pipeline, "R", job + ".R")
+
 if split:
     holdid = [jobid['hwe_merge']]
 else:
-    holdid = jobid['hwe']
+    holdid = [jobid['hwe']]
+job = "hwe_simulate"
+rscript = os.path.join(pipeline, "R", job + ".R")
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+
+
+job = "hwe_plots"
+rscript = os.path.join(pipeline, "R", job + ".R")
+holdid = [jobid["hwe_simulate"]]
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
 

@@ -14,8 +14,8 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_snp_file", "nc_samp_geno_file", "nc_samp_xy_file", "out_hwe_prefix")
-optional <- c("annot_snp_missingCol", "annot_snp_rsIDCol", "out_clust_prefix", "out_inbrd_plot", "out_maf_plot", "out_qq_plot")
-default <- c("missing.n1", "rsID", "hwe_clust", "hwe_inbrd.pdf", "hwe_maf.png", "hwe_qq.png")
+optional <- c("annot_snp_missingCol", "annot_snp_rsIDCol", "out_clust_prefix", "out_inbrd_plot", "out_maf_plot", "out_qq_plot", "out_sim_prefix")
+default <- c("missing.n1", "rsID", "hwe_clust", "hwe_inbrd.pdf", "hwe_maf.png", "hwe_qq.png", "hwe_sim")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -49,6 +49,22 @@ abline(v=mean(hwe$f[aut], na.rm=TRUE), lty=2, col="gray")
 abline(v=0, col="red")
 dev.off()
 
+# simulated vs observed inbreeding coefficient
+sim <- getobj(paste(config["out_sim_prefix"], ".RData", sep=""))
+sim <- sim[!is.na(sim$f.sim), ]
+d.obs <- density(sim$f.obs)
+d.sim <- density(sim$f.sim)
+#xlim <- c(min(d.obs$x, d.sim$x), max(d.obs$x, d.sim$x))
+xlim <- c(-0.2, 0.2)
+ylim <- c(0, max(d.obs$y, d.sim$y))
+main.txt <- paste("Simulated F -", nrow(sim), "SNPs - ", max(sim$N), "Samples")
+pdf(paste(config["out_sim_prefix"], "_f.pdf", sep=""))
+plot(density(sim$f.obs), col="black", lwd=2, ylim=ylim, xlim=xlim, main=main.txt, xlab="F", type="n")
+abline(v=0, h=0, col="gray", lty=2)
+lines(density(sim$f.obs), col="black", lwd=2)
+lines(density(sim$f.sim), col="red")
+legend("topright", c("Data", "Simulation"), col=c("black", "red"), lwd=c(2,2))
+dev.off()
 
 # MAF vs Pvalue
 png(config["out_maf_plot"], width=600, height=600)
