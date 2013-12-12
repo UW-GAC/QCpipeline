@@ -80,7 +80,7 @@ for (i in 1:length(actions)) {
   combined$chromosome[combined$chromosome == 26] <- "M"
   combined$chromosome[combined$chromosome == 27] <- "U"
   combined$chromosome[combined$chromosome == 28] <- "XYY"
-  combined$quality.filter <- getVariable(snpAnnot, config["annot_snp_filtCol"], index=index)
+  combined$composite.filter <- getVariable(snpAnnot, config["annot_snp_filtCol"], index=index)
 
   # MAF filter
   maf.thresh <- switch(model.type[i],
@@ -91,7 +91,7 @@ for (i in 1:length(actions)) {
                                combined$MAF > as.numeric(config["maf.absolute.threshold"])),
                      snp.specific=(!is.na(combined$MAF) & !is.na(combined$n) &
                                    2*combined$MAF*(1-combined$MAF)*combined$n > maf.thresh))
-  combined$qual.maf.filter <- combined$quality.filter & maf.filt
+  combined$comp.maf.filter <- combined$composite.filter & maf.filt
   
   print(dim(combined))
   fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")

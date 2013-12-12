@@ -101,15 +101,15 @@ for (i in 1:length(actions)) {
     qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
 
     # QQ plots - filtered, subsetted with plotchroms
-    pvaln <- pval[combined$quality.filter & (!is.na(pval))]
-    title <- paste("quality filter\n", length(pvaln), "SNPs")
+    pvaln <- pval[combined$composite.filter & (!is.na(pval))]
+    title <- paste("composite filter\n", length(pvaln), "SNPs")
     lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
 
     # QQ plots - maf filtered, subsetted with plotchroms
-    pvaln <- pval[combined$qual.maf.filter & (!is.na(pval))]
-    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
+    pvaln <- pval[combined$comp.maf.filter & (!is.na(pval))]
+    title <- paste("composite filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
     lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
@@ -134,17 +134,17 @@ for (i in 1:length(actions)) {
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - filtered, subsetted with plotchroms
-    pvaln <- pval[combined$quality.filter & (!is.na(pval))]
-    chromosome <- combined$chromosome[combined$quality.filter & !is.na(pval)]
-    title <- paste("quality filter\n", length(pvaln), "SNPs")
+    pvaln <- pval[combined$composite.filter & (!is.na(pval))]
+    chromosome <- combined$chromosome[combined$composite.filter & !is.na(pval)]
+    title <- paste("composite filter\n", length(pvaln), "SNPs")
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
 
     # Manhattan plots - maf filtered, subsetted with plotchroms
-    pvaln <- pval[combined$qual.maf.filter & (!is.na(pval))]
-    chromosome <- combined$chromosome[combined$qual.maf.filter & !is.na(pval)]
-    #title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs")
-    title <- paste("quality filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
+    pvaln <- pval[combined$comp.maf.filter & (!is.na(pval))]
+    chromosome <- combined$chromosome[combined$comp.maf.filter & !is.na(pval)]
+    #title <- paste("composite filter +",maf.text,"\n", length(pvaln), "SNPs")
+    title <- paste("composite filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
     manhattanPlot(p=pvaln,chromosome=chromosome,
                   main=title, signif=as.numeric(config["signif_line"]))
     dev.off()

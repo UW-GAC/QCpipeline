@@ -66,7 +66,7 @@ for (i in 1:length(actions)) {
          sub <- combined$snpID %in% snpID[chrom %in% plotchroms]
          combined <- combined[sub,]
       }
-      combined <- combined[combined$quality.filter,]
+      combined <- combined[combined$composite.filter,]
       
       varp <- "LR.pval"
       ## no LR test for models with interactions
