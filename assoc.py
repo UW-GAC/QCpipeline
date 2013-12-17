@@ -23,8 +23,8 @@ covars_as_factor   covariates to be cast as factors, quoted and space delimited 
 gene_action        gene actions for each model (usually additive), quoted and space delimited
 model_type         model types (logistic or linear), quoted and space delimited
 outcome            outcome variable for logistic regression (0=control, 1=case), quoted and space delimited
-nc_geno_file       genotype netCDF or GDS file (filtered subject-level recommended)
-nc_samp_geno_file  sample-level genotype netCDF file for plots
+nc_geno_file       genotype file (netCDF or GDS, filtered subject-level recommended)
+nc_samp_geno_file  sample-level genotype file (netCDF or GDS) for plots
 nc_samp_xy_file    sample-level XY intensity netCDF file for plots
 
 Optional config parameters [default]:    

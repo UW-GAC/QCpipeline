@@ -19,7 +19,7 @@ annot_scan_file  scan annotation file
 annot_snp_file   snp annotation file
 build            genome build (hg18 or hg19)
 nc_bl_file       BAF/LRR netCDF file
-nc_geno_file     genotype netCDF file
+nc_geno_file     genotype file (netCDF or GDS)
 nc_xy_file       XY intensity netCDF file
 
 Optional config parameters [default]:

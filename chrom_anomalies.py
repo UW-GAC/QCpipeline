@@ -24,7 +24,7 @@ annot_scan_file  scan annotation file
 annot_snp_file   snp annotation file
 build            genome build (hg18 or hg19)
 nc_bl_file       BAF/LRR netCDF file
-nc_geno_file     genotype netCDF file
+nc_geno_file     genotype file (netCDF or GDS)
 project          project name (prepend to output files)
 out_anom_dir     output directory for anomaly data
 out_plot_dir     output directory for anomaly plots
