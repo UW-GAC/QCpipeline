@@ -5,6 +5,7 @@
 
 library(GWASTools)
 library(QCpipeline)
+library(RColorBrewer)
 library(MASS)
 sessionInfo()
 
@@ -22,11 +23,13 @@ optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
               "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
               "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot",
               "out_parcoord_plot",
-              "out_ev12_plot_hapmap", "out_ev12_plot_study")
+              "out_ev12_plot_hapmap", "out_ev12_plot_study",
+              "parcoord_vars", "out_parcoord_var_prefix")
 default <- c(NA, "rsID", NA, "pop.group", 12, NA, "pca_corr", NA, "pca_dens.pdf",
              "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
              "pca_parcoord.pdf",
-             "pca_ev12_hapmap.pdf", "pca_ev12_study.pdf")
+             "pca_ev12_hapmap.pdf", "pca_ev12_study.pdf",
+             "", "pca_parcoord")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -34,11 +37,30 @@ print(config)
 if (length(args) < 2) stop("missing pca type (study or combined)")
 type <- args[2]
 
+
+# functions for parallel coordinate plots later
+.getN <- function(samp, var){
+  ntab <- table(samp[[var]])
+  n <- ntab[as.character(samp[[var]])]
+  n[is.na(n)] <- sum(is.na(samp[[var]]))
+  n
+}
+# transparency based on number of samples in a group
+.getParcoordAlpha <- function(samp, var) {
+  n <- .getN(samp, var)
+  return(ifelse(n < 10, 1,
+                ifelse(n < 100, 0.5,
+                       ifelse(n < 1000, 0.3, 0.1))) * 255) 
+}
+
+# parallel coordinates plot variables
+vars <- unlist(strsplit(config["parcoord_vars"], " "))
+
 # scan annotation
 if (type == "study") {
   scanAnnot <- getobj(config["annot_scan_file"])
-  samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_raceCol"]))
-  names(samp) <- c("scanID", "race")
+  samp <- getVariable(scanAnnot, c("scanID", c(config["annot_scan_raceCol"], vars)))
+  names(samp) <- c("scanID", "race", vars)
   if (!is.na(config["annot_scan_ethnCol"])) {
     samp$ethnicity <- getVariable(scanAnnot, config["annot_scan_ethnCol"])
   } else samp$ethnicity <- NA
@@ -127,25 +149,56 @@ dev.off()
 
 # parallel coordinates plot
 pdf(config["out_parcoord_plot"], width=12, height=6)
-# try to pick a reasonable alpha for the sample size - maybe do this more intelligently later.
-samp$alpha <- ifelse(samp$nrace < 10, 1,
-                     ifelse(samp$nrace < 100, 0.5,
-                            ifelse(samp$nrace < 1000, 0.3, 0.1))) * 255
+samp$alpha <- .getParcoordAlpha(samp, "race")
 par(mar = c(4, 2, 7, 2), xpd=TRUE)
 # legend in subplot above parcoord.
 #layout(matrix(c(2,1), nrow=2), heights=c(1,3))
 parcoord(pca$eigenvect[zorder, 1:12], col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[zorder], cex.axis=2)
 title(xlab="Eigenvector")
-#plot(0,0,type="n", axes=F, xlab="", ylab="")
-if(any(is.na(samp$race))) {
-  legendNames <- c(race, "Unknown")
-  legendCols <- c(config[race], "gray50")
-} else {
-  legendNames <- race
-  legendCols <- config[race]
+# legend
+legendNames <- race
+legendCols <- config[race]
+if (any(is.na(samp$race))){
+  legendNames <- c(legendNames, "Unknown")
+  legendCols <- c(legendCols, "gray50")
 }
 legend("topleft", legendNames, col=legendCols, lty=1, ncol=4, box.col="white", lwd=3, inset=c(0, -0.3))
 dev.off()
+
+
+
+## other variables for parallel coordinate, specified by user
+if (type == "study"){
+  for (var in vars){
+    stopifnot(var %in% names(samp))
+    
+    # auto filename
+    fname <- paste(config["out_parcoord_var_prefix"], "_", var, ".pdf", sep="")
+    
+    x <- table(samp[[var]])
+    x <- x[order(names(x))]
+    # palette and colors
+    if (length(x) > 9) stop("only 9 levels allowed")
+    if (length(x) < 3) pal <- c("black", "red") else  pal <- brewer.pal(length(x), "Set1")
+    names(pal) <- names(x)
+    samp$varcol <- pal[as.character(samp[[var]])]
+    samp$varcol[is.na(samp$varcol)] <- "gray"
+    # ordering and transparency
+    varorder <- order(-.getN(samp, var))
+    samp$alpha <- .getParcoordAlpha(samp, var)
+    # plot
+    pdf(fname, width=12, height=6)
+    par(mar = c(4, 2, 7, 2), xpd=TRUE)
+    parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], main=var)
+    title(xlab="Eigenvector")
+    # legend
+    if (any(is.na(samp[[var]])))  pal["Unknown"] <- "gray"
+    legend("topleft", names(pal), col=pal, lty=1, ncol=4, box.col="white", lwd=3, inset=c(0, -0.3))
+    dev.off()
+    
+    #dev.off()
+  }
+}
 
 if (type == "combined"){
   

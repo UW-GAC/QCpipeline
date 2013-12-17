@@ -71,6 +71,8 @@ out_ev12_plot_study          [pca_ev12_study.pdf]     output plot of EV2 vs EV1 
 out_pairs_plot               [pca_pairs.png]          output pairs plot of EV 1-4
 out_scree_plot               [pca_scree.pdf]          output scree plot
 out_parcoord_plot            [pca_parcoord.pdf]       output parallel coordinates plot of EV 1-8
+parcoord_vars                [NA]                     scan annotation variables for parallel coordinates plots
+out_parcoord_prefix          [pca_parcoord]           prefix for parcoord plots of parcoord_vars
 
 Additional parameters:
 each value for race should be a parameter with an associated color
