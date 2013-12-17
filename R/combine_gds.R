@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "ext_annot_scan_file",
-              "ext_annot_snp_file", "ext_nc_geno_file", "nc_geno_file")
+              "ext_annot_snp_file", "ext_nc_geno_file", "gds_geno_file")
 optional <- c("annot_scan_subjectCol", "annot_snp_rsIDCol",
               "comb_scan_exclude_file", "comb_snp_exclude_file",
               "ext_annot_scan_subjectCol", "ext_annot_snp_rsIDCol",
@@ -26,7 +26,7 @@ print(config)
 
 scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)
 # this might be a subject-level netCDF file, so subset annotation
-nc <- GenotypeReader(config["nc_geno_file"])
+nc <- GenotypeReader(config["gds_geno_file"])
 scanAnnot <- scanAnnot[match(getScanID(nc), getScanID(scanAnnot)),]; dim(scanAnnot)
 close(nc)
 
@@ -151,8 +151,10 @@ for (pro in names(FileList))
 	cat(date(), "\tProject Name,", pro, ":", pro, "\n")
 
 	# open netCDF
-	nc <- open.ncdf(pro.fn); print(nc)
-	sampleID <- get.var.ncdf(nc, "sampleID") # all scanIDs in the netCDF for pro
+## 	nc <- open.ncdf(pro.fn); print(nc)
+## 	sampleID <- get.var.ncdf(nc, "sampleID") # all scanIDs in the netCDF for pro
+        nc <- GenotypeReader(pro.fn); print(nc)
+        sampleID <- getScanID(nc)
 
 	# match snps
 	snp.flag <- match(snp.info$rsID, snp.info.list[[pro]]$rsID)
@@ -164,13 +166,16 @@ for (pro in names(FileList))
 	#cat(pro, ":", length(samp1.flag), "samples for set1\n")
         for (i in s1)
 	{
-		v <- get.var.ncdf(nc, "genotype", start=c(1, i), count=c(-1, 1))[snp.flag]
+## 		v <- get.var.ncdf(nc, "genotype", start=c(1, i), count=c(-1, 1))[snp.flag]
+		v <- getGenotype(nc, snp=c(1,-1), scan=c(i,1))[snp.flag]
+                v[is.na(v)] <- 3  ## 3 is missing value for GDS genotype file
 		write.gdsn(gGeno1, v, start=c(1, samp1.idx), count=c(-1, 1))
 		if (samp1.idx %% 100 == 0) cat(date(), "\tset1:", samp1.idx, "\n")
 		samp1.idx <- samp1.idx + 1
 	}
 	# close the ncdf file
-	close.ncdf(nc)
+## 	close.ncdf(nc)
+	close(nc)
 }
 
 # close GDS files

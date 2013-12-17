@@ -36,7 +36,6 @@ Required for "combined" option:
 ext_annot_scan_file       external dataset scan annotation file
 ext_annot_snp_file        external dataset snp annotation file
 ext_nc_geno_file          external dataset genotype netCDF file
-nc_geno_file              genotype netCDF file (filtered subject-level recommended)
 study_unduplicated_file   vector of scanID from study for combined PCA
 out_comb_scan_annot_file  output combined scan annotation
 out_comb_snp_annot_file   output combined snp annotation
