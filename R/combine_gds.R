@@ -83,7 +83,7 @@ names(samp.info2)[2] <- "subjectID"
 samp.info <- list(samp.info1, samp.info2)
 names(samp.info) <- proj
 
-FileList <- list(config["nc_geno_file"], config["ext_nc_geno_file"])
+FileList <- list(config["gds_geno_file"], config["ext_nc_geno_file"])
 names(FileList) <- proj
 
 # save annotation files
@@ -187,7 +187,7 @@ gds <- GdsGenotypeReader(config["out_comb_gds_geno_file"])
 (gData <- GenotypeData(gds, snpAnnot=snp.info.all, scanAnnot=samp.info.all))
 
 ## check genotypes
-nc1 <- GenotypeReader(config["nc_geno_file"])
+nc1 <- GenotypeReader(config["gds_geno_file"])
 nc2 <- GenotypeReader(config["ext_nc_geno_file"])
 
 scanID <- getScanID(gData)
