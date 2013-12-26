@@ -55,7 +55,10 @@ filtxy <- allx | ally
 if (sum(filtxy) > 0) {
   anom.xy <- anom[filtxy,]
   anom.xy$chromosome <- 24
-  anom <- rbind(anom, anom.xy)
+  anom.xyy <- anom[filtxy,]
+  anom.xyy$chromosome <- 28
+  anom.xyy$whole.chrom <- TRUE
+  anom <- rbind(anom, anom.xy, anom.xyy)
 }
 dim(anom)
 
