@@ -112,7 +112,7 @@ ethn <- as.character(sort(unique(samp$ethnicity)))
 if (length(ethn) > 0) {
   stopifnot(all(ethn %in% names(config)))
   for (e in ethn) {
-    sel <- samp$ethn %in% e
+    sel <- samp$ethnicity %in% e
     samp$plotsym[sel] <- as.integer(config[e])
   }
 }
