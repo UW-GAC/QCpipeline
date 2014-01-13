@@ -141,7 +141,7 @@ if (config["ibd_method"] == "KING") {
   psym[unexp] <- 2
   cols[c("Deg3", "Q", "U")] <- "black"
   pcol <- cols[prel]
-  plot(ibd$IBS0, ibd$kinship, col=pcol, pch=psym, main="IBD - expected", xlab="Fraction of IBS=0",
+  plot(ibd$IBS0, ibd$kinship, col=pcol, pch=psym, xlab="Fraction of IBS=0",
        ylab="Kinship coefficient")
   points(ibd$IBS0[unexp], ibd$kinship[unexp], col=pcol[unexp], pch=psym[unexp])
   abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
