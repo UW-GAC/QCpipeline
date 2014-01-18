@@ -27,7 +27,7 @@ optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
               "parcoord_vars", "out_parcoord_var_prefix")
 default <- c(NA, "rsID", NA, "pop.group", 12, NA, "pca_corr", NA, "pca_dens.pdf",
              "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
-             "pca_parcoord.pdf",
+             "pca_parcoord.png",
              "pca_ev12_hapmap.pdf", "pca_ev12_study.pdf",
              "", "pca_parcoord")
 config <- setConfigDefaults(config, required, optional, default)
@@ -148,12 +148,12 @@ legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn)
 dev.off()
 
 # parallel coordinates plot
-pdf(config["out_parcoord_plot"], width=12, height=6)
+png(config["out_parcoord_plot"], width=1200, height=600)
 samp$alpha <- .getParcoordAlpha(samp, "race")
-par(mar = c(4, 2, 7, 2), xpd=TRUE)
+par(mar = c(5, 2, 7, 2), xpd=TRUE)
 # legend in subplot above parcoord.
 #layout(matrix(c(2,1), nrow=2), heights=c(1,3))
-parcoord(pca$eigenvect[zorder, 1:12], col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[zorder], cex.axis=2)
+parcoord(pca$eigenvect[zorder, 1:12], col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[zorder], lwd=2)
 title(xlab="Eigenvector")
 # legend
 legendNames <- race
@@ -162,7 +162,7 @@ if (any(is.na(samp$race))){
   legendNames <- c(legendNames, "Unknown")
   legendCols <- c(legendCols, "gray50")
 }
-legend("topleft", legendNames, col=legendCols, lty=1, ncol=4, box.col="white", lwd=3, inset=c(0, -0.3))
+legend("topleft", legendNames, col=legendCols, lty=1, ncol=5, box.col="white", lwd=3, inset=c(0, -0.2))
 dev.off()
 
 
@@ -173,7 +173,7 @@ if (type == "study"){
     stopifnot(var %in% names(samp))
     
     # auto filename
-    fname <- paste(config["out_parcoord_var_prefix"], "_", var, ".pdf", sep="")
+    fname <- paste(config["out_parcoord_var_prefix"], "_", var, ".png", sep="")
     
     x <- table(samp[[var]])
     x <- x[order(names(x))]
@@ -187,16 +187,26 @@ if (type == "study"){
     varorder <- order(-.getN(samp, var))
     samp$alpha <- .getParcoordAlpha(samp, var)
     # plot
-    pdf(fname, width=12, height=6)
-    par(mar = c(4, 2, 7, 2), xpd=TRUE)
-    parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], main=var)
+    png(fname, width=1200, height=600)
+    samp$alpha <- .getParcoordAlpha(samp, "race")
+    par(mar = c(5, 2, 7, 2), xpd=TRUE)
+    parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], cex.axis=3, cex.lab=3, lwd=2)
     title(xlab="Eigenvector")
     # legend
     if (any(is.na(samp[[var]])))  pal["Unknown"] <- "gray"
-    legend("topleft", names(pal), col=pal, lty=1, ncol=4, box.col="white", lwd=3, inset=c(0, -0.3))
+    legend("topleft", names(pal), col=pal, lty=1, ncol=5, box.col="white", lwd=3, inset=c(0, -0.2))
     dev.off()
     
-    #dev.off()
+    
+#     pdf(fname, width=12, height=6)
+#     par(mar = c(4, 2, 7, 2), xpd=TRUE)
+#     parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], main=var)
+#     title(xlab="Eigenvector")
+#     # legend
+#     if (any(is.na(samp[[var]])))  pal["Unknown"] <- "gray"
+#     legend("topleft", names(pal), col=pal, lty=1, ncol=4, box.col="white", lwd=3, inset=c(0, -0.3))
+#     dev.off()
+    
   }
 }
 
