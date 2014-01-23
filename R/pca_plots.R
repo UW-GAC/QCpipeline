@@ -153,7 +153,7 @@ samp$alpha <- .getParcoordAlpha(samp, "race")
 par(mar = c(5, 2, 7, 2), xpd=TRUE)
 # legend in subplot above parcoord.
 #layout(matrix(c(2,1), nrow=2), heights=c(1,3))
-parcoord(pca$eigenvect[zorder, 1:12], col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[zorder], lwd=2)
+parcoord(pca$eigenvect[zorder, 1:12], col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[zorder])
 title(xlab="Eigenvector")
 # legend
 legendNames <- race
@@ -190,7 +190,7 @@ if (type == "study"){
     png(fname, width=1200, height=600)
     samp$alpha <- .getParcoordAlpha(samp, "race")
     par(mar = c(5, 2, 7, 2), xpd=TRUE)
-    parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], cex.axis=3, cex.lab=3, lwd=2)
+    parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], cex.axis=3, cex.lab=3)
     title(xlab="Eigenvector")
     # legend
     if (any(is.na(samp[[var]])))  pal["Unknown"] <- "gray"
