@@ -6,6 +6,7 @@ import(hexbin)
 import(Biostrings)
 import(tools)
 import(SRAdb)
+import(GWASExactHW)
 
 export(readConfig, writeConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
@@ -16,4 +17,6 @@ export(readConfig, writeConfig, setConfigDefaults,
        plateLayoutPlot,
        findRelSet,
        hweSimulate,
-       hweSimulateGenotypeMatrix)
+       hweSimulateGenotypeMatrix,
+       quadSolveMAF,
+       qqPlotPng, manhattanPlotPng)

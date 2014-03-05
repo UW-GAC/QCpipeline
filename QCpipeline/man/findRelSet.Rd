@@ -19,14 +19,16 @@ findRelSet(kinMat, thresh, unrel.set = NULL)
 \author{Matthew P. Conomos}
 \note{\code{findRelSet} is called internally in the function \code{pcair} but may also be used on its own to partition the sample into 'unrelated' and 'related' sets without performing PCA.}
 \seealso{
-	\code{\link{pcair}} which uses this function for finding principal components in the presence of related individuals.
-	\code{\link{king2mat}} for creating a matrix of pairwise kinship coefficient estimates that can be used as \code{kinMat} from KING output text files.
+% 	\code{\link{pcair}} which uses this function for finding principal components in the presence of related individuals.
+% 	\code{\link{king2mat}} for creating a matrix of pairwise kinship coefficient estimates that can be used as \code{kinMat} from KING output text files.
 }
 \examples{
+\dontrun{
 	# load matrix of estimated kinship coefficients
 	data("HapMap_ASW_MXL_kinMat")
 	# find related set
 	myrels <- findRelSet(HapMap_ASW_MXL_kinMat, thresh = 0.025)
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

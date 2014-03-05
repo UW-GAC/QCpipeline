@@ -1,5 +1,6 @@
 \name{hweSimulate}
 \alias{hweSimulate}
+\alias{hweSimulateGenotypeMatrix}
 \title{Simulations for HWE}
 \description{Simulates a set of HWE results for a set of samples and SNPs, under the null hypothesis that the genotypes are in HWE.}
 \usage{
@@ -10,10 +11,12 @@ hweSimulate(genotypes, p_in)
   \item{nsnp}{Number of SNPs to simulate}
   \item{nsamp}{Number of samples to simulate}
   \item{aFreq}{vector of allele A frequencies for the \code{nsnp} SNPs}
+  \item{genotypes}{matrix of genotypes}
+  \item{p_in}{input allele frequency}
 }
 \details{}
 \value{
-\code{hweSimulateGenotypeMtarix} returns a random matrix of genotypes for \code{nsamp} samples and \code{nsnp} SNPs with input allele frequencies \code{aFreq}, assuming that the samples' genotypes are in HWE for each SNP. There are no missing calls.
+\code{hweSimulateGenotypeMatrix} returns a random matrix of genotypes for \code{nsamp} samples and \code{nsnp} SNPs with input allele frequencies \code{aFreq}, assuming that the samples' genotypes are in HWE for each SNP. There are no missing calls.
 \itemize{
 \code{hweSimulate} returns a data frame with columns:
 \item{ \code{aFreq.exp}: Expected (input) allele frequency}

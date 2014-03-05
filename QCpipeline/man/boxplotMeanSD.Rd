@@ -3,7 +3,7 @@
 \title{Boxplot with mean and SD}
 \description{Boxplot with mean and SD}
 \usage{
-boxplotMeanSD(x, y, data=NULL, xlab=NULL, ylab=NULL, nSD=1, ...)
+boxplotMeanSD(x, y, data=NULL, xlab=NULL, ylab=NULL, ylim=NULL, nSD=1, showLegend=TRUE, ...)
 }
 \arguments{
   \item{x}{vector or character string denoting column in data}
