@@ -24,28 +24,15 @@ print(config)
 # variables
 snpAnnot <- getobj(config["annot_snp_file"])
 snpID <- getSnpID(snpAnnot)
-pathprefix <- config["out_assoc_prefix"]
-pathprefix
-actions <- unlist(strsplit(config["gene_action"]," "))
-actions
-qqfname <- config["out_plot_prefix"]
-qqfname
-outcome <- unlist(strsplit(config["outcome"]," "))
-outcome
-covar.list <- getobj(config["covar.list"])
-covar.list
-model.type <- unlist(strsplit(config["model_type"]," "))
+(pathprefix <- config["out_assoc_prefix"])
+(actions <- unlist(strsplit(config["gene_action"]," ")))
+(qqfname <- config["out_plot_prefix"])
+(outcome <- unlist(strsplit(config["outcome"]," ")))
+(covar.list <- getobj(config["covar.list"]))
+(model.type <- unlist(strsplit(config["model_type"]," ")))
 stopifnot(all(model.type %in% c("logistic", "linear")))
-model.type
 if (!is.na(config["plot_chroms"])) {
-  plotchroms <- getobj(config["plot_chroms"])
-  plotchroms
-}
-
-# function to find effective sample size MAF filter using quadratic equation
-.quadSolveMAF <- function(x, N) {
-  sq <- sqrt(1 - (2 * x / N)) / 2
-  min(0.5 + sq, 0.5 - sq)
+  (plotchroms <- getobj(config["plot_chroms"]))
 }
 
 for (i in 1:length(actions)) {
@@ -69,85 +56,50 @@ for (i in 1:length(actions)) {
   
   # calculate MAF
   if (config["maf.filter.type"] == "absolute") {
-    maf.text <- paste("MAF >", config["maf.absolute.threshold"])
-    maf.string <- ""
+    mafhi.text <- paste("MAF >", config["maf.absolute.threshold"])
+    mafhi.string <- ""
+    maflo.text <- paste("MAF <=", config["maf.absolute.threshold"])
+    maflo.string <- ""
   } else if (config["maf.filter.type"] == "snp.specific") {
     N <- switch(model.type[i],
-    			linear=max(combined$n, na.rm=TRUE),
-    			logistic=max( pmin( combined$nAA.cc0 + combined$nAB.cc0 + combined$nBB.cc0,
-    								combined$nAA.cc1 + combined$nAB.cc1 + combined$nBB.cc1), na.rm=TRUE))
-    								
-    maf <- .quadSolveMAF(as.numeric(maf.thresh), N)
-    maf.text <- paste("2*MAF*(1-MAF)*N >", maf.thresh)
-    maf.string <- paste("- MAF > ", round(maf, digits=3), sep="")
-  }
+                linear=max(combined$n, na.rm=TRUE),
+                logistic=max( pmin( combined$nAA.cc0 + combined$nAB.cc0 + combined$nBB.cc0,
+                  combined$nAA.cc1 + combined$nAB.cc1 + combined$nBB.cc1), na.rm=TRUE))
     
+    maf <- quadSolveMAF(as.numeric(maf.thresh), N)
+    mafhi.text <- paste("2*MAF*(1-MAF)*N >", maf.thresh)
+    mafhi.string <- paste("- MAF >", format(maf, digits=3))
+    maflo.text <- paste("2*MAF*(1-MAF)*N <=", maf.thresh)
+    maflo.string <- paste("- MAF <=", format(maf, digits=3))
+  }
+
   for (type in c("LR", "Wald")) { 
     varp <- paste(type,"pval", sep=".")    
     ## no LR test for models with interactions
     if (!(varp %in% names(combined))) next
+  
+    ## filtering
+    assoc <- combined[!is.na(combined[,varp]),
+                      c(varp, "chromosome", "composite.filter", "comp.maf.filter")]
+    names(assoc)[1] <- "pval"
+    title.no.filt <- paste("no filter\n", nrow(assoc), "SNPs")
+    qual.filt <- which(assoc$composite.filter)
+    title.qual.filt <- paste("composite filter\n", length(qual.filt), "SNPs")
+    mafhi.filt <- which(assoc$comp.maf.filter)
+    title.mafhi.filt <- paste("composite.filter +",mafhi.text,"\n", length(mafhi.filt), "SNPs", mafhi.string)
+    maflo.filt <- which(assoc$composite.filter & !assoc$comp.maf.filter)
+    title.maflo.filt <- paste("composite.filter +",maflo.text,"\n", length(maflo.filt), "SNPs", maflo.string)
+    filters <- list(1:nrow(assoc), qual.filt, mafhi.filt, maflo.filt)
+    names(filters) <- c(title.no.filt, title.qual.filt, title.mafhi.filt, title.maflo.filt)
     
+  
     # QQ plots
-    png(paste(qqfname,"_model_", i, "_",actions[i],"_qq_",type,".png",sep=""), width=720, height=720)
-    par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
-        cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)    
-    pval <- combined[,varp]
-
-    # QQ plots - unfiltered plot, subsetted with plotchroms
-    pvaln <- pval[!is.na(pval)]
-    title <- paste("no filter\n", length(pvaln), "SNPs")
-    lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
-    subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
-    qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
-
-    # QQ plots - filtered, subsetted with plotchroms
-    pvaln <- pval[combined$composite.filter & (!is.na(pval))]
-    title <- paste("composite filter\n", length(pvaln), "SNPs")
-    lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
-    subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
-    qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
-
-    # QQ plots - maf filtered, subsetted with plotchroms
-    pvaln <- pval[combined$comp.maf.filter & (!is.na(pval))]
-    title <- paste("composite filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
-    lambda <- median(-2*log(pvaln), na.rm=TRUE) / 1.39
-    subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
-    qqPlot(pvaln, trunc=FALSE, main=title, sub=subtitle)
-
-    # obs-exp plot
-    pvalx <- -log10(sort(pvaln)) # sort() removes NAs
-    n <- length(pvalx)
-    x <- -log10((1:n)/n)
-    plot(x, pvalx-x, xlab=substitute(paste(-log[10], "(expected P)")),
-         ylab=substitute(paste(log[10], "(expected P)", -log[10], "(observed P)")),
-         main=title)
-    abline(h=0,col="red")
-    dev.off()
-    
-    # Manhattan plots - no filter, subsetted with plotchroms
-    png(paste(qqfname,"_model_", i, "_",actions[i],"_manh_",type,".png",sep=""), width=720, height=720)
-    par(mfrow=c(3,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
-    pvaln <- pval[(!is.na(pval))]
-    chromosome <- combined$chromosome[!is.na(pval)]
-    title <- paste("no filter\n", length(pvaln), "SNPs")
-    manhattanPlot(p=pvaln,chromosome=chromosome,
-                  main=title, signif=as.numeric(config["signif_line"]))
-
-    # Manhattan plots - filtered, subsetted with plotchroms
-    pvaln <- pval[combined$composite.filter & (!is.na(pval))]
-    chromosome <- combined$chromosome[combined$composite.filter & !is.na(pval)]
-    title <- paste("composite filter\n", length(pvaln), "SNPs")
-    manhattanPlot(p=pvaln,chromosome=chromosome,
-                  main=title, signif=as.numeric(config["signif_line"]))
-
-    # Manhattan plots - maf filtered, subsetted with plotchroms
-    pvaln <- pval[combined$comp.maf.filter & (!is.na(pval))]
-    chromosome <- combined$chromosome[combined$comp.maf.filter & !is.na(pval)]
-    #title <- paste("composite filter +",maf.text,"\n", length(pvaln), "SNPs")
-    title <- paste("composite filter +",maf.text,"\n", length(pvaln), "SNPs", maf.string)
-    manhattanPlot(p=pvaln,chromosome=chromosome,
-                  main=title, signif=as.numeric(config["signif_line"]))
-    dev.off()
+    outfile <- paste(qqfname,"_model_", i, "_",actions[i],"_qq_",type,".png",sep="")
+    qqPlotPng(assoc$pval, filters, outfile)
+  
+    # Manhattan plots
+    outfile <- paste(qqfname,"_model_", i, "_",actions[i],"_manh_",type,".png",sep="")
+    manhattanPlotPng(assoc$pval, assoc$chromosome, filters[1:3], outfile)
   }
 }
 
