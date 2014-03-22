@@ -4,6 +4,7 @@
 ## Updated March 7, 2012, to allow for indel records where IlmnStrand != SourceStrand
 ## Updated January 31, 2013 to allow for non-verbose indel mapping (where SourceStrand is not available, print out "I" and "D," respectively, to represent insertion and deletion allele
 ## Updated October 10, 2013, to allow for Illumina manifests files lacking the "RefStrand" column
+## Updated March 22, 2014 to allow for one indel record
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -56,6 +57,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 {
 
   options(stringsAsFactors = FALSE)
+  require(Biostrings)
 
   ## Report total number of SNPs and indels
   cat("\tTotal number of probes:", length(snp.dat$Name),"\n")
@@ -182,10 +184,14 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
     del.first <- indels.dat[indels.dat$SNP=="[D/I]",]
     ins.first <- indels.dat[indels.dat$SNP=="[I/D]",]
 
+    if (nrow(del.first)>0){
     del.first$top.A <- del.first$design.A <- "D"
     del.first$top.B <- del.first$design.B <- "I"
+  }
+    if(nrow(ins.first)>0){
     ins.first$top.A <- ins.first$design.A <- "I"
     ins.first$top.B <- ins.first$design.B <- "D"
+  }
 
     ## Need to define alle1 and alle2 revcomp -- PICK UP HERE ON FRIDAY 2/1/2013
     
