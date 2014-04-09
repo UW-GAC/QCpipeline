@@ -19,4 +19,5 @@ export(readConfig, writeConfig, setConfigDefaults,
        hweSimulate,
        hweSimulateGenotypeMatrix,
        quadSolveMAF,
-       qqPlotPng, manhattanPlotPng)
+       qqPlotPng, manhattanPlotPng,
+       gdsMerge, gdsMergeCheck)

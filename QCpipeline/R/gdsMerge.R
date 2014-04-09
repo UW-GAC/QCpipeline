@@ -1,0 +1,122 @@
+## function to combine two (or more) gds files.
+## genoDataList - named list of GenotypeData objects. 
+##   list names will be used to identify datasets in output snp annotation
+## sampleList - optional list of scanIDs to include - list names same as genoDataList
+## outPrefix - output file prefix (will append ".gds" and "_snpAnnot.RData")
+## TO-DO: add another option - columns to preserve from original snp annotations?
+## TO-DO: log file for mismatched SNPs
+gdsMerge <- function(genoDataList, sampleList=NULL, outPrefix="new") {
+  if (is.null(names(genoDataList))) stop("Please supply names for genoDataList")
+  
+  ## scanIDs from sampleList, or all
+  if (!is.null(sampleList)) {
+    stopifnot(all(names(sampleList) == names(genoDataList)))
+  } else {
+    sampleList <- lapply(genoDataList, getScanID)
+  }
+  scanID.all <- unlist(sampleList, use.names=FALSE)
+  ## TO-DO: allow mapping to new scanIDs???
+  stopifnot(sum(duplicated(scanID.all)) == 0)
+  for (i in 1:length(sampleList)) {
+    message(length(sampleList[[i]]), " samples included from ", names(sampleList)[i])
+  }
+  
+  ## align snps on chromosome, position, and alleles
+  ## TO-DO: currently this gets only the minimum info - also merge other columns?
+  ## TO-DO: make log file with list of snps matching on chrom and position but not alleles.
+  message("Matching SNPs...")
+  snpList <- lapply(genoDataList, function(x) {
+    alleleA <- getAlleleA(x)
+    alleleB <- getAlleleB(x)
+    data.frame(snpID=getSnpID(x),
+               chromosome=getChromosome(x),
+               position=getPosition(x),
+               alleleA=alleleA,
+               alleleB=alleleB,
+               alleles=paste(pmin(alleleA, alleleB), pmax(alleleA, alleleB)),
+               stringsAsFactors=FALSE)
+  })
+  snp <- snpList[[1]]
+  for (x in names(snpList)[-1]) {
+    snp <- merge(snp, snpList[[x]], by=c("chromosome", "position", "alleles"), 
+                 suffixes=c("", paste0(".", x)), sort=FALSE)
+  }
+  snp <- snp[order(snp$snpID),]
+  message(nrow(snp), " SNPs with matching chromosome, position, and alleles")
+
+  ## use first object as allele coding.
+  ## make an index for A/B swaps (C/T in one file, T/C in other).
+  for (x in names(snpList)[-1]) {
+    snp[[paste("swap", x, sep=".")]] <- snp[[paste("alleleA", x, sep=".")]] != snp$alleleA
+    message(sum(snp[[paste("swap", x, sep=".")]]), " alleles swapped for ", x)
+  }
+  
+  ## create new gds file
+  message("Creating new GDS file with ", length(scanID.all), " samples and ", nrow(snp), " SNPs")
+  
+  gdsfile <- paste0(outPrefix, ".gds")
+  gds <- createfn.gds(gdsfile)
+
+  add.gdsn(gds, "sample.id", scanID.all, compress="ZIP.max", closezip=TRUE)
+  add.gdsn(gds, "snp.id", snp$snpID, compress="ZIP.max", closezip=TRUE)
+  add.gdsn(gds, "snp.chromosome", snp$chromosome, storage="uint8",
+           compress="ZIP.max", closezip=TRUE)
+  add.gdsn(gds, "snp.position", snp$position, compress="ZIP.max", closezip=TRUE)
+  add.gdsn(gds, "snp.allele", paste(snp$alleleA, snp$alleleB, sep="/"),
+           compress="ZIP.max", closezip=TRUE)
+  ## rsID???
+  sync.gds(gds)
+
+  geno.node <- add.gdsn(gds, "genotype", storage="bit2",
+                        valdim=c(nrow(snp), length(scanID.all)))
+  put.attr.gdsn(geno.node, "snp.order")
+  
+  for (i in 1:length(genoDataList)) {
+    set <- names(genoDataList)[i]
+    message("Reading genotypes from ", set)
+    snpID.col <- ifelse(i == 1, "snpID", paste0("snpID.", set))
+    swap <- snp[[paste0("swap.", set)]]
+    snp.index <- match(snp[[snpID.col]], getSnpID(genoDataList[[i]]))
+    for (s in sampleList[[i]]) {
+      samp.index <- which(getScanID(genoDataList[[i]]) == s)
+      geno <- getGenotype(genoDataList[[i]], scan=c(samp.index, 1), snp=c(1,-1))[snp.index]
+      ## if alleles are swapped, new genotype is 2-genotype
+      if (i > 1) geno[swap] <- 2 - geno[swap]
+      geno[is.na(geno)] <- 3
+      write.gdsn(geno.node, geno, start=c(1, which(scanID.all == s)), count=c(-1,1))
+    }
+  }
+  message("Cleaning up")
+  closefn.gds(gds)
+  cleanup.gds(gdsfile)
+  
+  message("Saving SNP annotation")
+  cols <- c("snpID", "chromosome", "position", "alleleA", "alleleB",
+            paste0("snpID.", names(genoDataList)[-1]))
+  snpAnnot <- SnpAnnotationDataFrame(snp[,cols])
+  save(snpAnnot, file=paste0(outPrefix, "_snpAnnot.RData"))
+}
+
+
+gdsMergeCheck <- function(genoDataList, outPrefix="new") {
+  snpAnnot <- getobj(paste0(outPrefix, "_snpAnnot.RData"))
+  genoData <- GenotypeData(GdsGenotypeReader(paste0(outPrefix, ".gds")),
+                           snpAnnot=snpAnnot)
+  scanID.all <- getScanID(genoData)
+  
+  for (i in 1:length(genoDataList)) {
+    set <- names(genoDataList)[i]
+    message("Reading genotypes from ", set)
+    snpID.col <- ifelse(i == 1, "snpID", paste0("snpID.", set))
+    snp.index <- match(snpAnnot[[snpID.col]], getSnpID(genoDataList[[i]]))
+    scanID.set <- getScanID(genoDataList[[i]])
+    for (s in intersect(scanID.set, scanID.all)) {
+      geno <- getGenotype(genoDataList[[i]], scan=c(which(scanID.set == s), 1), 
+                          snp=c(1,-1), char=TRUE, sort=TRUE)[snp.index]     
+      geno.new <- getGenotype(genoData, scan=c(which(scanID.all == s), 1), 
+                              snp=c(1,-1), char=TRUE, sort=TRUE)
+      stopifnot(allequal(geno, geno.new))
+    }
+  }
+  close(genoData)
+}
