@@ -2,10 +2,11 @@
 ## genoDataList - named list of GenotypeData objects. 
 ##   list names will be used to identify datasets in output snp annotation
 ## sampleList - optional list of scanIDs to include - list names same as genoDataList
+## snpList - optional list of snpIDs to include - list names same as genoDataList
 ## outPrefix - output file prefix (will append ".gds" and "_snpAnnot.RData")
 ## TO-DO: add another option - columns to preserve from original snp annotations?
 ## TO-DO: log file for mismatched SNPs
-gdsMerge <- function(genoDataList, sampleList=NULL, outPrefix="new") {
+gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL, outPrefix="new") {
   if (is.null(names(genoDataList))) stop("Please supply names for genoDataList")
   
   ## scanIDs from sampleList, or all
@@ -21,21 +22,30 @@ gdsMerge <- function(genoDataList, sampleList=NULL, outPrefix="new") {
     message(length(sampleList[[i]]), " samples included from ", names(sampleList)[i])
   }
   
+  ## snpIDs from snpList, or all
+  if (!is.null(snpList)) {
+    stopifnot(all(names(snpList) == names(genoDataList)))
+  } else {
+    snpList <- lapply(genoDataList, getSnpID)
+  }
+  
   ## align snps on chromosome, position, and alleles
   ## TO-DO: currently this gets only the minimum info - also merge other columns?
   ## TO-DO: make log file with list of snps matching on chrom and position but not alleles.
   message("Matching SNPs...")
-  snpList <- lapply(genoDataList, function(x) {
-    alleleA <- getAlleleA(x)
-    alleleB <- getAlleleB(x)
-    data.frame(snpID=getSnpID(x),
-               chromosome=getChromosome(x),
-               position=getPosition(x),
-               alleleA=alleleA,
-               alleleB=alleleB,
-               alleles=paste(pmin(alleleA, alleleB), pmax(alleleA, alleleB)),
-               stringsAsFactors=FALSE)
-  })
+  for (x in names(snpList)) {
+    snpID <- getSnpID(genoDataList[[x]])
+    index <- snpID %in% snpList[[x]]
+    alleleA <- getAlleleA(genoDataList[[x]], index=index)
+    alleleB <- getAlleleB(genoDataList[[x]], index=index)
+    snpList[[x]] <- data.frame(snpID=snpID[index],
+                      chromosome=getChromosome(genoDataList[[x]], index=index),
+                      position=getPosition(genoDataList[[x]], index=index),
+                      alleleA=alleleA,
+                      alleleB=alleleB,
+                      alleles=paste(pmin(alleleA, alleleB), pmax(alleleA, alleleB)),
+                      stringsAsFactors=FALSE)
+  }
   snp <- snpList[[1]]
   for (x in names(snpList)[-1]) {
     snp <- merge(snp, snpList[[x]], by=c("chromosome", "position", "alleles"), 
