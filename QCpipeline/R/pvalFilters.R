@@ -9,7 +9,7 @@ quadSolveMAF <- function(X, N) {
 
 
 
-## filters - named list with 4 sets of filters (names are plot titles)
+## filters - named list with 4 sets of filters (names are plot titles) (can have < 4)
 qqPlotPng <- function(pval, filters, outfile) {
   png(outfile, width=720, height=720)
   par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
@@ -28,7 +28,7 @@ qqPlotPng <- function(pval, filters, outfile) {
 ## filters - named list with 3 sets of filters (names are plot titles)
 manhattanPlotPng <- function(pval, chromosome, filters, outfile) {
   png(outfile, width=720, height=720)
-  par(mfrow=c(3,1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
+  par(mfrow=c(length(filters),1), mar=c(5,5,4,2)+0.1, lwd=1.5, cex.lab=1.5, cex.main=1.5)
   for (i in 1:length(filters)) {
     filt <- filters[[i]]
     title <- names(filters)[i]
