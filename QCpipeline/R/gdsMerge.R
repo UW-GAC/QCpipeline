@@ -52,10 +52,13 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
     snp <- merge(snp, snpList[[x]], by=c("chromosome", "position", "alleles"),
                  suffixes=c("", paste0(".", x)), sort=FALSE)
   }
+  names(snp)[names(snp) == "snpID"] <- paste0("snpID.", names(snpList)[1])
   snp <- snp[order(snp$chromosome, snp$position),]
+
   if (newSnpID) {
-      names(snp)[names(snp) == "snpID"] <- paste0("snpID.", names(snpList[[1]]))
       snp$snpID <- 1:nrow(snp)
+  } else {
+      snp$snpID <- snp[[paste0("snpID.", names(snpList)[1])]]
   }
   message(nrow(snp), " SNPs with matching chromosome, position, and alleles")
 
@@ -89,9 +92,9 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
   for (i in 1:length(genoDataList)) {
     set <- names(genoDataList)[i]
     message("Reading genotypes from ", set)
-    snpID.col <- ifelse(i == 1, "snpID", paste0("snpID.", set))
-    swap <- snp[[paste0("swap.", set)]]
+    snpID.col <- paste0("snpID.", set)
     snp.index <- match(snp[[snpID.col]], getSnpID(genoDataList[[i]]))
+    swap <- snp[[paste0("swap.", set)]]
     for (s in sampleList[[i]]) {
       samp.index <- which(getScanID(genoDataList[[i]]) == s)
       geno <- getGenotype(genoDataList[[i]], scan=c(samp.index, 1), snp=c(1,-1))[snp.index]
@@ -126,7 +129,7 @@ gdsMergeCheck <- function(genoDataList, outPrefix="new") {
   for (i in 1:length(genoDataList)) {
     set <- names(genoDataList)[i]
     message("Reading genotypes from ", set)
-    snpID.col <- ifelse(i == 1, "snpID", paste0("snpID.", set))
+    snpID.col <- paste0("snpID.", set)
     snp.index <- match(snpAnnot[[snpID.col]], getSnpID(genoDataList[[i]]))
     scanID.set <- getScanID(genoDataList[[i]])
     for (s in intersect(scanID.set, scanID.all)) {
