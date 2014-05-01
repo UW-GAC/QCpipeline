@@ -14,10 +14,10 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "build", "nc_bl_file", "nc_geno_file",
-              "out_anom_dir", "out_eligible_snps", "out_plot_dir", "project")
+              "out_anom_dir", "out_plot_dir", "project")
 optional <- c("annot_snp_IntensityOnlyCol", "chromXY", "out_plot_prefix", "plot.win",
-              "thresh.indiv", "thresh.sum", "scan_exclude_file")
-default <- c(NA, FALSE, "long_plot", 1, 5, 10, NA)
+              "thresh.indiv", "thresh.sum", "scan_exclude_file", "out_eligible_snps")
+default <- c(NA, FALSE, "long_plot", 1, 5, 10, NA, "snps_eligible.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

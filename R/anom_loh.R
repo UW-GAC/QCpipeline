@@ -14,9 +14,9 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "nc_bl_file", "nc_geno_file",
-              "out_anom_dir", "out_eligible_snps", "project")
-optional <- c("scan_exclude_file")
-default <- c(NA)
+              "out_anom_dir", "project")
+optional <- c("scan_exclude_file", "out_eligible_snps")
+default <- c(NA, "snps_eligible.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
