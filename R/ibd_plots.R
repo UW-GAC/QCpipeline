@@ -181,7 +181,7 @@ if (config["ibd_method"] == "KING") {
   psym[unexp] <- 2
   cols[c("Deg3", "Q", "U")] <- "black"
   pcol <- cols[prel]
-  ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym, rel.draw=c("FS", "Deg2"))
+  ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym)
   points(ibd$k0[unexp], ibd$k1[unexp], color=pcol[unexp], pch=psym[unexp])
   rel <- rels[rels %in% unique(prel)]
   col <- cols[rel]
