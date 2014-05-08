@@ -84,6 +84,9 @@ If you would like to use multithreading when available, add the
 use the maximum number of cores available (between 1-4), and 
 "--multithread 4" will request 4 cores. Do not request more than 8 cores.
 
+For family studies, provide a family variable in the config file.
+
+
 27) Plate layout maps
 "annot_scan_plateCol" and "annot_scan_wellCol" should refer to the plates
 on which the samples were shipped to the genotyping center.
