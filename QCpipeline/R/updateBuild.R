@@ -1,7 +1,6 @@
 
-updateBuild <- function(genoData, map, outPrefix="new",
-                        update.alleles=FALSE, remove.unmapped=TRUE,
-                        block.size=100) {
+updateBuild <- function(genoData, map, outPrefix="new", remove.unmapped=TRUE,
+                        update.alleles=FALSE, block.size=100) {
          
     gdsfile <- paste0(outPrefix, ".gds")
     gds <- createfn.gds(gdsfile)
@@ -24,13 +23,9 @@ updateBuild <- function(genoData, map, outPrefix="new",
         map[[v]] <- as.integer(map[[v]])
     }
     
-    snp <- getSnpVariable(genoData, c("snpID", "chromosome", "position", "rsID"))
-    if (update.alleles) {
-        stopifnot(all(c("alleleA", "alleleB") %in% names(map)))
-    } else {
-        snp <- cbind(snp, getSnpVariable(genoData, c("alleleA", "alleleB")))
-    }
-    names(snp) <- paste0("old.", names(snp))
+    snp <- getSnpVariable(genoData, c("snpID", "chromosome", "position", "rsID",
+                                      "alleleA", "alleleB"))
+    names(snp)[1:4] <- paste0("old.", names(snp)[1:4])
     snp <- merge(snp, map, all.x=TRUE)
     snp$new.chromosome[is.na(snp$new.chromosome)] <- 27L
     snp$new.position[is.na(snp$new.position)] <- 0L
@@ -40,13 +35,17 @@ updateBuild <- function(genoData, map, outPrefix="new",
     snp <- snp[order(snp$new.chromosome, snp$new.position),]
     snp$new.snpID <- 1:nrow(snp)
 
-    ## index that maps old snp order to new chrom-position order
-    ## WARNING: this assumes that rsIDs are unique
-    ## will fail if removeUnmapped=FALSE and some old SNPs are not in the map file
-    ## TO-DO: fix this if removeUnmapped=FALSE or there are duplicate rsIDs
-    snp.index <- match(snp$old.rsID, getSnpVariable(genoData, "rsID"))
-    stopifnot(allequal(snp$old.snpID, getSnpID(genoData)[snp.index]))
-
+    if (update.alleles) {
+        allele.match <- snp$alleleA == snp$old.alleleA & snp$alleleB == snp$old.alleleB
+        allele.switch <- snp$alleleA == snp$old.alleleB & snp$alleleB == snp$old.alleleA
+        if (!all(allele.match | allele.switch)) {
+            closefn.gds(gds)
+            stop("not all alleles match map file")
+        }
+        snp$alleleA <- ifelse(allele.switch, snp$new.alleleB, snp$new.alleleA)
+        snp$alleleB <- ifelse(allele.switch, snp$new.alleleA, snp$new.alleleB)
+    }
+    
     ## add snp data
     add.gdsn(gds, "snp.id", snp$new.snpID, compress="ZIP.max", closezip=TRUE)
     add.gdsn(gds, "snp.chromosome", snp$new.chromosome, storage="uint8",
@@ -56,6 +55,13 @@ updateBuild <- function(genoData, map, outPrefix="new",
              compress="ZIP.max", closezip=TRUE)
     add.gdsn(gds, "snp.rs.id", snp$new.rsID, compress="ZIP.max", closezip=TRUE)
     sync.gds(gds)
+
+    ## index that maps old snp order to new chrom-position order
+    ## WARNING: this assumes that rsIDs are unique
+    ## will fail if removeUnmapped=FALSE and some old SNPs are not in the map file
+    ## TO-DO: fix this if removeUnmapped=FALSE or there are duplicate rsIDs
+    snp.index <- match(snp$old.rsID, getSnpVariable(genoData, "rsID"))
+    stopifnot(allequal(snp$old.snpID, getSnpID(genoData)[snp.index]))
 
     nsamp <- nscan(genoData)
     nsnp <- nrow(snp)
