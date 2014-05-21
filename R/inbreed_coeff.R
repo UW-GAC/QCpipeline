@@ -15,8 +15,8 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("gds_geno_file", "out_snp_file")
-optional <- c("out_inbrd_file", "scan_ibd_include_file")
-default <- c("inbreed_coeff.RData", NA)
+optional <- c("out_inbrd_file", "scan_ibd_include_file", "ibd_method")
+default <- c("inbreed_coeff.RData", NA, "MoM")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -30,8 +30,15 @@ if (!is.na(config["scan_ibd_include_file"])) {
 }
 length(scan.sel)
 
+if (config["ibd_method"] == "MoM") {
+  method <- "mom.weir"
+} else if (config["ibd_method"] == "MLE") {
+  method <- "mle"
+}
+method
+
 gdsobj <- openfn.gds(config["gds_geno_file"])
-inbrd.coeff <- snpgdsIndInb(gdsobj, snp.id=snp.sel, sample.id=scan.sel)
+inbrd.coeff <- snpgdsIndInb(gdsobj, snp.id=snp.sel, sample.id=scan.sel, method=method)
 closefn.gds(gdsobj)
 
 save(inbrd.coeff, file=config["out_inbrd_file"])

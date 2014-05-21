@@ -14,7 +14,7 @@ Identity by Descent with the following steps:
    (from autosomal, non-monomorphic, missing<0.05)
 2) IBD calculations
 3) Assign observed relationships and plot results
-4) Calculate individual inbreeding coefficients
+4) Calculate individual inbreeding coefficients (if method is MoM)
 
 Required config parameters:
 annot_scan_file    scan annotation file
@@ -103,10 +103,12 @@ job = "ibd_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd']], queue=qname, email=email)
 
-job = "inbreed_coeff"
-if waitLD:
-    holdid = [jobid['ibd_snp_sel']]
-else:
-    holdid = None
-rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+# don't run inbreed_coeff for KING.
+if configdict["ibd_method"] != "KING":
+    job = "inbreed_coeff"
+    if waitLD:
+        holdid = [jobid['ibd_snp_sel']]
+    else:
+        holdid = None
+    rscript = os.path.join(pipeline, "R", job + ".R")
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
