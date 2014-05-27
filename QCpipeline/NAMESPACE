@@ -20,4 +20,5 @@ export(readConfig, writeConfig, setConfigDefaults,
        hweSimulateGenotypeMatrix,
        quadSolveMAF,
        qqPlotPng, manhattanPlotPng,
-       gdsMerge, gdsMergeCheck)
+       gdsMerge, gdsMergeCheck,
+       getSnpNames, readSnpTable)
