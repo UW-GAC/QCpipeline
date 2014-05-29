@@ -10,9 +10,10 @@ quadSolveMAF <- function(X, N) {
 
 
 ## filters - named list with 4 sets of filters (names are plot titles) (can have < 4)
-qqPlotPng <- function(pval, filters, outfile, ...) {
-  png(outfile, width=720, height=720)
-  par(mfrow=c(2,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
+qqPlotPng <- function(pval, filters, outfile, ncol=2, ...) {
+  nrow <- ceiling(length(filters) / ncol)
+  png(outfile, width=360*ncol, height=360*nrow) # maybe need to calculate padding here too
+  par(mfrow=c(nrow, ncol), mar=c(5,5,4,2)+0.1, lwd=1.5,
       cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)    
   for (i in 1:length(filters)) {
     filt <- filters[[i]]

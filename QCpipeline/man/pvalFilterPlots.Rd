@@ -7,7 +7,7 @@
   different filter levels
 }
 \usage{
-qqPlotPng(pval, filters, outfile, ...)
+qqPlotPng(pval, filters, outfile, ncol=2, ...)
 manhattanPlotPng(pval, chromosome, filters, outfile, ...)
 }
 \arguments{
@@ -18,6 +18,7 @@ manhattanPlotPng(pval, chromosome, filters, outfile, ...)
     should have 4 elements for \code{qqPlotPng} and 3 elements for
     \code{manhattanPlotPng}.}
   \item{outfile}{name of output png file}
+  \item{ncol}{number of columns in QQ plot}
   \item{...}{other parameters passed to \code{\link{qqPlot}} or \code{\link{manhattanPlot}}}
 }
 \details{
