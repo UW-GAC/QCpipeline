@@ -57,7 +57,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 {
 
   options(stringsAsFactors = FALSE)
-  require(Biostrings)
+  #require(Biostrings)
 
   ## Report total number of SNPs and indels
   cat("\tTotal number of probes:", length(snp.dat$Name),"\n")

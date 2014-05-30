@@ -1,5 +1,7 @@
 import(GWASTools)
-import(gplots)
+import(IRanges)
+import(GenomicRanges)
+importFrom(gplots, plotCI) # used in boxplotMeanSD
 import(grid)
 import(gridBase)
 import(hexbin)
@@ -7,9 +9,7 @@ import(Biostrings)
 import(tools)
 import(SRAdb)
 import(GWASExactHW)
-import(IRanges)
-import(GenomicRanges)
-import(rtracklayer)
+importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
 
 
 export(readConfig, writeConfig, setConfigDefaults,
