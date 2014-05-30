@@ -7,6 +7,10 @@ import(Biostrings)
 import(tools)
 import(SRAdb)
 import(GWASExactHW)
+import(IRanges)
+import(GenomicRanges)
+import(rtracklayer)
+
 
 export(readConfig, writeConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
@@ -21,4 +25,5 @@ export(readConfig, writeConfig, setConfigDefaults,
        quadSolveMAF,
        qqPlotPng, manhattanPlotPng,
        gdsMerge, gdsMergeCheck,
-       getSnpNames, readSnpTable)
+       getSnpNames, readSnpTable,
+       convertBuild)
