@@ -10,6 +10,7 @@ import(tools)
 import(SRAdb)
 import(GWASExactHW)
 importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
+importFrom(stringr, str_sub) # used in checkABalleles
 
 
 export(readConfig, writeConfig, setConfigDefaults,
@@ -26,4 +27,5 @@ export(readConfig, writeConfig, setConfigDefaults,
        qqPlotPng, manhattanPlotPng,
        gdsMerge, gdsMergeCheck,
        getSnpNames, readSnpTable,
-       convertBuild)
+       convertBuild, checkABalleles,
+       chromToChar, chromToInt)
