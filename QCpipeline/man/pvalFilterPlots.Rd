@@ -7,8 +7,8 @@
   different filter levels
 }
 \usage{
-qqPlotPng(pval, filters, outfile, ncol=2, ...)
-manhattanPlotPng(pval, chromosome, filters, outfile, ...)
+qqPlotPng(pval, filters, outfile, ncol=2, addText="", ...)
+manhattanPlotPng(pval, chromosome, filters, outfile, addText="", ...)
 }
 \arguments{
   \item{pval}{p values to plot}
@@ -19,6 +19,7 @@ manhattanPlotPng(pval, chromosome, filters, outfile, ...)
     \code{manhattanPlotPng}.}
   \item{outfile}{name of output png file}
   \item{ncol}{number of columns in QQ plot}
+  \item{addText}{string to add to the upper left corner of the plot}
   \item{...}{other parameters passed to \code{\link{qqPlot}} or \code{\link{manhattanPlot}}}
 }
 \details{
