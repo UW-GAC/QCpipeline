@@ -21,7 +21,6 @@ qqPlotPng <- function(pval, filters, outfile, ncol=2, addText="", ...) {
     lambda <- median(-2*log(pval[filt]), na.rm=TRUE) / 1.39
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pval[filt], truncate=FALSE, main=title, sub=subtitle, ...)
-    print(i)
 
     if (i == 1){
       mtext(side=3, line=-1, text=addText, padj=0.9, adj=0.02, outer=T, cex=1.5) 
