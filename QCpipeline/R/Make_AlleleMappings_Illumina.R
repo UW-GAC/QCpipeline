@@ -5,6 +5,7 @@
 ## Updated January 31, 2013 to allow for non-verbose indel mapping (where SourceStrand is not available, print out "I" and "D," respectively, to represent insertion and deletion allele
 ## Updated October 10, 2013, to allow for Illumina manifests files lacking the "RefStrand" column
 ## Updated March 22, 2014 to allow for one indel record
+## Updated July 10, 2014 to rename some variables, re-organize some code (Tin Louie)
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -27,8 +28,8 @@
 ## In previous strand annotations from Illumina for build 36 arrays, "BlastStrand" held +/- result of  BLAST search of the SOURCE sequence
 
 ################################# USAGE
-## Requires as input:
-# -- "snp.dat", the name of a data frame made from SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following required fields:
+## options(stringsAsFactors = FALSE)
+#  data frame made from SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following required fields:
 #  "IlmnID"                "Name"                  "IlmnStrand"           
 #  "SNP"                   "SourceSeq"         
 ## optional fields:
@@ -55,10 +56,13 @@
 
 make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 {
-
   options(stringsAsFactors = FALSE)
-  #require(Biostrings)
+  if (indels.verbose && !require(Biostrings)) {
+	indels.verbose <- FALSE
+	warning("\tverbose indels NOT written to output")
+  }
 
+  
   ## Report total number of SNPs and indels
   cat("\tTotal number of probes:", length(snp.dat$Name),"\n")
   cat("\tTotal number of indels:", length(snp.dat$Name[is.element(snp.dat$SNP, c("[D/I]","[I/D]"))]),"\n")
@@ -71,11 +75,10 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 
   ## detect if snp.dat contains "RefStrand" - if not, print warning message that plus(+) alleles will not be written out
   print.plus <- TRUE
-  if(!is.element("RefStrand",names(snp.dat)))
-     {
+  if(!is.element("RefStrand",names(snp.dat))) {
        print.plus <- FALSE
        warning("\tSNP manifest lacks RefStrand column; plus(+) alleles NOT written to output")
-     }
+  }
   
   ## set up table template - 2 rows per SNP, first "A", second "B"
   map <- as.data.frame(c(snp.dat$Name, snp.dat$Name))
@@ -101,108 +104,86 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   ## extract the Illumina info for the indels, if present
   indels.dat <- snp.dat[is.element(snp.dat$design.A,c("I","D")),]
   
-  indels <- indels.dat$Name
-  
-  ### Make conditional on presence of indels
-  if(length(indels)>0){
-  cat("\tCreating mappings for insertion/deletion probes\n")
-  
-  if(indels.verbose) {
-	## get alleles from the SourceSeq column; makes a list
-	sourceseq.start <- strsplit(indels.dat$SourceSeq,"[",fixed=TRUE)
+	### Make conditional on presence of indels
+	indels <- indels.dat$Name
+	if(length(indels) > 0) {
+		cat("\tCreating mappings for insertion/deletion probes\n")
+        if (indels.verbose) {
+			# extract 4 portions from each indel's SourceSeq:
+			# sourceseq.start = portion before the brackets []
+			# sourceseq.end   = portion after the brackets []
+			# left            = inside the brackets & before the slash /
+			# right           = inside the brackets & after the slash /
+            tmp <- strsplit(indels.dat$SourceSeq, "[", fixed = TRUE)
+			sourceseq.start <- sapply(tmp, "[[", 1)
+            tmp <- sapply(tmp, "[[", 2)
+			
+			tmp <- strsplit(tmp, "]", fixed = TRUE)
+            sourceseq.end <- sapply(tmp, "[[", 2)
+            tmp <- sapply(tmp, "[[", 1)
+			
+            tmp <- strsplit(tmp, "/", fixed = TRUE)
+            left  <- sapply(tmp, "[[", 1)
+            right <- sapply(tmp, "[[", 2)
 
-	## get just the 2nd element of each list
-	tmp <- sapply(sourceseq.start, "[[", 2)
+			# gather info about each indel:
+			# var = the ACGTs inside the brackets
+			# strand.diff = TRUE if IlmnStrand is different from SourceStrand
+            a <- as.data.frame(cbind(left, right))
+            a$var <- ifelse(a$left == "-", a$right, a$left)
+            tmp <- DNAStringSet(a$var)
+            a$var.revcomp <- as.character(reverseComplement(tmp))
+            a$Name <- indels
+            a$DI <- indels.dat$SNP == "[D/I]"
+            a$strand.diff <- indels.dat$IlmnStrand != indels.dat$SourceStrand
 
-	sourceseq.end <- strsplit(tmp,"]",fixed=TRUE)
+			# design.A and .B depend on DI and strand.diff
+            indels.dat$design.A[a$DI] <- "-"
+            indels.dat$design.B[a$DI & !a$strand.diff] <- a$var[match(indels.dat$Name[a$DI & !a$strand.diff], a$Name)]
+            indels.dat$design.B[a$DI & a$strand.diff] <- a$var.revcomp[match(indels.dat$Name[a$DI & a$strand.diff], a$Name)]
 
-	## indels.snp holds a vector like: [1] "-/GA"     "-/CTCT"   "-/GAAGT"
-	indels.snp <- sapply(sourceseq.end, "[[", 1)
+            indels.dat$design.B[!a$DI] <- "-"
+            indels.dat$design.A[!a$DI & !a$strand.diff] <- a$var[match(indels.dat$Name[!a$DI & !a$strand.diff], a$Name)]
+            indels.dat$design.A[!a$DI & a$strand.diff] <- a$var.revcomp[match(indels.dat$Name[!a$DI & a$strand.diff], a$Name)]
 
-	## ready to define possible alleles parsed from SourceSeq column
-	## SourceSeq USUALLY presents deletion first; order of A/B assignment indicated by SNP column D/I vs I/D
-	alles <- strsplit(indels.snp,"/",fixed=TRUE)
-	ins <- sapply(alles, "[[", 2)
-	dels <- sapply(alles, "[[", 1)
+			# top.A and .B depend on IlmnStrand and design.A and .B (or revcomp)
+			# PLUS is equivalent to TOP, MINUS is equivalent to BOT
+            tmp <- DNAStringSet(indels.dat$design.A)
+            indels.dat$alle1.revcomp <- as.character(reverseComplement(tmp))
+            tmp <- DNAStringSet(indels.dat$design.B)
+            indels.dat$alle2.revcomp <- as.character(reverseComplement(tmp))
 
-	## bind "ins" and "del" columns together
-	a <- as.data.frame(cbind(ins, dels))
-	a$var <- ifelse(a$ins=="-", a$dels, a$ins)
+            indels.dat$top.A[is.element(indels.dat$IlmnStrand,
+                c("P", "PLUS"))] <- indels.dat$design.A[is.element(indels.dat$IlmnStrand, c("P", "PLUS"))]
+            indels.dat$top.B[is.element(indels.dat$IlmnStrand,
+                c("P", "PLUS"))] <- indels.dat$design.B[is.element(indels.dat$IlmnStrand, c("P", "PLUS"))]
+			
+            indels.dat$top.A[is.element(indels.dat$IlmnStrand,
+                c("M", "MINUS"))] <- indels.dat$alle1.revcomp[is.element(indels.dat$IlmnStrand, c("M", "MINUS"))]
+            indels.dat$top.B[is.element(indels.dat$IlmnStrand,
+                c("M", "MINUS"))] <- indels.dat$alle2.revcomp[is.element(indels.dat$IlmnStrand, c("M", "MINUS"))]
+				
+			
+        } else { # else not verbose 
+			## write out simpler versin of indel mapping
+            del.first <- indels.dat[indels.dat$SNP == "[D/I]",]
+            ins.first <- indels.dat[indels.dat$SNP == "[I/D]",]
+            if (nrow(del.first) > 0) {
+                del.first$top.A <- del.first$design.A <- "D"
+                del.first$top.B <- del.first$design.B <- "I"
+            }
+            if (nrow(ins.first) > 0) {
+                ins.first$top.A <- ins.first$design.A <- "I"
+                ins.first$top.B <- ins.first$design.B <- "D"
+            }
+            indels.dat <- rbind(del.first, ins.first)
+            indels.dat$alle1.revcomp <- indels.dat$design.A
+            indels.dat$alle2.revcomp <- indels.dat$design.B
+        }
 
-	## Get reverse complement of the variation
-	## make DNAstrings object
-	var.dstr <- DNAStringSet(a$var)
-	## get reverse complement of var
-	a$var.revcomp <- as.character(reverseComplement(var.dstr))
+	}
 
-	## map the indel names back on
-	a$id <- indels
-
-	## identify the records where "ins" is actually the deletion character
-	a$deletion.first <- indels.dat$SNP=="[D/I]"
-
-	## identify records where SourceStrand==IlmnStrand
-	a$strand.diff <- indels.dat$IlmnStrand!=indels.dat$SourceStrand
-
-	## Assign design alleles, taking into account both "[D/I]" vs "[I/D]" and whether IllmnStrand equals SourceStrand
-
-	indels.dat$alle1[!a$deletion.first & !a$strand.diff] <- a$var[match(indels.dat$Name[!a$deletion.first & !a$strand.diff], a$id)]
-	indels.dat$alle1[!a$deletion.first & a$strand.diff] <- a$var.revcomp[match(indels.dat$Name[!a$deletion.first & a$strand.diff], a$id)]
-
-	indels.dat$alle1[a$deletion.first] <- "-"
-	indels.dat$alle2[!a$deletion.first] <- "-"  
-
-	indels.dat$alle2[a$deletion.first & !a$strand.diff] <- a$var[match(indels.dat$Name[a$deletion.first & !a$strand.diff], a$id)]
-	indels.dat$alle2[a$deletion.first & a$strand.diff] <- a$var.revcomp[match(indels.dat$Name[a$deletion.first & a$strand.diff], a$id)]  
-
-	## MINUS equiv to Illumina BOT; PLUS equiv to TOP
-
-	## Where design strand is PLUS, TOP alles A and B are alles 1, 2 
-	indels.dat$top.A[is.element(indels.dat$IlmnStrand,c("P","PLUS"))] <- indels.dat$alle1[is.element(indels.dat$IlmnStrand,c("P","PLUS"))]
-	indels.dat$top.B[is.element(indels.dat$IlmnStrand,c("P","PLUS"))] <-indels.dat$alle2[is.element(indels.dat$IlmnStrand,c("P","PLUS"))]
-
-	## make DNAstrings objects for alle1, alle2
-	alle1.dstr <- DNAStringSet(indels.dat$alle1)
-	alle2.dstr <- DNAStringSet(indels.dat$alle2)
-
-	## get reverse complement of alle1, alle2
-	indels.dat$alle1.revcomp <- as.character(reverseComplement(alle1.dstr))
-	indels.dat$alle2.revcomp <- as.character(reverseComplement(alle2.dstr))
-
-	## where design sequence is MINUS (i.e., BOT) top alleles are reverse complement of alle1, 2
-	indels.dat$top.A[is.element(indels.dat$IlmnStrand,c("M","MINUS"))]<- indels.dat$alle1.revcomp[is.element(indels.dat$IlmnStrand,c("M","MINUS"))]
-	indels.dat$top.B[is.element(indels.dat$IlmnStrand,c("M","MINUS"))] <- indels.dat$alle2.revcomp[is.element(indels.dat$IlmnStrand,c("M","MINUS"))]
-
-	## identify the DESIGN alleles 
-	indels.dat$design.A <- indels.dat$alle1
-	indels.dat$design.B <- indels.dat$alle2
-
-      }
-
-  if(!indels.verbose) {
-    ## write out simpler version of indel mapping
-    del.first <- indels.dat[indels.dat$SNP=="[D/I]",]
-    ins.first <- indels.dat[indels.dat$SNP=="[I/D]",]
-
-    if (nrow(del.first)>0){
-    del.first$top.A <- del.first$design.A <- "D"
-    del.first$top.B <- del.first$design.B <- "I"
-  }
-    if(nrow(ins.first)>0){
-    ins.first$top.A <- ins.first$design.A <- "I"
-    ins.first$top.B <- ins.first$design.B <- "D"
-  }
-
-    ## Need to define alle1 and alle2 revcomp -- PICK UP HERE ON FRIDAY 2/1/2013
-    
-    indels.dat <- rbind(del.first, ins.first)
-    indels.dat$alle1.revcomp <- indels.dat$design.A
-    indels.dat$alle2.revcomp <- indels.dat$design.B
-  }
-  }
-  
-  #### exit indels, return to snp.dat
-  ## Allow for no indels in SNP.dat
+  # temporarily remove indels from snp.dat
   if (length(indels)>0)   {
   snp.dat <- snp.dat[!is.element(snp.dat$Name, indels),] }
   
