@@ -4,6 +4,6 @@ chromToChar <- function(chrom.int) {
 }
 
 chromToInt <- function(chrom.char) {
-    chrom.map <- as.integer(c(setNames(1:22, 1:22), "X"=23, "XY"=24, "Y"=25, "M"=26, "U"=27, "XYY"=28))
-    unname(chrom.map[chrom.char])
+    chrom.map <- c(setNames(1:22, 1:22), "X"=23, "XY"=24, "Y"=25, "M"=26, "U"=27, "XYY"=28)
+    unname(as.integer(chrom.map[chrom.char]))
 }
