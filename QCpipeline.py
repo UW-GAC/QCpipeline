@@ -32,7 +32,7 @@ def readConfig(file):
     return config
 
 
-def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, options=""):
+def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, options="", qsubOptions=""):
     """Sumbit a pipeline job.
 
     Usage: 
@@ -45,6 +45,7 @@ def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, options=""
     queue - compute cluster queue to submit job into
     holdid - list of job ids that must be complete before this job is run
     email - email address to notify when job is complete
+    qsubArgs - additional options to pass to qsub
 
     Returns:
     id of the submitted job
@@ -69,7 +70,7 @@ def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, options=""
 
     argStr = " ".join(args)
 
-    qsub = "qsub %s %s %s %s %s %s %s" % (nameStr, holdStr, queueStr, emailStr, options, cmd, argStr)
+    qsub = "qsub %s %s %s %s %s %s %s %s" % (qsubOptions, nameStr, holdStr, queueStr, emailStr, options, cmd, argStr)
     process = subprocess.Popen(qsub, shell=True, stdout=subprocess.PIPE)
     pipe = process.stdout
     qsubout = pipe.readline()

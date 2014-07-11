@@ -56,6 +56,8 @@ parser.add_option("-a", "--assoc", dest="assoc",
 parser.add_option("-m", "--merge", dest="merge",
                   action="store_true", default=False,
                   help="merge output for chromosomes chromStart - chromEnd")
+parser.add_option("-o", "--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 parser.add_option("--plotQQManh", dest="plotqq",
                   action="store_true", default=False,
                   help="QQ and Manhattan plots")
@@ -71,6 +73,7 @@ merge = options.merge
 plotq = options.plotqq
 plotc = options.plotcl
 qname = options.qname
+qsubOptions = options.qsubOptions
 
 # 3 arguments (config file, starting chrom, and end chrom) when assoc = True
 if len(args) < 1:
@@ -105,7 +108,7 @@ if assoc:
         sys.exit("cEnd is smaller than cStart")
 
     for ichrom in chroms:
-        jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email)
+        jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email, qsubOptions=qsubOptions)
 
 if merge:
     job = "merge.chroms"
@@ -117,9 +120,9 @@ if merge:
             holdid = holdid + [jobid["run.assoc." + str(i)]]
         #print "hold id for merge: "
         #print holdid
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], holdid=holdid, queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     else: # assoc == False means association tests were run in a previous run and will not carry over holdids
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], queue=qname, email=email, qsubOptions=qsubOptions)
     #print jobid
         
 if plotq:
@@ -130,9 +133,9 @@ if plotq:
         holdid = [jobid["merge.chroms"]]
         #print "hold id for plotq: "
         #print holdid
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     else:
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
 if plotc:
     job = "plot.cluster"
@@ -143,7 +146,7 @@ if plotc:
         holdid = [jobid["merge.chroms"]]
         #print "hold id for plotc: "
         #print holdid
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     else:
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
