@@ -6,7 +6,7 @@
 ## Updated October 10, 2013, to allow for Illumina manifests files lacking the "RefStrand" column
 ## Updated March 22, 2014 to allow for one indel record
 ## Updated July 10, 2014 to rename some variables, re-organize some code (Tin Louie)
-## Updated July 14, 2014 to output indels vcf file as side effect 
+## Updated July 14, 2014 to output indels vcf file as side effect (Tin Louie) 
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -36,7 +36,7 @@
 #  "SourceStrand", "RefStrand"
 
 #  args:
-#  indela.verbose - defaults to TRUE, will parse full nucleotide sequence if alleles from the SourceSeq column  
+#  indels.verbose - defaults to TRUE, will parse full nucleotide sequence of alleles from the SourceSeq column  
 #                   when FALSE, prints I" and "D" characters, respectively, to represent insertion and deletion allele
 #               
 #  indels.vcfout - default value FALSE; when TRUE, will create indels vcf file
@@ -335,7 +335,8 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 					
 					# write header rows of vcf
 					# disregard warning "appending column names to file"
-					writeLines(c("##fileformat=VCFv4.1", "##FORMAT=<ID=GT,Number=1,Type=String,Description=>"), indels.vcfout.filename)
+                                        # R package VariantAnnotation won't read in VCF if "Description=>", so SN edited to write out "Description="">"
+					writeLines(c("##fileformat=VCFv4.1", "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"\">"), indels.vcfout.filename)
 					colnames(vcf) = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT", "dummySubject")
 					write.table(vcf, indels.vcfout.filename, sep="\t", quote=F, row.names=F, col.names=T, append=T)
 				} else {
