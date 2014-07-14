@@ -6,6 +6,7 @@
 ## Updated October 10, 2013, to allow for Illumina manifests files lacking the "RefStrand" column
 ## Updated March 22, 2014 to allow for one indel record
 ## Updated July 10, 2014 to rename some variables, re-organize some code (Tin Louie)
+## Updated July 14, 2014 to output indels vcf file as side effect 
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -28,18 +29,30 @@
 ## In previous strand annotations from Illumina for build 36 arrays, "BlastStrand" held +/- result of  BLAST search of the SOURCE sequence
 
 ################################# USAGE
-## options(stringsAsFactors = FALSE)
-#  data frame made from SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following required fields:
-#  "IlmnID"                "Name"                  "IlmnStrand"           
-#  "SNP"                   "SourceSeq"         
-## optional fields:
-# "SourceStrand"
-# "RefStrand"
+#  options(stringsAsFactors = FALSE)
+#  read SNP Illumina annotation file (i.e., "HumanOmni2.5-4v1_D.csv"), with following required fields:
+#  "IlmnID", "Name", "IlmnStrand", "SNP", "SourceSeq"         
+#  optional fields:
+#  "SourceStrand", "RefStrand"
 
-# -- "indel.verbose" - a T/F field that defaults to TRUE;  when FALSE, prints I" and "D" characters, respectively, to represent insertion and deletion allele; when TRUE, will parse full nucleotide sequence if alleles from the SourceSeq column
+#  args:
+#  indela.verbose - defaults to TRUE, will parse full nucleotide sequence if alleles from the SourceSeq column  
+#                   when FALSE, prints I" and "D" characters, respectively, to represent insertion and deletion allele
+#               
+#  indels.vcfout - default value FALSE; when TRUE, will create indels vcf file
+#                  REF and ALT columns can be used to replace Ds and Is in .bim files
+#                  no entry for ambiguous indels (could be either insertion or deletion, given the Illumina file)
+#                  indels not yet in standardized, left-aligned format 
+#                  (which could be the format used by 1000Genomes; 
+#                  see Broad's GATK LeftAlignAndTrimVariants option)
+#
+#  indels.vcfout.filename - default value "indels.needLeftAlign.vcf"
+#                           disregard warning "appending column names to file"
+#                           
 
-## Returns as output: R data frame object with columns "snp", "alle.AB", "alle.design", "alle.top", "alle.fwd", "alle.plus"
-# *Note "alle.plus" will only be returned if the snp.dat input contains "RefStrand" column
+#  returns:
+#  data frame object with columns "snp", "alle.AB", "alle.design", "alle.top", "alle.fwd", "alle.plus"
+#  *Note "alle.plus" will only be returned if the snp.dat input contains "RefStrand" column
 
 ## #Example of using:
 ## source("/projects/geneva/geneva_sata/GCC_code/Imputation/R_functions/Make_AlleleMappings_Illumina.R")
@@ -52,16 +65,66 @@
 ##  map.final <- make.allele.mappings(snp.dat)
 ## 	 write.csv(map.final, file="/projects/geneva/geneva_sata/SNP_annotation/Illumina/HumanOmni2.5_4v1/testfn.csv", row.names=FALSE,quote=FALSE))
 
-################################# FUNCTION
+################################# FUNCTIONS
 
-make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
-{
+# equalACTGN() is invoked by maybeDeletion() and maybeInsertion()
+# to test for string equality, 
+# skipping over any Ns (N is IUPAC wildcard) appearing in flank 
+# and test only the LEN bases adjacent to indel
+#
+# side == 1 means flank is to the "left" of the indel
+#
+# n.b. if LEN is increased, some indels may not be written to output vcf
+# e.g. rs10305752, whose flank has inversions with respect to hg19
+# TTATATGGCTATTGTTAATTACCAAGTGACCCTGTTGAGATGGGTGTCCA
+#  ********
+# TATGGCTATTATTGTTAATTACCAAGTGACCCTGTTGAGATGGGTGTCCA
+equalACGTN <- function(flank, hg19, side) {
+	LEN = 40
+	
+	if (side == 1) {
+		lastN  = nchar(flank)
+		startN = lastN -LEN +1
+		return(0 == mapply(function(c1, c2) sum(c1 != c2 & c1 != "N"), strsplit(substr(flank, startN, lastN), ''), strsplit(substr(hg19, startN, lastN), '')))
+	} else {
+		return(0 == mapply(function(c1, c2) sum(c1 != c2 & c1 != "N"), strsplit(substr(flank, 1, LEN), ''), strsplit(substr(hg19, 1, LEN), '')))
+	}
+	
+}
+
+# maybeDeletion() is invoked by make.allele.mappings(indels.vcfout=TRUE) 
+# to determine whether variants appear to be deletions
+#
+# var is the sequence deleted, flanked by seq1 and seq2
+#
+# assume:
+# nchar(var)  == var.n
+#
+# n.b. rs2032615 (chrY deletion) has IUPAC code non-ACGT in seq2
+#      so it will not be equal to hg19
+maybeDeletion <- function(a) {
+	equalACGTN(a$seq1, substr(a$hg19, 1, a$seq1.n), 1) & (a$var == substr(a$hg19, a$seq1.n +1, a$seq1.n +a$var.n)) & equalACGTN(a$seq2, substr(a$hg19, a$seq1.n +a$var.n +1, a$seq1.n +a$var.n +a$seq2.n), 2)
+}
+
+# maybeInsertion() is similar to maybeDeletion()
+# no test for var (the inserted sequence)
+maybeInsertion <- function(a) {
+	equalACGTN(a$seq1, substr(a$hg19, 1, a$seq1.n), 1) & equalACGTN(a$seq2, substr(a$hg19, a$seq1.n +1, a$seq1.n + a$seq2.n), 2)
+}
+
+
+make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout = FALSE, indels.vcfout.filename = "indels.needLeftAlign.vcf") {
   options(stringsAsFactors = FALSE)
+  
   if (indels.verbose && !require(Biostrings)) {
 	indels.verbose <- FALSE
 	warning("\tverbose indels NOT written to output")
   }
 
+  if (indels.vcfout && !require(BSgenome.Hsapiens.UCSC.hg19)) {
+	indels.vcfout <- FALSE
+	warning("\tno vcf file will be created")
+  }
   
   ## Report total number of SNPs and indels
   cat("\tTotal number of probes:", length(snp.dat$Name),"\n")
@@ -78,6 +141,9 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   if(!is.element("RefStrand",names(snp.dat))) {
        print.plus <- FALSE
        warning("\tSNP manifest lacks RefStrand column; plus(+) alleles NOT written to output")
+	   
+	   if (indels.vcfout) warning("\tvcf output file NOT written")
+	   indels.vcfout <- FALSE
   }
   
   ## set up table template - 2 rows per SNP, first "A", second "B"
@@ -104,9 +170,9 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   ## extract the Illumina info for the indels, if present
   indels.dat <- snp.dat[is.element(snp.dat$design.A,c("I","D")),]
   
-	### Make conditional on presence of indels
+	### conditional on presence of indels
 	indels <- indels.dat$Name
-	if(length(indels) > 0) {
+	if (length(indels) > 0) {
 		cat("\tCreating mappings for insertion/deletion probes\n")
         if (indels.verbose) {
 			# extract 4 portions from each indel's SourceSeq:
@@ -115,16 +181,16 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 			# left            = inside the brackets & before the slash /
 			# right           = inside the brackets & after the slash /
             tmp <- strsplit(indels.dat$SourceSeq, "[", fixed = TRUE)
-			sourceseq.start <- sapply(tmp, "[[", 1)
+			sourceseq.start <- toupper(sapply(tmp, "[[", 1))
             tmp <- sapply(tmp, "[[", 2)
 			
 			tmp <- strsplit(tmp, "]", fixed = TRUE)
-            sourceseq.end <- sapply(tmp, "[[", 2)
+            sourceseq.end <- toupper(sapply(tmp, "[[", 2))
             tmp <- sapply(tmp, "[[", 1)
 			
             tmp <- strsplit(tmp, "/", fixed = TRUE)
-            left  <- sapply(tmp, "[[", 1)
-            right <- sapply(tmp, "[[", 2)
+            left  <- toupper(sapply(tmp, "[[", 1))
+            right <- toupper(sapply(tmp, "[[", 2))
 
 			# gather info about each indel:
 			# var = the ACGTs inside the brackets
@@ -163,9 +229,123 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
             indels.dat$top.B[is.element(indels.dat$IlmnStrand,
                 c("M", "MINUS"))] <- indels.dat$alle2.revcomp[is.element(indels.dat$IlmnStrand, c("M", "MINUS"))]
 				
+			if (indels.vcfout) {
+				# gather more info per indel
+				# seq1   var   seq2
+				# A..A   TT    G..G
+				a$needflip = xor(a$strand.diff, is.element(indels.dat$RefStrand, "-"))
+				a$var  = ifelse(a$needflip, a$var.revcomp, a$var)
+				a$seq1 = ifelse(a$needflip, as.character(reverseComplement(DNAStringSet(sourceseq.end))), sourceseq.start)
+				a$seq2 = ifelse(a$needflip, as.character(reverseComplement(DNAStringSet(sourceseq.start))), sourceseq.end)
+				
+				a$var.n  = nchar(a$var)
+				a$seq1.n = nchar(a$seq1)
+				a$seq2.n = nchar(a$seq2)
+
+				# ? trim flanking seqs to 40 ?
+				# LEN = 40
+				# a$seq1   = ifelse(a$seq1.n > LEN, substr(a$seq1, a$seq1.n -LEN +1, a$seq1.n), a$seq1)
+				# a$seq2   = ifelse(a$seq2.n > LEN, substr(a$seq2, 1, LEN), a$seq2)
+				# a$seq1.n = ifelse(a$seq1.n > LEN, LEN, a$seq1.n)
+				# a$seq2.n = ifelse(a$seq2.n > LEN, LEN, a$seq2.n)
+				
+				a$MapInfo  = indels.dat$MapInfo
+				a$chr      = ifelse(indels.dat$Chr == "XY", "X", indels.dat$Chr)
+				a$chr.name = paste0("chr", a$chr)
+				# cannot evaluate chr0, so drop them
+				a = a[a$chr.name != "chr0",] 
+				
+				# column MapInfo of Illumina file contains a position 
+				# whose precise value depends on whether the variant is an insertion or deletion
+				#
+				# seq1   var   seq2
+				# AAAAAA TT    GGGGGG
+				#      i
+				#        d
+				#
+				# pos == i if insertion (e.g. 1KG_2_71060821)
+				#     == d if deletion  (e.g. exm-IND2-70914329)
+				# 
+				# if needflip, then pos may or may not need to be adjusted to have the 
+				# same meaning as the above picture (we test all scenarios below)
+				
+				# if var is 60 or more (e.g. large deletions characterized by "1KG_SV" in Illumina file),
+				# ignore flanks and just check if var is found in hg19 reference at MapInfo 
+				# (or related location if needflip); 
+				# if yes, mark those variants as possible deletions
+				a$posD = ifelse(a$needflip, a$MapInfo - a$var.n + 1, a$MapInfo)
+				a$del = (a$var.n >= 60) & (a$var == toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD, a$posD + a$var.n -1))))
+
+				# skip variants already marked as possible deletions, 
+				# test remaining variants by comparing flanks + var to hg19
+				a$hg19 = ifelse(a$del, NA, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD -a$seq1.n, a$posD + a$var.n +a$seq2.n -1))))
+				a$del = ifelse(a$del, TRUE, maybeDeletion(a))
+								
+				# similar to above, except
+				# consider the possibility that MapInfo should be adjusted slightly
+				a$posD = ifelse(a$del, a$posD,  1+ a$posD)
+				a$hg19 = ifelse(a$del, a$hg19, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD -a$seq1.n, a$posD + a$var.n +a$seq2.n -1))))
+				a$del  = ifelse(a$del, TRUE, maybeDeletion(a))
+
+				# similar to above, except
+				# consider the possibility that for needflip variants, we shouldn't have adjusted MapInfo at all
+				a$posD = ifelse(!a$del & a$needflip, a$MapInfo, a$posD)
+				a$hg19 = ifelse(!a$del & a$needflip, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD -a$seq1.n, a$posD + a$var.n +a$seq2.n -1))), a$hg19)
+				a$del  = ifelse(!a$del & a$needflip, maybeDeletion(a), a$del) 
+
+				
+				# if variant is an insertion, then var isn't found in hg19
+				# so compare flanks sans var, to hg19
+				a$posI = a$MapInfo
+				a$hg19 = toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posI -a$seq1.n +1, a$posI +a$seq2.n)))
+				a$ins = maybeInsertion(a)
+
+				# similar to above, except
+				# consider the possibility that MapInfo should be adjusted slightly
+				a$posI = ifelse(a$ins, a$posI, a$posI -1)
+				a$hg19 = ifelse(a$ins, a$hg19, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posI -a$seq1.n +1, a$posI +a$seq2.n))))
+				a$ins  = ifelse(a$ins, TRUE, maybeInsertion(a))
+				
+				
+				# keep only indels that are unambiguously an insertion or deletion 
+				# i.e. toss indels that could be either, and toss indels that appear to be neither
+				a = a[xor(a$ins, a$del),]
+				if (nrow(a) > 0) {
+					# define pos, ref, alt columns of vcf output
+					a$pos = ifelse(a$ins, a$posI, a$posD -1)
+					a$ref = ifelse(a$ins, substr(a$seq1, a$seq1.n, a$seq1.n), paste0(substr(a$seq1, a$seq1.n, a$seq1.n), a$var))
+					a$alt = ifelse(a$ins, paste0(a$ref, a$var), substr(a$ref, 1, 1))
+					
+					# sort by chr, pos 
+					vcf = a[,c("chr", "pos", "Name", "ref", "alt")]
+					vcf$chr = ifelse(vcf$chr == "X", "23", vcf$chr)
+					vcf$chr = ifelse(vcf$chr == "Y", "24", vcf$chr)
+					vcf$chr = as.integer(vcf$chr)
+					vcf = vcf[order(vcf$chr, vcf$pos),]
+					vcf$chr = as.character(vcf$chr)
+					vcf$chr = ifelse(vcf$chr == "23", "X", vcf$chr)
+					vcf$chr = ifelse(vcf$chr == "24", "Y", vcf$chr)
+					
+					# create dummy values to comply with vcf format
+					vcf$column6 = 100
+					vcf$column7 = "PASS"
+					vcf$column8 = "."
+					vcf$column9 = "GT"
+					vcf$column10 = "0/1"
+					
+					# write header rows of vcf
+					# disregard warning "appending column names to file"
+					writeLines(c("##fileformat=VCFv4.1", "##FORMAT=<ID=GT,Number=1,Type=String,Description=>"), indels.vcfout.filename)
+					colnames(vcf) = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT", "dummySubject")
+					write.table(vcf, indels.vcfout.filename, sep="\t", quote=F, row.names=F, col.names=T, append=T)
+				} else {
+					warning("\tno vcf written (no indel is unambiguously an insertion or deletion)")
+				}
+				
+			} # end of if indels.vcfout
 			
-        } else { # else not verbose 
-			## write out simpler versin of indel mapping
+        } else { # else not indels.verbose 
+			## write out simpler version of indel mapping
             del.first <- indels.dat[indels.dat$SNP == "[D/I]",]
             ins.first <- indels.dat[indels.dat$SNP == "[I/D]",]
             if (nrow(del.first) > 0) {
@@ -184,8 +364,9 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
 	}
 
   # temporarily remove indels from snp.dat
-  if (length(indels)>0)   {
-  snp.dat <- snp.dat[!is.element(snp.dat$Name, indels),] }
+  if (length(indels) > 0) {
+    snp.dat <- snp.dat[!is.element(snp.dat$Name, indels),] 
+  }
   
   ## for SNPs, make lookup to table to define reverse complement of alleles A, B
   lup <- as.data.frame(c("A","C","G","T"))
@@ -205,24 +386,24 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   snp.dat$top.A[is.element(snp.dat$IlmnStrand,c("BOT","M"))] <- snp.dat$alle1.revcomp[is.element(snp.dat$IlmnStrand,c("BOT","M"))]
   snp.dat$top.B[is.element(snp.dat$IlmnStrand,c("BOT","M"))] <- snp.dat$alle2.revcomp[is.element(snp.dat$IlmnStrand,c("BOT","M"))]
   
-  ## now that design and TOP alleles are defined, rejoin indels with main SNP annotation, keeping select columns
+  ## now that design and TOP alleles are defined, 
+  ## rejoin indels with main SNP annotation, keeping select columns
   cols.keep <- c("IlmnID","Name","IlmnStrand","SNP",
                  "design.A","design.B","alle1.revcomp","alle2.revcomp","top.A","top.B","order")
 
-  if(print.plus) cols.keep <- c("RefStrand",cols.keep)
+  if (print.plus) cols.keep <- c("RefStrand",cols.keep)
   
-  ## allow for arrays with no indels - in those cases, just keep main snp.dat object with selected columns
-  if (length(indels)>0)  {
-    comb <- rbind(snp.dat[,cols.keep], indels.dat[,cols.keep])} 
-
-  if (length(indels)==0) comb <- snp.dat[,cols.keep] 
-
+  if (length(indels) > 0) {
+    comb <- rbind(snp.dat[,cols.keep], indels.dat[,cols.keep])
+  } else { 
+    comb <- snp.dat[,cols.keep] 
+  }
+  
   ## restore original order, rename to snp.dat
   snp.dat <- comb[order(comb$order),]
   
-  cat("\tDefining FORWARD alleles\n")
-  
   ## get FORWARD alleles: make column to indicate dbSNP orientation of DESIGN strand
+  cat("\tDefining FORWARD alleles\n")
   snp.dat$dbSNPStrand.fordesign[is.element(snp.dat$IlmnID,grep("_F_",snp.dat$IlmnID, value=TRUE))] <- "FWD"
   snp.dat$dbSNPStrand.fordesign[is.element(snp.dat$IlmnID,grep("_R_",snp.dat$IlmnID, value=TRUE))] <- "REV"
   
@@ -284,7 +465,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose=TRUE)
   cat("\tMapping file created; do some spot checking against original annotation to confirm mappings!\n\n")
   
   return(map.final)
-  }
+}
 
 
 make.allele.annotation <- function(map, alleles=c("top", "design", "fwd", "plus")) {
