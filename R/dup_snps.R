@@ -145,7 +145,7 @@ prob.tbl <- cbind(prob.disc, num)
 
 ## choose threshold as min # disc where error=0.01 is <0.99
 threshold <- which(prob.tbl[,"error=0.01"] < 0.99)[1] - 1
-message("filter pairs with >= ", threshold, " discordances")
+message("filter pairs with > ", threshold, " discordances") # changed ">=" to  ">"
 
 
 ## for the snp pairs with <threshold discordant calls, filter out one member of each pair,
@@ -158,14 +158,14 @@ snpset3 <- merge(snpset2, snp.mcr, by.x="snpID.1", by.y="snpID")
 snpset3 <- merge(snpset3, snp.mcr, by.x="snpID.2", by.y="snpID", suffixes=c(".1",".2"))
 
 # snpIDs to filter out
-filt <- snpset3[snpset3$disc.count < threshold,]; dim(filt)
+filt <- snpset3[snpset3$disc.count <= threshold,]; dim(filt) #changed "<" to  "<="
 filt$out <- ifelse(filt$mcr.1 > filt$mcr.2, 1, 2)
 snpID.out <- c(filt$snpID.1[filt$out==1], filt$snpID.2[filt$out==2])
 snp.mcr$redundant <- snp.mcr$snpID %in% snpID.out
 table(snp.mcr$redundant)
 
 # indicate the snps with at least one discordant duplicate
-filt <- snpset3[snpset3$disc.count >= threshold,]; dim(filt)
+filt <- snpset3[snpset3$disc.count > threshold,]; dim(filt) #changed ">=" to  ">"
 disc.rm <- unique(c(filt$snpID.1, filt$snpID.2))
 snp.mcr$dup.probe.disc <- snp.mcr$snpID %in% disc.rm
 table(snp.mcr$dup.probe.disc)
