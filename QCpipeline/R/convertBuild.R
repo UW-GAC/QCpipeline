@@ -11,7 +11,7 @@
 # Returns input SNP annotation as a data frame with added columns: chromosome and position in the target build
 
 ## example usage:
-## library(OLGApipline)
+## library(OLGApipeline)
 ## data.dir <- "/projects/geneva/gcc-fs2/OLGA/genotype/freeze1/gds/freeze1"
 ## olgaData <- OlgaGenotypeData(data.dir)
 ## snpAnnot <- getSnpAnnotation(olgaData, 21)

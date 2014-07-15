@@ -115,11 +115,12 @@ maybeInsertion <- function(a) {
 
 make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout = FALSE, indels.vcfout.filename = "indels.needLeftAlign.vcf") {
   options(stringsAsFactors = FALSE)
-  
-  if (indels.verbose && !require(Biostrings)) {
-	indels.verbose <- FALSE
-	warning("\tverbose indels NOT written to output")
-  }
+
+  ## Biostrings is imported in NAMESPACE
+  ## if (indels.verbose && !require(Biostrings)) {
+  ##       indels.verbose <- FALSE
+  ##       warning("\tverbose indels NOT written to output")
+  ## }
 
   if (indels.vcfout && !require(BSgenome.Hsapiens.UCSC.hg19)) {
 	indels.vcfout <- FALSE
