@@ -6,7 +6,8 @@
 ## Updated October 10, 2013, to allow for Illumina manifests files lacking the "RefStrand" column
 ## Updated March 22, 2014 to allow for one indel record
 ## Updated July 10, 2014 to rename some variables, re-organize some code (Tin Louie)
-## Updated July 14, 2014 to output indels vcf file as side effect (Tin Louie) 
+## Updated July 14, 2014 to output indels vcf file as side effect (Tin Louie)
+## Updated Aug 1, 2014 to fix bugs/enhance previous update
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -67,12 +68,48 @@
 
 ################################# FUNCTIONS
 
-# equalACTGN() is invoked by maybeDeletion() and maybeInsertion()
-# to test for string equality, 
-# skipping over any Ns (N is IUPAC wildcard) appearing in flank 
-# and test only the LEN bases adjacent to indel
+# getSequence() is a wrapper for getSeq (Biostrings)
+# and is invoked by make.allele.mappings(indels.vcfout=TRUE) 
+# 
+# a$var is the sequence within square brackets [ ], 
+# flanked by a$seq1 and a$seq2, 
+# from column SourceSeq in the Illumina file
 #
-# side == 1 means flank is to the "left" of the indel
+# nchar(a$var)  == a$var.n
+# nchar(a$seq1) == a$seq1.n
+# nchar(a$seq2) == a$seq2.n
+#
+# return value is an hg19 sequence of length equal to:
+# seq1 + seq2       if insertion, or
+# seq1 + var + seq2 if deletion
+#
+# return value *should* match seq1 + seq2 (or seq1 + var + seq2)
+# if caller uses column MapInfo from Illumina file
+# to correctly guess (without using BLAT) where seq1 and seq2 are located in hg19;
+# this guess is represented by a$posI (or a$posD), see I and D below
+#
+# seq1   var   seq2
+# AAAAAA TT    GGGGGG
+#      I
+#        D
+#
+getSequence <- function(a, insertion=FALSE) {
+	if (insertion) {
+		toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posI - a$seq1.n +1, a$posI + a$seq2.n)))
+	} else {
+		toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD - a$seq1.n,    a$posD + a$var.n + a$seq2.n - 1)))
+	}
+}
+
+
+
+# equalACTGN() is invoked by equal.hg19()
+# to test for string equality, 
+# skipping over any non-ACGT characters (e.g. N, which is IUPAC wildcard) appearing in flank (arg1) 
+#
+# if side (arg3) == 1, flank is to the "left" (upstream) of the indel,
+# otherwise flank is to the "right" (downstream);
+# test only LEN bases adjacent to the indel
 #
 # n.b. if LEN is increased, some indels may not be written to output vcf
 # e.g. rs10305752, whose flank has inversions with respect to hg19
@@ -81,45 +118,202 @@
 # TATGGCTATTATTGTTAATTACCAAGTGACCCTGTTGAGATGGGTGTCCA
 equalACGTN <- function(flank, hg19, side) {
 	LEN = 40
+	ACGT = c("A", "C", "G", "T")
 	
 	if (side == 1) {
 		lastN  = nchar(flank)
 		startN = lastN -LEN +1
-		return(0 == mapply(function(c1, c2) sum(c1 != c2 & c1 != "N"), strsplit(substr(flank, startN, lastN), ''), strsplit(substr(hg19, startN, lastN), '')))
+		return(0 == mapply(function(c1, c2) sum(c1 != c2 & c1 %in% ACGT), strsplit(substr(flank, startN, lastN), ''), strsplit(substr(hg19, startN, lastN), '')))
 	} else {
-		return(0 == mapply(function(c1, c2) sum(c1 != c2 & c1 != "N"), strsplit(substr(flank, 1, LEN), ''), strsplit(substr(hg19, 1, LEN), '')))
+		return(0 == mapply(function(c1, c2) sum(c1 != c2 & c1 %in% ACGT), strsplit(substr(flank, 1, LEN), ''), strsplit(substr(hg19, 1, LEN), '')))
 	}
 	
 }
 
-# maybeDeletion() is invoked by make.allele.mappings(indels.vcfout=TRUE) 
-# to determine whether variants appear to be deletions
+# equal.hg19() is invoked by make.allele.mappings(indels.vcfout=TRUE) 
 #
-# var is the sequence deleted, flanked by seq1 and seq2
+# a$var is the sequence within square brackets [ ], 
+# flanked by a$seq1 and a$seq2, 
+# from column SourceSeq in the Illumina file
 #
-# assume:
-# nchar(var)  == var.n
+# if insertion (arg2) is TRUE:
+# disregard a$var, and
+# return TRUE if flanks match the hg19 sequence stored in a$hg19I
 #
-# n.b. rs2032615 (chrY deletion) has IUPAC code non-ACGT in seq2
-#      so it will not be equal to hg19
-maybeDeletion <- function(a) {
-	equalACGTN(a$seq1, substr(a$hg19, 1, a$seq1.n), 1) & (a$var == substr(a$hg19, a$seq1.n +1, a$seq1.n +a$var.n)) & equalACGTN(a$seq2, substr(a$hg19, a$seq1.n +a$var.n +1, a$seq1.n +a$var.n +a$seq2.n), 2)
+# if insertion (arg2) is FALSE:
+# return TRUE if variant appears to be a deletion because 
+# seq1 + var + seq2 match the hg19 sequence stored in a$hg19D
+#
+# pre-req: 
+# nchar(a$var)  == a$var.n
+# nchar(a$seq1) == a$seq1.n
+# nchar(a$seq2) == a$seq2.n
+#
+#
+equal.hg19 <- function(a, insertion=FALSE) {
+	if (insertion) {
+		equalACGTN(a$seq1, substr(a$hg19I, 1, a$seq1.n), side=1) & 
+		equalACGTN(a$seq2, substr(a$hg19I, a$seq1.n +1, a$seq1.n + a$seq2.n), side=2)
+	} else {
+		equalACGTN(a$seq1, substr(a$hg19D, 1, a$seq1.n), side=1) & 
+		(a$var == substr(a$hg19D, a$seq1.n +1, a$seq1.n +a$var.n)) & 
+		equalACGTN(a$seq2, substr(a$hg19D, a$seq1.n +a$var.n +1, a$seq1.n +a$var.n +a$seq2.n), side=2)
+	}
 }
 
-# maybeInsertion() is similar to maybeDeletion()
-# no test for var (the inserted sequence)
-maybeInsertion <- function(a) {
-	equalACGTN(a$seq1, substr(a$hg19, 1, a$seq1.n), 1) & equalACGTN(a$seq2, substr(a$hg19, a$seq1.n +1, a$seq1.n + a$seq2.n), 2)
+# approx.hg19() is more complex than equal.hg19()
+# returns a numeric score instead of TRUE/FALSE, where 
+# higher scores = more similarity to hg19
+# (except when one.sided (arg3) is TRUE, see below)
+# 
+# insertions:
+# each flank is scored zero if flank is too dissimilar to hg19, 
+# otherwise score = [length of flank] minus [edit distance between flank & hg19]
+#
+# deletions:
+# score is adjusted by:
+# [length of deletion] minus 6 * [number of mismatches between deletion & hg19]
+#
+# n.b. the deletion, as it appears in Illumina file, is expected to almost always 
+# match something in hg19
+#
+# one.sided:
+# used by pseudoBLAT() to see if seq1 or seq2 has score zero
+#
+approx.hg19 <- function(b, insertion=FALSE, one.sided=FALSE) {
+	var.adjustment = 0
+	distance1 = NULL
+	distance2 = NULL
+	
+	if (insertion) {
+		distance1 = mapply(function(x, y) adist(x,y)[1,1], b$seq1, substr(b$hg19I, 1, b$seq1.n))
+		distance2 = mapply(function(x, y) adist(x,y)[1,1], b$seq2, substr(b$hg19I, b$seq1.n +1, b$seq1.n + b$seq2.n))
+		
+		# alternative scoring:
+		# (b$seq1.n - mapply(function(x, y) adist(x,y)[1,1], b$seq1, substr(b$hg19I, 1, b$seq1.n)) +
+		 # b$seq2.n - mapply(function(x, y) adist(x,y)[1,1], b$seq2, substr(b$hg19I, b$seq1.n +1, b$seq1.n + b$seq2.n))) / 
+		# (b$seq1.n + b$seq2.n)
+		
+	} else {
+		distance1 = mapply(function(x, y) adist(x,y)[1,1], b$seq1, substr(b$hg19D, 1, b$seq1.n))
+		distance2 = mapply(function(x, y) adist(x,y)[1,1], b$seq2, substr(b$hg19D, b$seq1.n +1 +b$var.n, b$seq1.n + b$var.n + b$seq2.n))
+
+		var.adjustment = b$var.n  - (6 * mapply(function(c1, c2) sum(c1 != c2), strsplit(b$var, ''), strsplit(substr(b$hg19D, b$seq1.n +1, b$seq1.n +b$var.n), '')))
+		
+		# alternative scoring:
+		# (b$seq1.n - mapply(function(x, y) adist(x,y)[1,1], b$seq1, substr(b$hg19D, 1, b$seq1.n)) +
+		 # b$seq2.n - mapply(function(x, y) adist(x,y)[1,1], b$seq2, substr(b$hg19D, b$seq1.n +1 +b$var.n, b$seq1.n + b$var.n + b$seq2.n)) +
+		 # b$var.n  - (6 * mapply(function(c1, c2) sum(c1 != c2), strsplit(b$var, ''), strsplit(substr(b$hg19D, b$seq1.n +1, b$seq1.n +b$var.n), '')))) / 
+		# (b$seq1.n + b$seq2.n + b$var.n)
+	}
+	
+	seq1.score = ifelse(distance1 > (b$seq1.n / 10), 0, b$seq1.n - distance1)
+	seq2.score = ifelse(distance2 > (b$seq2.n / 10), 0, b$seq2.n - distance2)
+	
+	if (one.sided) {
+		# return 1 if seq1.score is zero, 
+		#        2 if seq2.score is zero, 
+		#        0 if neither is zero or both are zero
+		ifelse((seq1.score == 0) & (seq2.score > 0), 
+		        1, 
+		        ifelse((seq1.score > 0) & (seq2.score == 0), 2, 0) ) 
+		
+	} else {
+		return(seq1.score + seq2.score + var.adjustment)
+	}
+	
+}
+
+
+# pseudoBLAT() is like approx.hg19(), except the focus is on deletions only
+# return value has same number of rows (i.e. same number of indels) as b (arg1) 
+# but only 3 columns:
+# 1) scoreD
+# 2) hg19D
+# 3) posD
+
+# 1) scoreD will be same as b$scoreD.old (the score of the best deletion scenario so far)
+#    unless this function can obtain a higher score by finding an exact match to 
+#    seq1 or seq2 in hg19 
+#
+# 2) hg19D may be the same as b$hg19D.old; if it is different, then:
+#    a) hg19D will be *longer* than seq1 + var + seq2, implying that the deletion is 
+#       longer than what is shown in column ScoreSeq from Illumina file
+#    b) one end of hg19D will be an exact match to seq1 or seq2
+#    c) scoreD will be higher than scoreD.old
+#
+# 3) posD may be the same as b$posD.old; in any event, it can be used 
+#    in conjunction with hg19D to print the variant to the vcf output file,
+#    (assuming the variant is not ruled an insertion, of course)
+#
+#
+pseudoBLAT <- function(b) {
+	# score of the best deletion scenario so far, and its associated variables
+	b$posD   = b$posD.old
+	b$hg19D  = b$hg19D.old
+	b$scoreD = b$scoreD.old
+	
+	# process only those variants where we haven't found a good match
+	# for seq1 or seq2 in hg19
+	b$one.sided = approx.hg19(b, one.sided=TRUE)
+	b$originalOrder = 1:nrow(b)
+	upstream   = b[b$one.sided == 1,]
+	downstream = b[b$one.sided == 2,]
+	neither    = b[b$one.sided == 0,]
+	
+	# grab a long hg19 sequence (LEN bases) upstream or downstream of deletion
+	# (deletion begins at posD according to best deletion scenario so far) 
+	LEN = 9999
+	upstream$hg19L   = with(upstream,   toupper(as.character(getSeq(Hsapiens, chr.name, posD - LEN,   posD -1))))
+	downstream$hg19L = with(downstream, toupper(as.character(getSeq(Hsapiens, chr.name, posD + var.n, posD + var.n + LEN -1))))
+
+	# look for exact match of seq1 or seq2 in long hg19 sequence
+	# (if there're multiple matches, get the closest one to the deletion)
+	upstream$hit   = with(upstream,   mapply(function(x, y) rev(gregexpr(x, y, fixed=T)[[1]])[1], seq1, hg19L))
+	downstream$hit = with(downstream, mapply(function(x, y) regexpr(x, y, fixed=T),               seq2, hg19L))
+	
+	# if no match, then hg19D remains the same as hg19D.old, 
+	# else extend hg19D by that portion of hg19L up to the hit 
+	upstream$hg19D   = with(upstream,   ifelse(hit == -1, hg19D, paste0(substr(hg19L, hit, LEN), 
+	                                                                    substr(hg19D, seq1.n +1, seq1.n + var.n + seq2.n)) ))
+	downstream$hg19D = with(downstream, ifelse(hit == -1, hg19D, paste0(substr(hg19D, 1, seq1.n + var.n),
+	                                                                    substr(hg19L, 1, hit + seq2.n - 1)) ))
+	
+
+	# if no match, then posD remains the same as posD.old
+	# else for upstream match to seq1, shift posD upstream
+	# (deletion now extends all the way up to end of seq1)
+	# else for downstream match to seq2, posD remains the same as posD.old 
+	# (because even though the deletion has been extended, its starting location has not changed)
+	upstream$posD = with(upstream, ifelse(hit == -1, posD, posD - LEN + hit + seq1.n -1))
+	
+	# if no match, then scoreD remains the same as scoreD.old
+	# else increase the score by the length of seq1 or seq2 
+	# (see the scoring system in approx.hg19();
+	#  remember that processed variants are one-sided, i.e. zero contribution to the score from seq1 or seq2)
+	upstream$scoreD   = with(upstream,   ifelse(hit == -1, scoreD, scoreD + seq1.n))
+	downstream$scoreD = with(downstream, ifelse(hit == -1, scoreD, scoreD + seq2.n))
+
+	# combine processed variants with un-processed variants, restore original ordering of rows
+	b = rbind(neither, upstream, downstream)
+	b = b[order(b$originalOrder),]
+	return(b[,c("posD", "hg19D", "scoreD")])
+}
+
+
+# future use:  ?undo left align?
+nchar.suffix <- function(a) {
+	ifelse(a$seq1.n >= a$var.n, mapply(function(x,y,z) x - nchar(sub( paste0("(",  y, ")+$"), "", z )), a$seq1.n, a$var, a$seq1), 0)
 }
 
 
 make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout = FALSE, indels.vcfout.filename = "indels.needLeftAlign.vcf") {
   options(stringsAsFactors = FALSE)
 
-  ## Biostrings is imported in NAMESPACE
+  ## Biostrings is imported in NAMESPACE  
   ## if (indels.verbose && !require(Biostrings)) {
-  ##       indels.verbose <- FALSE
-  ##       warning("\tverbose indels NOT written to output")
+  ##	indels.verbose <- FALSE
+  ##	warning("\tverbose indels NOT written to output")
   ## }
 
   if (indels.vcfout && !require(BSgenome.Hsapiens.UCSC.hg19)) {
@@ -230,10 +424,11 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
             indels.dat$top.B[is.element(indels.dat$IlmnStrand,
                 c("M", "MINUS"))] <- indels.dat$alle2.revcomp[is.element(indels.dat$IlmnStrand, c("M", "MINUS"))]
 				
+			### July 2014 modification ###
 			if (indels.vcfout) {
 				# gather more info per indel
-				# seq1   var   seq2
-				# A..A   TT    G..G
+				# seq1      var   seq2
+				# A.....A   TT    G.....G
 				a$needflip = xor(a$strand.diff, is.element(indels.dat$RefStrand, "-"))
 				a$var  = ifelse(a$needflip, a$var.revcomp, a$var)
 				a$seq1 = ifelse(a$needflip, as.character(reverseComplement(DNAStringSet(sourceseq.end))), sourceseq.start)
@@ -243,78 +438,172 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 				a$seq1.n = nchar(a$seq1)
 				a$seq2.n = nchar(a$seq2)
 
-				# ? trim flanking seqs to 40 ?
+				# do NOT trim flanking seqs to length 40
 				# LEN = 40
 				# a$seq1   = ifelse(a$seq1.n > LEN, substr(a$seq1, a$seq1.n -LEN +1, a$seq1.n), a$seq1)
 				# a$seq2   = ifelse(a$seq2.n > LEN, substr(a$seq2, 1, LEN), a$seq2)
 				# a$seq1.n = ifelse(a$seq1.n > LEN, LEN, a$seq1.n)
 				# a$seq2.n = ifelse(a$seq2.n > LEN, LEN, a$seq2.n)
 				
-				a$MapInfo  = indels.dat$MapInfo
-				a$chr      = ifelse(indels.dat$Chr == "XY", "X", indels.dat$Chr)
+				a$chr     = indels.dat$Chr
+				a$MapInfo = indels.dat$MapInfo
+				# cannot evaluate chr0 or chrMT or position 0, so drop them
+				# (hg19 MT inaccessible via current R library) 
+				a = a[!is.na(a$chr) & !is.na(a$MapInfo) & is.element(a$chr, c(1:22, "X", "Y", "XY")) & a$MapInfo != 0,] 
+
+				a$chr      = ifelse(a$chr == "XY", "X", a$chr)
 				a$chr.name = paste0("chr", a$chr)
-				# cannot evaluate chr0, so drop them
-				a = a[a$chr.name != "chr0",] 
 				
-				# column MapInfo of Illumina file contains a position 
-				# whose precise value depends on whether the variant is an insertion or deletion
+				# column MapInfo of Illumina file contains genomic position 
+				# which usually corresponds to * or @ below
+				# so that BLAT is not needed to find seq1/var/seq2 in hg19
 				#
 				# seq1   var   seq2
 				# AAAAAA TT    GGGGGG
-				#      i
-				#        d
+				#      *
+				#        @
 				#
-				# pos == i if insertion (e.g. 1KG_2_71060821)
-				#     == d if deletion  (e.g. exm-IND2-70914329)
+				# position = * if variant is an insertion (e.g. 1KG_2_71060821)
+				#          = @ if               deletion  (e.g. exm-IND2-70914329)
 				# 
-				# if needflip, then pos may or may not need to be adjusted to have the 
-				# same meaning as the above picture (we test all scenarios below)
+				# MapInfo is not always at * or @
+				# so we test different scenarios below
+				# (hope the adjusted position lands at * or @)
 				
-				# if var is 60 or more (e.g. large deletions characterized by "1KG_SV" in Illumina file),
-				# ignore flanks and just check if var is found in hg19 reference at MapInfo 
-				# (or related location if needflip); 
-				# if yes, mark those variants as possible deletions
-				a$posD = ifelse(a$needflip, a$MapInfo - a$var.n + 1, a$MapInfo)
-				a$del = (a$var.n >= 60) & (a$var == toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD, a$posD + a$var.n -1))))
-
-				# skip variants already marked as possible deletions, 
-				# test remaining variants by comparing flanks + var to hg19
-				a$hg19 = ifelse(a$del, NA, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD -a$seq1.n, a$posD + a$var.n +a$seq2.n -1))))
-				a$del = ifelse(a$del, TRUE, maybeDeletion(a))
+				# deletion scenario 1 of 4:
+				# mark variants as possible deletions (a$del = TRUE)
+				a$posD  = a$MapInfo
+				a$hg19D = getSequence(a)
+				a$del   = equal.hg19(a)
 								
-				# similar to above, except
-				# consider the possibility that MapInfo should be adjusted slightly
-				a$posD = ifelse(a$del, a$posD,  1+ a$posD)
-				a$hg19 = ifelse(a$del, a$hg19, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD -a$seq1.n, a$posD + a$var.n +a$seq2.n -1))))
-				a$del  = ifelse(a$del, TRUE, maybeDeletion(a))
+				# deletion scenario 2 of 4:
+				# skip variants already marked as possible deletions, 
+				# consider the possibility that MapInfo is off by 1
+				a$posD  = ifelse(a$del, a$posD,  1+ a$MapInfo)
+				a$hg19D = ifelse(a$del, a$hg19D, getSequence(a))
+				a$del   = ifelse(a$del, TRUE,    equal.hg19(a))
 
-				# similar to above, except
-				# consider the possibility that for needflip variants, we shouldn't have adjusted MapInfo at all
-				a$posD = ifelse(!a$del & a$needflip, a$MapInfo, a$posD)
-				a$hg19 = ifelse(!a$del & a$needflip, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD -a$seq1.n, a$posD + a$var.n +a$seq2.n -1))), a$hg19)
-				a$del  = ifelse(!a$del & a$needflip, maybeDeletion(a), a$del) 
+				# deletion scenario 3 of 4:
+				a$posD  = ifelse(a$del, a$posD,  a$MapInfo - a$var.n +1)
+				a$hg19D = ifelse(a$del, a$hg19D, getSequence(a))
+				a$del   = ifelse(a$del, TRUE,    equal.hg19(a))
+
+				# deletion scenario 4 of 4:
+				a$posD  = ifelse(a$del, a$posD,  a$MapInfo - a$var.n +2)
+				a$hg19D = ifelse(a$del, a$hg19D, getSequence(a))
+				a$del   = ifelse(a$del, TRUE,    equal.hg19(a))
+				
+				# insertion scenario 1 of 2:
+				a$posI  = a$MapInfo
+				a$hg19I = getSequence(a, insertion=TRUE)
+				a$ins   = equal.hg19(a, insertion=TRUE)
+
+				# insertion scenario 2 of 2:
+				a$posI  = ifelse(a$ins, a$posI,  a$posI -1)
+				a$hg19I = ifelse(a$ins, a$hg19I, getSequence(a, insertion=TRUE))
+				a$ins   = ifelse(a$ins, TRUE,    equal.hg19(a, insertion=TRUE))
 
 				
-				# if variant is an insertion, then var isn't found in hg19
-				# so compare flanks sans var, to hg19
-				a$posI = a$MapInfo
-				a$hg19 = toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posI -a$seq1.n +1, a$posI +a$seq2.n)))
-				a$ins = maybeInsertion(a)
+				# if any variant has not yet been tagged as insertion or deletion
+				# (because of equal.hg19() test results)
+				# then go through the above scenarios again (plus one new scenario), 
+				# but instead of equal.hg19(), use approx.hg19() which returns 
+				# a numeric score per scenario, then pick scenario with highest score
+				b = a[!a$ins & !a$del,]
+				if (nrow(b) > 0) {
+					# deletion scenario 1
+					b$posD       = b$MapInfo
+					b$hg19D      = getSequence(b)
+					b$scoreD     = approx.hg19(b) 
+					
+					# deletion scenario 2 (save previous results first)
+					b$posD.old   = b$posD
+					b$hg19D.old  = b$hg19D
+					b$scoreD.old = b$scoreD
+					
+					b$posD   = 1 + b$MapInfo
+					b$hg19D  = getSequence(b)
+					b$scoreD = approx.hg19(b) 
+					
+					# compare 1st & 2nd scenarios, keep the better score & its associated variables in .old
+					b$posD.old    = ifelse(b$scoreD.old >= b$scoreD, b$posD.old,   b$posD)
+					b$hg19D.old   = ifelse(b$scoreD.old >= b$scoreD, b$hg19D.old,  b$hg19D)
+					b$scoreD.old  = ifelse(b$scoreD.old >= b$scoreD, b$scoreD.old, b$scoreD)
+					
+					# deletion scenario 3 
+					b$posD   = b$MapInfo - b$var.n +1
+					b$hg19D  = getSequence(b)
+					b$scoreD = approx.hg19(b)
 
-				# similar to above, except
-				# consider the possibility that MapInfo should be adjusted slightly
-				a$posI = ifelse(a$ins, a$posI, a$posI -1)
-				a$hg19 = ifelse(a$ins, a$hg19, toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posI -a$seq1.n +1, a$posI +a$seq2.n))))
-				a$ins  = ifelse(a$ins, TRUE, maybeInsertion(a))
-				
+					# compare & keep the better score
+					b$posD.old    = ifelse(b$scoreD.old >= b$scoreD, b$posD.old,   b$posD)
+					b$hg19D.old   = ifelse(b$scoreD.old >= b$scoreD, b$hg19D.old,  b$hg19D)
+					b$scoreD.old  = ifelse(b$scoreD.old >= b$scoreD, b$scoreD.old, b$scoreD)
+
+					# deletion scenario 4
+					b$posD   = b$MapInfo - b$var.n +2
+					b$hg19D  = getSequence(b)
+					b$scoreD = approx.hg19(b)
+					
+					# compare & keep the better score 
+					b$posD.old    = ifelse(b$scoreD.old >= b$scoreD, b$posD.old,   b$posD)
+					b$hg19D.old   = ifelse(b$scoreD.old >= b$scoreD, b$hg19D.old,  b$hg19D)
+					b$scoreD.old  = ifelse(b$scoreD.old >= b$scoreD, b$scoreD.old, b$scoreD)
+					
+					# deletion scenario 5 (new scenario)
+					results = pseudoBLAT(b) 
+					
+					# compare & keep the better score 
+					# n.b. pseudoBLAT results invalidate b$var and b$var.n, 
+					#      so don't run more deletion scenarios
+					b$posD    = ifelse(b$scoreD.old >= results$scoreD, b$posD.old,   results$posD)
+					b$hg19D   = ifelse(b$scoreD.old >= results$scoreD, b$hg19D.old,  results$hg19D)
+					b$scoreD  = ifelse(b$scoreD.old >= results$scoreD, b$scoreD.old, results$scoreD)
+					
+
+					# insertion scenario 1
+					b$posI   = b$MapInfo
+					b$hg19I  = getSequence(b, insertion=TRUE)
+					b$scoreI = approx.hg19(b, insertion=TRUE)
+					
+					# insertion scenario 2 (save previous results first)
+					b$posI.old   = b$posI
+					b$hg19I.old  = b$hg19I
+					b$scoreI.old = b$scoreI
+					
+					b$posI   = b$posI -1
+					b$hg19I  = getSequence(b, insertion=TRUE)
+					b$scoreI = approx.hg19(b, insertion=TRUE)
+
+					# keep the better score & its associated variables
+					b$posI    = ifelse(b$scoreI.old >= b$scoreI, b$posI.old,   b$posI)
+					b$hg19I   = ifelse(b$scoreI.old >= b$scoreI, b$hg19I.old,  b$hg19I)
+					b$scoreI  = ifelse(b$scoreI.old >= b$scoreI, b$scoreI.old, b$scoreI)
+					
+					# compare best insertion scenario vs best deletion scenario
+					# n.b. both b$del and b$ins may remain FALSE 
+					b$del = (b$scoreD > b$scoreI) & (b$scoreD > 65)
+					b$ins = (b$scoreI > b$scoreD) & (b$scoreI > 60)
+					# b$del  = ((b$scoreD > (b$scoreI + 0.02)) & (b$scoreD > 0.6)) | ((b$scoreD > b$scoreI) & (b$scoreD > 0.8))
+					# b$ins  = ((b$scoreI > (b$scoreD + 0.02)) & (b$scoreI > 0.6)) | ((b$scoreI > b$scoreD) & (b$scoreI > 0.8))
+					
+					# remove extraneous columns & merge results back 
+					b = subset(b, select = -c(scoreD, scoreI, scoreD.old, scoreI.old, hg19D.old, hg19I.old, posD.old, posI.old))
+					a = a[a$ins | a$del,]
+					a = rbind(a, b)
+				}
 				
 				# keep only indels that are unambiguously an insertion or deletion 
 				# i.e. toss indels that could be either, and toss indels that appear to be neither
 				a = a[xor(a$ins, a$del),]
 				if (nrow(a) > 0) {
 					# define pos, ref, alt columns of vcf output
-					a$pos = ifelse(a$ins, a$posI, a$posD -1)
-					a$ref = ifelse(a$ins, substr(a$seq1, a$seq1.n, a$seq1.n), paste0(substr(a$seq1, a$seq1.n, a$seq1.n), a$var))
+					a$pos = ifelse(a$ins, a$posI, a$posD -1) # reconcile vcf requirements & posI or posD (see * @ above)
+					
+					# n.b. pseudoBLAT results, if any were kept, invalidate var.n, so don't use it
+					# a$ref = ifelse(a$ins, substr(a$hg19I, a$seq1.n, a$seq1.n), substr(a$hg19D, a$seq1.n, a$seq1.n +a$var.n))
+					a$ref = ifelse(a$ins, substr(a$hg19I, a$seq1.n, a$seq1.n), substr(a$hg19D, a$seq1.n, nchar(a$hg19D) - a$seq2.n))
+					
 					a$alt = ifelse(a$ins, paste0(a$ref, a$var), substr(a$ref, 1, 1))
 					
 					# sort by chr, pos 
@@ -336,7 +625,6 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 					
 					# write header rows of vcf
 					# disregard warning "appending column names to file"
-                                        # R package VariantAnnotation won't read in VCF if "Description=>", so SN edited to write out "Description="">"
 					writeLines(c("##fileformat=VCFv4.1", "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"\">"), indels.vcfout.filename)
 					colnames(vcf) = c("#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT", "dummySubject")
 					write.table(vcf, indels.vcfout.filename, sep="\t", quote=F, row.names=F, col.names=T, append=T)
