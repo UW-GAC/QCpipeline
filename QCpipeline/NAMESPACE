@@ -28,4 +28,5 @@ export(readConfig, writeConfig, setConfigDefaults,
        gdsMerge, gdsMergeCheck,
        getSnpNames, readSnpTable,
        convertBuild, checkABalleles,
-       chromToChar, chromToInt)
+       chromToChar, chromToInt,
+       gdsUpdateBuild)

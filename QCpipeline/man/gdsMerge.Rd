@@ -39,4 +39,3 @@ is to include all of them.
 \author{Stephanie Gogarten}
 %\seealso{}
 %\examples{}
-%\keyword{}

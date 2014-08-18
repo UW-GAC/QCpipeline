@@ -1,7 +1,10 @@
 
-updateBuild <- function(genoData, map, outPrefix="new", remove.unmapped=TRUE,
-                        update.alleles=FALSE, block.size=100) {
-         
+gdsUpdateBuild <- function(genoData, map, outPrefix="new", remove.unmapped=TRUE,
+                           update.alleles=FALSE, block.size=100) {
+
+    if (!remove.unmapped) warning("Use of remove.unmapped=FALSE will fail if some SNPs are not in map")
+    stopifnot(hasSnpVariable(genoData, "rsID"))
+        
     gdsfile <- paste0(outPrefix, ".gds")
     gds <- createfn.gds(gdsfile)
 
@@ -25,6 +28,10 @@ updateBuild <- function(genoData, map, outPrefix="new", remove.unmapped=TRUE,
     
     snp <- getSnpVariable(genoData, c("snpID", "chromosome", "position", "rsID",
                                       "alleleA", "alleleB"))
+    if (sum(duplicated(snp$rsID)) > 0) {
+        closefn.gds(gds)
+        stop("rsID must be unique")
+    }
     names(snp)[1:4] <- paste0("old.", names(snp)[1:4])
     snp <- merge(snp, map, all.x=TRUE)
     snp$new.chromosome[is.na(snp$new.chromosome)] <- 27L
