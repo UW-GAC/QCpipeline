@@ -16,9 +16,9 @@ boxplotMeanSD(x, y, data=NULL, xlab=NULL, ylab=NULL, ylim=NULL, nSD=1, showLegen
   \item{showLegend}{show the legend? default is TRUE}
   \item{...}{additional plotting arguments}
 }
-\details{}
+%\details{}
 \author{Jess Shen}
-\seealso{}
+%\seealso{}
 \examples{
 age <- sample(25:55, 100, replace=TRUE)
 sex <- sample(c("M", "F"), 100, replace=TRUE)
@@ -27,4 +27,3 @@ boxplotMeanSD(sex, age)
 data <- data.frame(age, sex)
 boxplotMeanSD("sex", "age", data)
 }
-\keyword{}

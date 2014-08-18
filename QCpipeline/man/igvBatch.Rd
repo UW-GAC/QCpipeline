@@ -23,8 +23,7 @@ igvPlot(sock, chromosome, position, window=10, bam, outdir="./", prefix="igv",
     "both"=make two plots, one collapsed and one expanded.}
   \item{sock}{A socket connection to IGV.}
 }
-\details{
-}
+%\details{}
 \value{
   \code{igvBatch} creates a text file which be run in IGV with the command "File->Run Batch Script."
   The result of running this file will be .png files for each
@@ -34,7 +33,7 @@ igvPlot(sock, chromosome, position, window=10, bam, outdir="./", prefix="igv",
   directly on a running IGV session.
 }
 \author{Stephanie Gogarten}
-\seealso{}
+%\seealso{}
 \examples{
 bamfile <- "/projects/geneva/gcc-fs2/Peters_seq/bam/B00Y2ACXX_1_GGCTAC.bam"
 outdir <- tempdir()
@@ -53,4 +52,3 @@ igvPlot(sock, chrom, pos, bam=bamfile, outdir=outdir,
         genome="hg19", collapse="yes")
 }
 }
-\keyword{}

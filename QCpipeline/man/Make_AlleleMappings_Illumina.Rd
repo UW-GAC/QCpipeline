@@ -62,7 +62,7 @@ make.allele.annotation(map, alleles=c("top", "design", "fwd", "plus"))
   "alleleA.*", "alleleB.*" where "*"=\code{alleles}.
 }
 \author{Sarah Nelson, Tin Louie}
-\seealso{}
+%\seealso{}
 \examples{
 \dontrun{
 ##  Load in Illumina annotation
@@ -98,4 +98,3 @@ snp.annot <- make.allele.annotation(map.final, alleles="top")
 #  reference genome sequence
 }
 }
-\keyword{}

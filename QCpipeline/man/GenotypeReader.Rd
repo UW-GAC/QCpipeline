@@ -11,13 +11,12 @@ GenotypeReader(file)
   \item{file}{Character string with the path to a NetCDF file (ending in
     ".nc") or a GDS file (ending in ".gds").}    
 }
-\details{
-}
+%\details{}
 \value{
   A \code{\link{NcdfGenotypeReader}} or \code{\link{GdsGenotypeReader}} object.
 }
 \author{Stephanie Gogarten}
-\seealso{}
+%\seealso{}
 \examples{
 ncfile <- "tmp.nc"
 simulateGenotypeMatrix(ncdf.filename=ncfile)
@@ -31,4 +30,3 @@ stopifnot(is(dat, "GdsGenotypeReader"))
 close(dat)
 unlink(c(ncfile, gdsfile))
 }
-\keyword{}

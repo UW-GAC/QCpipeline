@@ -22,12 +22,7 @@ plateLayoutPlot(samples, out.file, nprob)
 \item{\code{unobsdup.id}:}{ integer identifier for expected dupliates in which the members were not observed to be duplicates}
 }
 }
-\value{
-  
-}
+%\value{}
 \author{Cathy Laurie, Adrienne Stilp}
-\seealso{}
-\examples{
-
-}
-\keyword{}
+%\seealso{}
+%\examples{}

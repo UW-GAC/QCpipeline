@@ -20,9 +20,9 @@ plot2DwithHist(x, y, xlab=NULL, ylab=NULL, xlim=NULL, ylim=NULL,
   \item{sd}{2-element vector with sd of x and y}
   \item{...}{additional arguments to pass to \code{points}}
 }
-\details{}
+%\details{}
 \author{Leila Zelnick}
-\seealso{}
+%\seealso{}
 \examples{
 library(MSBVAR)
 # generate some multivariate normal example data
@@ -40,4 +40,3 @@ plot2DwithHist(x, y, xlab="This is the X variable", ylab="This is the Y variable
 plot2DwithHist(x, y, xlab="This is the X variable", ylab="This is the Y variable.",
   sub="Example Plot!", xlim=c(0,4), ylim=c(-2,2))
 }
-\keyword{}

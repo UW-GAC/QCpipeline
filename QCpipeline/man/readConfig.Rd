@@ -21,7 +21,7 @@ setConfigDefaults(config, required, optional, default)
   \item{default}{character vector of default values for parameters in
     \code{optional}}
 }
-\details{}
+%\details{}
 \value{
   \code{readConfig} returns a named character vector of parameter
   values.
@@ -35,7 +35,7 @@ setConfigDefaults(config, required, optional, default)
   missing from \code{config}.
 }
 \author{Stephanie Gogarten}
-\seealso{}
+%\seealso{}
 \examples{
 file <- tempfile()
 write.table(cbind(letters[1:10], 1:10), file=file, quote=FALSE,
@@ -51,4 +51,3 @@ writeConfig(config, file)
 
 unlink(file)
 }
-\keyword{}

@@ -47,9 +47,9 @@ far to have this annotation issue.
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
+%\seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+%}
 \examples{
 
 illumina <-  read.csv(file="/projects/geneva/gcc-fs2/SNP_annotation/Illumina/HumanOmni2.5_4v1/HumanOmni2.5-4v1_D.csv", skip=7, nrows=10000)

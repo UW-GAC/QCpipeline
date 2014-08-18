@@ -13,15 +13,15 @@ findRelSet(kinMat, thresh, unrel.set = NULL)
 \details{We recommend using the software KING to estimate pairwise kinship coefficients to be used in \code{kinMat}.  Any pair of individuals with a pairwise kinship greater than \code{thresh} will be declared 'related' and any pair of individuals with a pairwise kinship less than \code{-thresh} will be declared 'divergent'.  Typically, \code{thresh} is set to be the amount of error around 0 expected in the kinship estimate for a pair of truly unrelated individuals.  If \code{unrel.set = NULL}, the PC-AiR algorithm is used to find an 'optimal' partition (see 'References' for a paper describing the algorithm).  If \code{unrel.set} is specified, then all individuals indexed in \code{unrel.set} are forced in the 'unrelated set' and the PC-AiR algorithm is used to partition the rest of the sample; this is especially useful for including reference samples of known ancestry in the 'unrelated set'.
 }
 \value{A vector of indices identifying which individuals are in the 'related set'.  Note: these are not individual IDs, they are indices for which rows/columns of \code{kinMat} are in the 'related set'.}
-\references{
+%\references{
 %% ~put references to the literature/web site here ~
-}
+%}
 \author{Matthew P. Conomos}
 \note{\code{findRelSet} is called internally in the function \code{pcair} but may also be used on its own to partition the sample into 'unrelated' and 'related' sets without performing PCA.}
-\seealso{
+%\seealso{
 % 	\code{\link{pcair}} which uses this function for finding principal components in the presence of related individuals.
 % 	\code{\link{king2mat}} for creating a matrix of pairwise kinship coefficient estimates that can be used as \code{kinMat} from KING output text files.
-}
+%}
 \examples{
 \dontrun{
 	# load matrix of estimated kinship coefficients

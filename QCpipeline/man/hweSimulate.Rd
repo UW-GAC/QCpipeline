@@ -14,7 +14,7 @@ hweSimulate(genotypes, p_in)
   \item{genotypes}{matrix of genotypes}
   \item{p_in}{input allele frequency}
 }
-\details{}
+%\details{}
 \value{
 \code{hweSimulateGenotypeMatrix} returns a random matrix of genotypes for \code{nsamp} samples and \code{nsnp} SNPs with input allele frequencies \code{aFreq}, assuming that the samples' genotypes are in HWE for each SNP. There are no missing calls.
 \itemize{
@@ -29,7 +29,7 @@ hweSimulate(genotypes, p_in)
 }
 }
 \author{Adrienne Stilp}
-\seealso{}
+%\seealso{}
 \examples{
 nsnp <- 100
 nsamp <- 50
@@ -41,4 +41,3 @@ plot(density(sim$f.sim, na.rm=TRUE), col="red")
 lines(density(sim$f.exp), col="black")
 
 }
-\keyword{}

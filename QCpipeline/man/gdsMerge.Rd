@@ -37,7 +37,6 @@ One can provide a list of scanIDs (\code{sampleList}) and snpIDs
 is to include all of them.
 }
 \author{Stephanie Gogarten}
-\seealso{}
-\examples{
-}
-\keyword{}
+%\seealso{}
+%\examples{}
+%\keyword{}

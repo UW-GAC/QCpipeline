@@ -22,9 +22,9 @@ Path to UCSC chain file, from original build to target build
 logical flag to report out counts of successful and unsuccessful conversion
 }
 }
-\details{
+%\details{
 %%  ~~ If necessary, more details than the description above ~~
-}
+%}
 \value{
  Returns input SNP annotation as a data frame with added columns: chromosome and position in the target build
 }
@@ -35,15 +35,15 @@ http://genome.ucsc.edu/cgi-bin/hgLiftOver
 \author{
 Sarah Nelson
 }
-\note{
+%\note{
 %%  ~~further notes~~
-}
+%}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
+%\seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+%}
 \examples{
 \dontrun{
  library(OLGApipline)
@@ -56,4 +56,4 @@ Sarah Nelson
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{manip}
+%\keyword{manip}

@@ -59,7 +59,5 @@ dbgapSnpAnnotation(snpAnnot, dir=".",
   \code{scanAnnot} and \code{snpAnnot}.
 }
 \author{Stephanie Gogarten}
-\seealso{}
-\examples{
-}
-\keyword{}
+%\seealso{}
+%\examples{}

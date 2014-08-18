@@ -10,16 +10,15 @@ bestLegendPos(x, y)
   \item{x}{Points on the x axis}
   \item{y}{Points on the y axis}
 }
-\details{}
+%\details{}
 \value{
   Returns one of the legend placement strings from the list \code{"bottomright"}, \code{"bottom"}, \code{"bottomleft"}, \code{"left"}, \code{"topleft"}, \code{"top"}, \code{"topright"}, \code{"right"} and \code{"center"}.
 }
 \author{Stephanie Gogarten}
-\seealso{}
+%\seealso{}
 \examples{
 x <- sample(1:100, 50, replace=TRUE)
 y <- sample(1:100, 50, replace=TRUE)
 plot(x,y)
 legend(bestLegendPos(x,y), "points", pch=1)
 }
-\keyword{}

@@ -22,7 +22,6 @@ the lower 95\% prediction interval for half-sibling-like relationships.
   be numbered sequentially starting with \code{start.fam.id}.
 }
 \author{Cathy Laurie}
-\seealso{}
-\examples{
-}
-\keyword{}
+%\seealso{}
+%\examples{}
+%\keyword{}

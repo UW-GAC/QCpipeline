@@ -17,7 +17,7 @@ quadSolveMAF(X, N)
   2*MAF*(1-MAF)*N >X.
 }
 \author{Adrienne Stilp}
-\seealso{}
+%\seealso{}
 \examples{
 X <- 30
 N <- c(1000, 3000, 10000)

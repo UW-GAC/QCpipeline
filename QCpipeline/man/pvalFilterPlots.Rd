@@ -31,4 +31,4 @@ manhattanPlotPng(pval, chromosome, filters, outfile, addText="", ...)
 }
 \author{Stephanie Gogarten}
 \seealso{\code{\link{qqPlot}}, \code{\link{manhattanPlot}}}
-\examples{}
+%\examples{}
