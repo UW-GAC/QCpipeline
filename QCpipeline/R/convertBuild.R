@@ -25,8 +25,6 @@
 
 convertBuild <- function(snpAnnot, chain.file, snp.include = NULL, verbose = TRUE) {
     
-    require(rtracklayer)
-    
     # check for required fields in SNP annotation
     stopifnot(all(c("chromosome", "position", "rsID", "snpID") %in% varLabels(snpAnnot)))
     
