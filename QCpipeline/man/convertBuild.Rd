@@ -8,7 +8,7 @@ Convert genome build
 Converts genome build in a SNP annotation, using R implementation of UCSC liftOver tool  
 }
 \usage{
-convertBuild(snpAnnot, chain.file, verbose = TRUE)
+convertBuild(snpAnnot, chain.file, snp.include = NULL, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,10 @@ Open SNP annotation object (object of class 'SnpAnnotationDataFrame') with "chro
   \item{chain.file}{
 Path to UCSC chain file, from original build to target build
 }
+  \item{snp.include}{
+Optionally, a integer vector containing the snpIDs of SNPs to be
+included; defaults to including all SNPs in snpAnnot
+}
   \item{verbose}{
 logical flag to report out counts of successful and unsuccessful conversion
 }
@@ -26,7 +30,17 @@ logical flag to report out counts of successful and unsuccessful conversion
 %%  ~~ If necessary, more details than the description above ~~
 %}
 \value{
- Returns input SNP annotation as a data frame with added columns: chromosome and position in the target build
+ Returns input SNP annotation as a data frame with added columns:
+ chromosome and position in the target build
+ ("chromosome.converted","position.converted")
+ 
+ Note that pseudoautosomal SNPs are input as either chromosome "X" or
+ "Y", depending on initial chromosome codes (i.e. XY SNP with base pair position
+ on the X or position on the Y). In the output, converted chromosome is
+ given as "X" or "Y", meaning users may need to re-evaluate whether X
+ and Y SNPs belong to the pseudoautosomal regions of those chromosomes,
+ based on the updated base pair positions, and re-assign chromosome
+ codes accordingly.
 }
 \references{
 http://www.bioconductor.org/packages/release/bioc/manuals/rtracklayer/man/rtracklayer.pdf
