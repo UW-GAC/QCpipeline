@@ -2,8 +2,12 @@
 gdsUpdateBuild <- function(genoData, map, outPrefix="new", remove.unmapped=TRUE,
                            update.alleles=FALSE, block.size=100) {
 
-    if (!remove.unmapped) warning("Use of remove.unmapped=FALSE will fail if some SNPs are not in map")
     stopifnot(hasSnpVariable(genoData, "rsID"))
+    if (!remove.unmapped) {
+        if (!all(getSnpVariable(genoData, "rsID") %in% map$old.rsID)) {
+            stop("If remove.unmapped=FALSE, all SNPs must be in map")
+        }
+    }
         
     gdsfile <- paste0(outPrefix, ".gds")
     gds <- createfn.gds(gdsfile)
