@@ -15,11 +15,9 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_snp_file_1", "annot_snp_file_2", "out_prefix")
 optional <- c("annot_snp_clustSepCol_2", "annot_snp_mafCol_1",
-              "annot_snp_snpCol_1", "annot_snp_snpCol_2",
               "bins_maf", "bins_clustSep",
               "out_summary_prefix", "summary_include_file")
 default <- c("cluster.sep", "MAF",
-             "rsID", "rsID",
              "0 0.01 0.05 0.5", "0 0.4 0.8 1",
              NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
@@ -39,31 +37,27 @@ if (is.na(config["out_summary_prefix"])) {
 
 if (type == "senspec") {
   snp.disc <- disc
-  metric <- names(disc)[-1]
+  metric <- setdiff(names(snp.disc),
+                    c("snpID1", "snpID2", "chromosome", "position", "alleles", "name"))
 } else {
   snp.disc <- disc$discordance.by.snp
   # metric to summarize = concordance rate
   snp.disc$conc.rate <- 1 - snp.disc$discord.rate
   metric <- "conc.rate"
 }
-snp.id <- row.names(snp.disc)
 
 snpAnnot1 <- getobj(config["annot_snp_file_1"])
-snp.annot1 <- pData(snpAnnot1)[snpAnnot1[[config["annot_snp_snpCol_1"]]] %in% snp.id,
-                               c(config["annot_snp_snpCol_1"], config["annot_snp_mafCol_1"])]
-names(snp.annot1) <- c("snp.id", "MAF")
+snp.annot1 <- pData(snpAnnot1)[snpAnnot1$snpID %in% snp.disc$snpID1,
+                               c("snpID", config["annot_snp_mafCol_1"])]
+names(snp.annot1) <- c("snpID", "MAF")
 
 snpAnnot2 <- getobj(config["annot_snp_file_2"])
-snp.annot2 <- pData(snpAnnot2)[snpAnnot2[[config["annot_snp_snpCol_2"]]] %in% snp.id,
-                               c(config["annot_snp_snpCol_2"], config["annot_snp_clustSepCol_2"])]
-names(snp.annot2) <- c("snp.id", "cluster.sep")
+snp.annot2 <- pData(snpAnnot2)[snpAnnot2$snpID %in% snp.disc$snpID2,
+                               c("snpID", config["annot_snp_clustSepCol_2"])]
+names(snp.annot2) <- c("snpID", "cluster.sep")
 
-snp.annot <- merge(snp.annot1, snp.annot2)
-row.names(snp.annot) <- snp.annot$snp.id
-snp.annot <- snp.annot[snp.id, c("MAF", "cluster.sep")]
-
-stopifnot(allequal(row.names(snp.disc), row.names(snp.annot)))
-snp <- cbind(snp.disc, snp.annot)
+snp <- merge(snp.disc, snp.annot1, by.x="snpID1", by.y="snpID")
+snp <- merge(snp, snp.annot2, by.x="snpID2", by.y="snpID")
 
 if (!is.na(config["summary_include_file"])) {
   snp.include <- getobj(config["summary_include_file"])

@@ -20,11 +20,14 @@ required <- c("annot_scan_file_1", "annot_scan_file_2",
               "out_prefix")
 optional <- c("annot_scan_subjCol_1", "annot_scan_subjCol_2",
               "annot_snp_snpCol_1", "annot_snp_snpCol_2",
+              "match_snps_on",
               "scan_exclude_file_1", "scan_exclude_file_2",
+              "snp_exclude_file_1", "snp_exclude_file_2",
               "snp_include_file")
 default <- c("subjectID", "subjectID",
              "rsID", "rsID",
-             NA, NA, NA)
+             "position,alleles",
+             NA, NA, NA, NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -79,6 +82,15 @@ if (!is.na(config["scan_exclude_file_1"])) {
 }
 length(scan.exclude1)
 
+# are there any snps to exclude?
+if (!is.na(config["snp_exclude_file_1"])) {
+  snp.exclude1 <- getobj(config["snp_exclude_file_1"])
+  stopifnot(all(snp.exclude1 %in% getSnpID(genoData1)))
+} else {
+  snp.exclude1 <- NULL
+}
+length(snp.exclude1)
+
   
 # dataset 2
 scanAnnot <- getobj(config["annot_scan_file_2"])
@@ -100,6 +112,15 @@ if (!is.na(config["scan_exclude_file_2"])) {
 }
 length(scan.exclude2)
 
+# are there any snps to exclude?
+if (!is.na(config["snp_exclude_file_2"])) {
+  snp.exclude2 <- getobj(config["snp_exclude_file_2"])
+  stopifnot(all(snp.exclude2 %in% getSnpID(genoData2)))
+} else {
+  snp.exclude2 <- NULL
+}
+length(snp.exclude2)
+
 
 # snps
 if (!is.na(config["snp_include_file"])) {
@@ -109,19 +130,26 @@ if (!is.na(config["snp_include_file"])) {
 }
 length(snp.include)
 
+# how to match snps?
+match.snps.on <- unlist(strsplit(config["match_snps_on"], ",", fixed=TRUE))
+
 if (func.name == "duplicateDiscordanceAcrossDatasets") {
   disc <- duplicateDiscordanceAcrossDatasets(genoData1, genoData2,
+    match.snps.on=match.snps.on,
     subjName.cols=config[c("annot_scan_subjCol_1","annot_scan_subjCol_2")],
     snpName.cols=config[c("annot_snp_snpCol_1", "annot_snp_snpCol_2")],
     one.pair.per.subj=TRUE, minor.allele.only=MAonly,
     missing.fail=miss.fail,
     scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
+    snp.exclude1=snp.exclude1, snp.exclude2=snp.exclude2,
     snp.include=snp.include)
 } else if (func.name == "minorAlleleSensitivitySpecificity") {
   disc <- minorAlleleDetectionAccuracy(genoData1, genoData2,
+    match.snps.on=match.snps.on,
     subjName.cols=config[c("annot_scan_subjCol_1","annot_scan_subjCol_2")],
     snpName.cols=config[c("annot_snp_snpCol_1", "annot_snp_snpCol_2")],
     scan.exclude1=scan.exclude1, scan.exclude2=scan.exclude2,
+    snp.exclude1=snp.exclude1, snp.exclude2=snp.exclude2,
     snp.include=snp.include)
 } else {
   stop("unknown function name")
