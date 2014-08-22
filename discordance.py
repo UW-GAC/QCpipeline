@@ -23,13 +23,13 @@ out_prefix         prefix for output files
 Optional config parameters [default]:
 annot_scan_subjCol_1  [subjectID]         column of matching subject ID in scan annotation 1
 annot_scan_subjCol_2  [subjectID]         column of matching subject ID in scan annotation 2
-annot_snp_snpCol_1    [rsID]              column of matching snp ID in snp annotation 1
-annot_snp_snpCol_2    [rsID]              column of matching snp ID in snp annotation 2
+annot_snp_snpCol_1    [rsID]              column of matching snp ID in snp annotation 1 (if matching on name)
+annot_snp_snpCol_2    [rsID]              column of matching snp ID in snp annotation 2 (if matching on name)
 match_snps_on         [position,alleles]  how to match snps (position, alleles, and/or name)
 scan_exclude_file_1   [NA]                vector of scanID to exclude from dataset 1
 scan_exclude_file_2   [NA]                vector of scanID to exclude from dataset 2
-snp_exclude_file_1    [NA]                vector of scanID to exclude from dataset 1
-snp_exclude_file_2    [NA]                vector of scanID to exclude from dataset 2
+snp_exclude_file_1    [NA]                vector of snpID to exclude from dataset 1
+snp_exclude_file_2    [NA]                vector of snpID to exclude from dataset 2
 snp_include_file      [NA]                vector of matching snp ID to include
 out_summary_prefix    [NA]                prefix for summary output files
 summary_include_file  [NA]                vector of snp ID to include in summary
