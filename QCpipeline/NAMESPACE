@@ -5,6 +5,7 @@ importFrom(gplots, plotCI) # used in boxplotMeanSD
 import(grid)
 import(gridBase)
 import(hexbin)
+import(BiocGenerics)
 import(Biostrings)
 import(tools)
 import(SRAdb)
@@ -29,4 +30,7 @@ export(readConfig, writeConfig, setConfigDefaults,
        getSnpNames, readSnpTable,
        convertBuild, checkABalleles,
        chromToChar, chromToInt,
-       gdsUpdateBuild)
+       gdsUpdateBuild,
+       filterImputationSegments,
+       getAnomSegOverlap
+       )

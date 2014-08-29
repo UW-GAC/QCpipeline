@@ -248,6 +248,9 @@ approx.hg19 <- function(b, insertion=FALSE, one.sided=FALSE) {
 #
 #
 pseudoBLAT <- function(b) {
+  
+  chr.name = posD = var.n = seq1 = hg19L = seq1 = seq2 = hit = hg19D = seq1.n = seq2.n = scoreD = NULL
+  
 	# score of the best deletion scenario so far, and its associated variables
 	b$posD   = b$posD.old
 	b$hg19D  = b$hg19D.old
@@ -309,6 +312,7 @@ nchar.suffix <- function(a) {
 
 make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout = FALSE, indels.vcfout.filename = "indels.needLeftAlign.vcf") {
   options(stringsAsFactors = FALSE)
+  scoreD = scoreI = scoreD.old = scoreI.old = hg19D.old = hg19I.old = posD.old = posI.old = NULL
 
   ## Biostrings is imported in NAMESPACE  
   ## if (indels.verbose && !require(Biostrings)) {
