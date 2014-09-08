@@ -36,38 +36,18 @@ if (length(args) > 1) {
 }
 nsamp <- nrow(scanAnnot)
 
-##########
-# Create ncdf and populate with snp annotation
-##########
-(snpAnnot <- getobj(config["annot_snp_file"]))
-snp.cols <- intersect(c("snpID", "chromosome", "position", "rsID", "alleleA", "alleleB"),
-                      getVariableNames(snpAnnot))
-snpdf <- getVariable(snpAnnot, snp.cols)
-
-ncfile <- config["geno_file"]
-createDataFile(snp.annotation = snpdf,
-               filename = ncfile,
-               file.type = config["geno_file_type"],
-               variables = "genotype",
-               n.samples = nsamp,
-               array.name = config["array_name"],
-               genome.build = config["array_build"])
-
-# check
-# validity methods of NcdfGenotypeReader and GenotypeData take care of
-# most checks we need
-(nc <- GenotypeReader(ncfile))
-stopifnot(nsnp(nc) == nrow(snpAnnot))
-#stopifnot(nscan(nc) == nsamp)
-data <- GenotypeData(nc, snpAnnot=snpAnnot)
-close(data)
-
 
 ##########
 # Add data to ncdf
 ##########
-snpdf <- getVariable(snpAnnot, c("snpID", config["annot_snp_nameCol"]))
-names(snpdf) <- c("snpID", "snpName")
+ncfile <- config["geno_file"]
+
+(snpAnnot <- getobj(config["annot_snp_file"]))
+snp.cols <- intersect(c("snpID", config["annot_snp_nameCol"], "chromosome", "position", 
+                        "alleleA", "alleleB"),
+                      getVariableNames(snpAnnot))
+snpdf <- getVariable(snpAnnot, snp.cols)
+names(snpdf)[2] <- "snpName"
 
 scandf <- getVariable(scanAnnot, c("scanID", config["annot_scan_nameCol"], config["annot_scan_fileCol"]))
 names(scandf) <- c("scanID","scanName" ,"file")
@@ -92,13 +72,16 @@ if (config["raw_scanNameInFile"] == 1) {
   names(col.nums)[2] <- "sample"
 }
 
-res <- addSampleData(path = config["raw_path"], filename = ncfile,
-                     file.type = config["geno_file_type"],
-                     snp.annotation = snpdf, scan.annotation = scandf,
-                     sep.type=config["raw_sepType"], skip.num=skip.num,
-                     col.total=col.total,
-                     col.nums=col.nums, scan.name.in.file=scan.name.in.file,
-                     diagnostics.filename=config["geno_diagFile"])
+res <- createDataFile(path = config["raw_path"], filename = ncfile,
+                      file.type = config["geno_file_type"],
+                      variables = "genotype",
+                      snp.annotation = snpdf, scan.annotation = scandf,
+                      sep.type=config["raw_sepType"], skip.num=skip.num,
+                      col.total=col.total,
+                      col.nums=col.nums, scan.name.in.file=scan.name.in.file,
+                      array.name = config["array_name"],
+                      genome.build = config["array_build"],
+                      diagnostics.filename=config["geno_diagFile"])
 
 ########################################
 # MANUAL REVIEW - DIAGNOSTICS
@@ -178,8 +161,3 @@ stopifnot(all(res$snp.order == 1))
 table(res$geno.chk, useNA="ifany")
 stopifnot(all(res$geno.chk == 1))
 
-
-# last check that annotation matches netCDF
-(nc <- GenotypeReader(ncfile))
-data <- GenotypeData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
-close(data)

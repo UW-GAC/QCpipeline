@@ -1,11 +1,13 @@
 \name{GenotypeReader}
 \alias{GenotypeReader}
+\alias{IntensityReader}
 \title{Return a NcdfGenotypeReader or GdsGenotypeReader}
 \description{
   Return a NcdfGenotypeReader or GdsGenotypeReader based on the file extension.
 }
 \usage{
 GenotypeReader(file)
+IntensityReader(file)
 }
 \arguments{
   \item{file}{Character string with the path to a NetCDF file (ending in
@@ -13,7 +15,8 @@ GenotypeReader(file)
 }
 %\details{}
 \value{
-  A \code{\link{NcdfGenotypeReader}} or \code{\link{GdsGenotypeReader}} object.
+  \code{GenotypeReader}: a \code{\link{NcdfGenotypeReader}} or \code{\link{GdsGenotypeReader}} object.
+  \code{IntensityReader}: a \code{\link{NcdfIntensityReader}} or \code{\link{GdsIntensityReader}} object.
 }
 \author{Stephanie Gogarten}
 %\seealso{}

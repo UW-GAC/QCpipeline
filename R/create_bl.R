@@ -36,39 +36,18 @@ if (length(args) > 1) {
 }
 nsamp <- nrow(scanAnnot)
 
-##########
-# Create ncdf and populate with snp annotation
-##########
-(snpAnnot <- getobj(config["annot_snp_file"]))
-snp.cols <- intersect(c("snpID", "chromosome", "position", "rsID", "alleleA", "alleleB"),
-                      getVariableNames(snpAnnot))
-snpdf <- getVariable(snpAnnot, snp.cols)
-
-ncfile <- config["bl_file"]
-createDataFile(snp.annotation = snpdf,
-               filename = ncfile,
-               file.type = config["bl_file_type"],
-               variables = c("BAlleleFreq","LogRRatio"),
-               n.samples = nsamp,
-               precision = "single",
-               array.name = config["array_name"],
-               genome.build = config["array_build"])
-
-# check
-# validity methods of NcdfIntensityReader and IntensityData take care of
-# most checks we need
-(nc <- NcdfIntensityReader(ncfile))
-stopifnot(nsnp(nc) == nrow(snpAnnot))
-stopifnot(nscan(nc) == nsamp)
-data <- IntensityData(nc, snpAnnot=snpAnnot)
-close(data)
-
 
 ##########
 # Add data to ncdf
 ##########
-snpdf <- getVariable(snpAnnot, c("snpID", config["annot_snp_nameCol"]))
-names(snpdf) <- c("snpID", "snpName")
+ncfile <- config["bl_file"]
+
+(snpAnnot <- getobj(config["annot_snp_file"]))
+snp.cols <- intersect(c("snpID", config["annot_snp_nameCol"], "chromosome", "position", 
+                        "alleleA", "alleleB"),
+                      getVariableNames(snpAnnot))
+snpdf <- getVariable(snpAnnot, snp.cols)
+names(snpdf)[2] <- "snpName"
 
 scandf <- getVariable(scanAnnot, c("scanID", config["annot_scan_nameCol"], config["annot_scan_fileCol"]))
 names(scandf) <- c("scanID", "scanName", "file")
@@ -83,13 +62,16 @@ skip.num <- as.integer(config["raw_skipNum"])
 col.total <- as.integer(config["raw_colTotal"])
 scan.name.in.file <- as.integer(config["raw_scanNameInFile"])
 
-res <- addSampleData(path = config["raw_path"], filename = ncfile,
-                     file.type = config["bl_file_type"],
-                     snp.annotation = snpdf, scan.annotation = scandf,
-                     sep.type=config["raw_sepType"], skip.num=skip.num,
-                     col.total=col.total,
-                     col.nums=col.nums, scan.name.in.file=scan.name.in.file,
-                     diagnostics.filename=config["bl_diagFile"])
+res <- createDataFile(path = config["raw_path"], filename = ncfile,
+                      file.type = config["bl_file_type"],
+                      variables = c("BAlleleFreq","LogRRatio"),
+                      snp.annotation = snpdf, scan.annotation = scandf,
+                      sep.type=config["raw_sepType"], skip.num=skip.num,
+                      col.total=col.total,
+                      col.nums=col.nums, scan.name.in.file=scan.name.in.file,
+                      array.name = config["array_name"],
+                      genome.build = config["array_build"],
+                      diagnostics.filename=config["bl_diagFile"])
 
 ########################################
 # MANUAL REVIEW - DIAGNOSTICS
@@ -116,7 +98,7 @@ stopifnot(all(res$chk == 1))
 ########################################
 # MANUAL REVIEW - DATA VALUES
 ########################################
-(nc <- NcdfIntensityReader(ncfile))
+(nc <- IntensityReader(ncfile))
 data <- IntensityData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
 scanID <- getScanID(data)
 range(scanID)
@@ -177,8 +159,3 @@ stopifnot(all(res$inten.chk$ballelefreq == 1))
 table(res$inten.chk$logrratio, useNA="ifany")
 stopifnot(all(res$inten.chk$logrratio == 1))
 
-
-# last check that annotation matches netCDF
-(nc <- NcdfIntensityReader(ncfile))
-data <- IntensityData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
-close(data)

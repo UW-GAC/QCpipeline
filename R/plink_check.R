@@ -13,7 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file", "plink_prefix")
+required <- c("annot_scan_file", "annot_snp_file", "geno_file", "plink_prefix")
 optional <- c("annot_scan_nameCol", "annot_snp_alleleACol", "annot_snp_alleleBCol",
               "annot_snp_nameCol", "out_plink_logfile")
 default <- c("Sample.Name", "alleleA", "alleleB", "rsID", "plink_check.log")
@@ -39,7 +39,7 @@ if (length(args) > 1 & args[2] == "ABcoding") {
   snpAnnot[[config["annot_snp_alleleBCol"]]] <- "B"
 }
 
-data <- GenotypeReader(config["nc_geno_file"])
+data <- GenotypeReader(config["geno_file"])
 genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 res <- plinkCheck(genoData,
