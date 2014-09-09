@@ -46,10 +46,10 @@ raw_lrrCol            [19]                   column number with LRR
 geno_file_type        [gds]                  type for genotype file (gds or ncdf)
 geno_checkFile        [geno_check.RData]     output file for genotype check
 geno_diagFile         [geno_diag.RData]      output file for genotype creation
-xy_file_type          [ncdf]                 type for XY file (gds or ncdf)
+xy_file_type          [gds]                  type for XY file (gds or ncdf)
 xy_checkFile          [xy_check.RData]       output file for XY check
 xy_diagFile           [xy_diag.RData]        output file for XY creation
-bl_file_type          [ncdf]                 type for BAF/LRR file (gds or ncdf)
+bl_file_type          [gds]                  type for BAF/LRR file (gds or ncdf)
 bl_checkFile          [bl_check.RData]       output file for BAF/LRR check
 bl_diagFile           [bl_diag.RData]        output file for BAF/LRR creation
 out_plink_logfile     [plink_check.log]      output file for PLINK check"""

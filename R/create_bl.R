@@ -20,7 +20,7 @@ optional <- c("annot_scan_fileCol", "annot_scan_nameCol", "annot_snp_nameCol",
               "raw_bafCol", "raw_lrrCol",
               "raw_colTotal", "raw_sampleCol", "raw_scanNameInFile", "raw_sepType",
               "raw_skipNum", "raw_snpCol")
-default <- c("file", "Sample.Name", "rsID", "bl_check.RData", "bl_diag.RData", "ncdf",
+default <- c("file", "Sample.Name", "rsID", "bl_check.RData", "bl_diag.RData", "gds",
              18, 19, 19, 2, 1, ",", 11, 1)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
