@@ -153,9 +153,9 @@ stopifnot(all(res$chk == 1))
 table(res$snp.order, useNA="ifany")
 stopifnot(all(res$snp.order == 1))
 
-table(res$inten.chk$ballelefreq, useNA="ifany")
+table(res$inten.chk$BAlleleFreq, useNA="ifany")
 stopifnot(all(res$inten.chk$ballelefreq == 1))
 
-table(res$inten.chk$logrratio, useNA="ifany")
+table(res$inten.chk$LogRRatio, useNA="ifany")
 stopifnot(all(res$inten.chk$logrratio == 1))
 

@@ -20,8 +20,8 @@ optional <- c("annot_scan_fileCol", "annot_scan_nameCol", "annot_snp_nameCol",
               "raw_a1Col", "raw_a2Col", "raw_genoCol",
               "raw_colTotal", "raw_sampleCol", "raw_scanNameInFile", "raw_sepType",
               "raw_skipNum", "raw_snpCol")
-default <- c("file", "Sample.Name", "rsID", "geno_check.RData", "gds",
-             "geno_diag.RData", 10, 11, NA, 19, 2, 1, ",", 11, 1)
+default <- c("file", "Sample.Name", "rsID", "geno_check.RData", "geno_diag.RData",
+             "gds", 10, 11, NA, 19, 2, 1, ",", 11, 1)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

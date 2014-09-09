@@ -174,9 +174,9 @@ if (getqual) {
   stopifnot(all(res$chk == 1))
 }
 
-table(res$inten.chk$x, useNA="ifany")
+table(res$inten.chk$X, useNA="ifany")
 stopifnot(all(res$inten.chk$x == 1))
 
-table(res$inten.chk$y, useNA="ifany")
+table(res$inten.chk$Y, useNA="ifany")
 stopifnot(all(res$inten.chk$y == 1))
 
