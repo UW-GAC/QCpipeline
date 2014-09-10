@@ -13,7 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 ## check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "nc_geno_subj_file")
+required <- c("annot_scan_file", "annot_snp_file", "geno_subj_file")
 optional <- c("annot_snp_dupSnpCol", "annot_snp_missingCol", "annot_snp_rsIDCol",
               "dupsnp_scan_exclude_file", "out_dupsnp_file")
 default <- c("dup.pos.id", "missing.n1", "rsID", NA, "dup_snps.RData")
@@ -22,7 +22,7 @@ print(config)
 
 (snpAnnot <- getobj(config["annot_snp_file"]))
 
-data <- GenotypeReader(config["nc_geno_subj_file"])
+data <- GenotypeReader(config["geno_subj_file"])
 (scanAnnot <- getobj(config["annot_scan_file"]))
 # take subset of annotation to match netCDF
 scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)), ]

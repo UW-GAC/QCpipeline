@@ -13,9 +13,9 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "out_afreq_file")
-optional <- c("annot_scan_hapmapCol", "annot_scan_subjectCol", "corr.by.snp", "maf.bin", "out_disc_file", "out_disc_maf_file", "out_disc_plot", "out_ma_conc_plot", "out_maf_autosomes_plot", "out_maf_plot", "out_maf_xchrom_plot", "out_snp_conc_plot", "out_snp_corr_plot")
-default <- c("geno.cntl", "subjectID", FALSE, 0.01, "dup_disc.RData", NA, "dup_disc.pdf", "snp_ma_conc.pdf", "maf_aut_hist.pdf", "maf_hist.pdf", "maf_x_hist.pdf", "snp_conc.pdf", "snp_corr.pdf")
+required <- c("annot_scan_file", "annot_snp_file")
+optional <- c("annot_scan_hapmapCol", "annot_scan_subjectCol", "corr.by.snp", "maf.bin", "out_afreq_file", "out_disc_file", "out_disc_maf_file", "out_disc_plot", "out_ma_conc_plot", "out_maf_autosomes_plot", "out_maf_plot", "out_maf_xchrom_plot", "out_snp_conc_plot", "out_snp_corr_plot")
+default <- c("geno.cntl", "subjectID", FALSE, 0.01, "allele_freq.RData", "dup_disc.RData", NA, "dup_disc.pdf", "snp_ma_conc.pdf", "maf_aut_hist.pdf", "maf_hist.pdf", "maf_x_hist.pdf", "snp_conc.pdf", "snp_corr.pdf")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

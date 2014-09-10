@@ -20,14 +20,18 @@ Detect chromosome anomalies with the following steps:
    (or sum on a chromosome > thresh.sum)
 
 Required config parameters:
-annot_scan_file  scan annotation file
-annot_snp_file   snp annotation file
-build            genome build (hg18 or hg19)
-nc_bl_file       BAF/LRR netCDF file
-nc_geno_file     genotype file (netCDF or GDS)
-project          project name (prepend to output files)
-out_anom_dir     output directory for anomaly data
-out_plot_dir     output directory for anomaly plots
+annot_scan_file   scan annotation file
+annot_snp_file    snp annotation file
+build             genome build (hg18 or hg19)
+bl_file           BAF/LRR file (netCDF or GDS)
+geno_file         genotype file (netCDF or GDS)
+project           project name (prepend to output files)
+out_anom_dir      output directory for anomaly data
+out_plot_dir      output directory for anomaly plots
+out_baf_med_file  output (or existing) median BAF SD file
+
+Required for "--maf" option:
+out_afreq_file    output (or existing) allele frequency file
 
 Optional config parameters [default]:
 annot_snp_IntensityOnlyCol  [NA]                            column of intensity-only in snp annotation
@@ -38,9 +42,7 @@ scan_exclude_file           [NA]                            vector of scanID to 
 snp_exclude_file            [NA]                            vector of snpID to exclude
 thresh.indiv                [5]                             threshold for plotting individual anomalies (Mb)
 thresh.sum                  [10]                            threshold for sum of all anomalies on a chromosome (Mb)  
-out_afreq_file              [allele_freq.RData]             output (or existing) allele frequency file
 out_baf_mean_file           [baf_mean_by_scan_chrom.RData]  output BAF mean file
-out_baf_med_file            [median_baf_sd_by_scan.RData]   output (or existing) median BAF SD file
 out_baf_sd_file             [baf_sd_by_scan_chrom.RData]    output BAF SD file
 out_eligible_snps           [snps_eligible.RData]           output file of eligible SNPs
 out_plot_prefix             [long_plot]                     output prefix for anomaly plots

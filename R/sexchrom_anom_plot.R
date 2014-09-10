@@ -52,9 +52,8 @@ if (length(anom.ind) > 0) {
   anom.comment <- comment[anom.ind]
   main <- paste("Scan", anom.id, "- Local", localID, "- Sex", sex, "- Chrom X\n", anom.comment)
   
-  bl.file <- config["bl_file"]
-  blnc <- IntensityReader(bl.file)
-  blData <-  IntensityData(blnc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+  bl <- IntensityReader(config["bl_file"])
+  blData <-  IntensityData(bl, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
   png.file <- file.path(paste(config["out_sexchrom_prefix"], "_%003d.png", sep=""))
   png(png.file, width=720, height=720)

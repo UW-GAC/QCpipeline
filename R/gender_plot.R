@@ -13,9 +13,11 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "out_het_file", "out_inten_file")
-optional <- c("annot_scan_sexCol", "out_pdf", "out_autosome_prefix")
-default <- c("sex", "sex_check.pdf", "autosome")
+required <- c("annot_scan_file", "annot_snp_file")
+optional <- c("annot_scan_sexCol", "out_pdf", "out_autosome_prefix",
+              "out_het_file", "out_inten_file")
+default <- c("sex", "sex_check.pdf", "autosome",
+             "het_by_scan.RData", "mean_inten.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

@@ -13,10 +13,10 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "nc_geno_file", "out_afreq_file")
+required <- c("annot_scan_file", "annot_snp_file", "geno_file")
 optional <- c("annot_scan_subjectCol", "annot_snp_missingCol", 
-              "out_disc_maf_file", "disc_scan_exclude_file")
-default <- c("subjectID", "missing.n1", "dup_disc_maf.RData", NA)
+              "out_afreq_file", "out_disc_maf_file", "disc_scan_exclude_file")
+default <- c("subjectID", "missing.n1", "allele_freq.RData", "dup_disc_maf.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -26,7 +26,7 @@ scanID <- getScanID(scanAnnot)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
-data <- GenotypeReader(config["nc_geno_file"])
+data <- GenotypeReader(config["geno_file"])
 genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # are there any scans to exclude?

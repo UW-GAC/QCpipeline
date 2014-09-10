@@ -13,8 +13,8 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "nc_geno_file")
-optional <- c("out_afreq_file", "scan_exclude_file", "nc_geno_subj_file")
+required <- c("annot_scan_file", "geno_file")
+optional <- c("out_afreq_file", "scan_exclude_file", "geno_subj_file")
 default <- c("allele_freq.RData", NA, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
@@ -24,10 +24,10 @@ print(config)
 # but sometimes allele frequency is run before there is a subject-level (ie chromosome anomalies)
 # and sometimes it is run giving only *one* netcdf (the subject-level)
 # so we need an if statement.
-if (!is.na(config["nc_geno_subj_file"])){
-  data <- GenotypeReader(config["nc_geno_subj_file"])
+if (!is.na(config["geno_subj_file"])){
+  data <- GenotypeReader(config["geno_subj_file"])
 } else {
-  data <- GenotypeReader(config["nc_geno_file"])
+  data <- GenotypeReader(config["geno_file"])
 }
 data
 scanAnnot <- getobj(config["annot_scan_file"])

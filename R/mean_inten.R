@@ -19,9 +19,8 @@ default <- c("mean_inten.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-ncfile <- config["xy_file"]
-nc <- IntensityReader(ncfile)
-intenData <- IntensityData(nc)
+xy <- IntensityReader(config["xy_file"])
+intenData <- IntensityData(xy)
 
 mninten <- meanIntensityByScanChrom(intenData)
 

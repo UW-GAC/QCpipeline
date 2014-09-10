@@ -13,9 +13,9 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "mend.bin.end", "mend.bin.start", "out_mend_file", "nc_geno_file", "nc_xy_file")
-optional <- c("annot_snp_rsIDCol", "out_mend_clust_prefix")
-default <- c("rsID", "mendel_clust")
+required <- c("annot_snp_file", "mend.bin.end", "mend.bin.start", "geno_file", "xy_file")
+optional <- c("annot_snp_rsIDCol", "out_mend_clust_prefix", "out_mend_file")
+default <- c("rsID", "mendel_clust", "mendel_err.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -48,10 +48,10 @@ sum(bins)
 sum(unlist(lapply(ids,length)))
 bins
 
-xyNC <- NcdfIntensityReader(config["nc_xy_file"])
-xyData <- IntensityData(xyNC, snpAnnot=snpAnnot)
-genoNC <- GenotypeReader(config["nc_geno_file"])
-genoData <- GenotypeData(genoNC, snpAnnot=snpAnnot)
+xy <- IntensityReader(config["xy_file"])
+xyData <- IntensityData(xy, snpAnnot=snpAnnot)
+geno <- GenotypeReader(config["geno_file"])
+genoData <- GenotypeData(geno, snpAnnot=snpAnnot)
 
 for(j in 1:3){  # independent sets of samples, each in a different png file
   # sample n from each bin

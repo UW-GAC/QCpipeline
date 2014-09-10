@@ -14,7 +14,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "nc_bl_file", "nc_geno_file")
+required <- c("annot_snp_file", "bl_file", "geno_file")
 optional <- c("annot_snp_missingCol", "out_baf_mean_file", "out_baf_med_file",
               "out_baf_sd_file", "snp_exclude_file")
 default <- c("missing.n1", "baf_mean_by_scan_chrom.RData", "median_baf_sd_by_scan.RData",
@@ -25,13 +25,11 @@ print(config)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
-ncfile <- config["nc_geno_file"]
-ncgds <- GenotypeReader(ncfile)
-genoData <- GenotypeData(ncgds, snpAnnot=snpAnnot)
+geno <- GenotypeReader(config["geno_file"])
+genoData <- GenotypeData(geno, snpAnnot=snpAnnot)
 
-blfile <- config["nc_bl_file"]
-blnc <- NcdfIntensityReader(blfile)
-blData <- IntensityData(blnc, snpAnnot=snpAnnot)
+bl <- IntensityReader(config["bl_file"])
+blData <- IntensityData(bl, snpAnnot=snpAnnot)
 
 # any snps to exclude?
 if (!is.na(config["snp_exclude_file"])) {

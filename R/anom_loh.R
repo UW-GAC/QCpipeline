@@ -13,7 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "nc_bl_file", "nc_geno_file",
+required <- c("annot_scan_file", "annot_snp_file", "bl_file", "geno_file",
               "out_anom_dir", "project")
 optional <- c("scan_exclude_file", "out_eligible_snps")
 default <- c(NA, "snps_eligible.RData")
@@ -33,13 +33,11 @@ scanID <- getScanID(scanAnnot)
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snpID <- getSnpID(snpAnnot)
 
-bl.file <- config["nc_bl_file"]
-blnc <- NcdfIntensityReader(bl.file)
-blData <-  IntensityData(blnc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+bl <- IntensityReader(config["bl_file"])
+blData <-  IntensityData(bl, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
-geno.file <- config["nc_geno_file"]
-geno_ncgds <- GenotypeReader(geno.file)
-genoData <-  GenotypeData(geno_ncgds, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+geno <- GenotypeReader(config["geno_file"])
+genoData <-  GenotypeData(geno, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # select SNPs
 snp.ok <- getobj(config["out_eligible_snps"])
