@@ -11,9 +11,9 @@ mkdir $proj
 chgrp $grp $proj
 
 cd $proj
-mkdir netCDF
-mkdir netCDF/samples
-mkdir netCDF/subjects
+mkdir gds
+mkdir gds/samples
+mkdir gds/subjects
 
 mkdir plink
 mkdir plink/samples
@@ -26,11 +26,15 @@ mkdir accessory_files/CC
 mkdir accessory_files/SI
 
 mkdir dbGaP
-mkdir dbGaP/Pedigree
+mkdir dbGaP/SI
 mkdir dbGaP/To_dbGaP
+
+mkdir imputation
 
 mkdir chrom_anomalies
 mkdir chrom_anomalies/data
+mkdir chrom_anomalies/plots
+mkdir chrom_anomalies/plots/QC
 
 mkdir $user
 mkdir $user/R
