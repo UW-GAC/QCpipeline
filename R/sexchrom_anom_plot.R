@@ -13,7 +13,7 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "build", "nc_bl_file")
+required <- c("annot_scan_file", "annot_snp_file", "build", "bl_file")
 optional <- c("annot_scan_commentCol", "annot_scan_localIDCol", "annot_scan_sexCol",
               "annot_snp_IntensityOnlyCol", "out_sexchrom_prefix")
 default <- c("Comment", "local.scanID", "sex", NA, "sexchrom_anom")
@@ -52,8 +52,8 @@ if (length(anom.ind) > 0) {
   anom.comment <- comment[anom.ind]
   main <- paste("Scan", anom.id, "- Local", localID, "- Sex", sex, "- Chrom X\n", anom.comment)
   
-  bl.file <- config["nc_bl_file"]
-  blnc <- NcdfIntensityReader(bl.file)
+  bl.file <- config["bl_file"]
+  blnc <- IntensityReader(bl.file)
   blData <-  IntensityData(blnc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
   png.file <- file.path(paste(config["out_sexchrom_prefix"], "_%003d.png", sep=""))

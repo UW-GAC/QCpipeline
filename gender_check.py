@@ -18,9 +18,9 @@ Required config parameters:
 annot_scan_file  scan annotation file
 annot_snp_file   snp annotation file
 build            genome build (hg18 or hg19)
-nc_bl_file       BAF/LRR netCDF file
-nc_geno_file     genotype file (netCDF or GDS)
-nc_xy_file       XY intensity netCDF file
+geno_file        genotype file (netCDF or GDS)
+xy_file          XY intensity file (netCDF or GDS)
+bl_file          BAF/LRR file (netCDF or GDS)
 
 Optional config parameters [default]:
 annot_scan_commentCol       [Comment]            column of comments in scan annotation incuding sex chrom anomaly codes (XXX, XXY, XYY, XO)
