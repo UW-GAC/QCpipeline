@@ -15,14 +15,14 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", "annot_scan_raceCol", "inten_file")
 optional <- c("annot_scan_batchCol", "annot_scan_missAutoCol", "annot_scan_redoCol",
-              "out_chisq_file", "out_fisher_file", "out_hist_plot", "out_inten_plot",
+              "out_batch_prefix", "out_hist_plot", "out_inten_plot",
               "out_lambda_race_plot", "out_mcr_plot", "out_meanchisq_nscan_plot",
               "out_meanchisq_race_plot", "out_meanmcr_meanchisq_plot",
               "out_meanmcr_meanor_plot", "out_meanmcr_nscan_plot",
               "out_meanor_nscan_plot", "out_meanor_race_plot",
               "scan_exclude_file")
-default <- c("Sample.Plate", "miss.e1.auto", "Redo.Processing.Plate", "batch_chisq",
-             "batch_fisher", "batch_nscan_hist.pdf", "batch_chr1inten.pdf",
+default <- c("Sample.Plate", "miss.e1.auto", "Redo.Processing.Plate",
+             "batch_test", "batch_nscan_hist.pdf", "batch_chr1inten.pdf",
              "batch_lambda_race.pdf", "batch_mcr.pdf", "batch_meanchisq_nscan.pdf",
              "batch_meanchisq_race.pdf", "batch_meanmcr_meanchisq.pdf",
              "batch_meanmcr_meanor.pdf", "batch_meanmcr_nscan.pdf",
@@ -58,16 +58,7 @@ scan.index <- !(scanAnnot$scanID %in% scan.exclude)
 stopifnot(all(!(getScanID(scanAnnot, index=scan.index) %in% scan.exclude)))
 sum(scan.index)
 
-
-if (type == "chisq") {
-  batch.res <- getobj(paste(config["out_chisq_file"], "RData", sep="."))
-} else if (type == "fisher") {
-  batch.res <- getobj(paste(config["out_fisher_file"], "RData", sep="."))
-} else {
-  stop("test type must be chisq or fisher")
-}
-
-
+batch.res <- getobj(paste(config["out_batch_prefix"], "RData", sep="."))
 batches <- names(batch.res$lambda)
 n <- length(batches)
 batch <- getVariable(scanAnnot, config["annot_scan_batchCol"], index=scan.index)

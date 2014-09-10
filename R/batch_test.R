@@ -1,6 +1,6 @@
 ##########
 # Allelic frequency batch test
-# Usage: R --args config.file < batch_chisq.R
+# Usage: R --args config.file test.type < batch_test.R
 ##########
 
 library(GWASTools)
@@ -13,16 +13,20 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "nc_geno_file")
-optional <- c("annot_scan_batchCol", "annot_scan_hapmapCol", "out_fisher_file", "scan_exclude_file")
-default <- c("Sample.Plate", "geno.cntl", "batch_fisher", NA)
+required <- c("annot_scan_file", "geno_file")
+optional <- c("annot_scan_batchCol", "annot_scan_hapmapCol", "out_batch_prefix", "scan_exclude_file")
+default <- c("Sample.Plate", "geno.cntl", "batch_test", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
+# check for test
+if (length(args) < 2) stop("missing test type (chisq or fisher)")
+type <- args[2]
+  
 (scanAnnot <- getobj(config["annot_scan_file"]))
 scanID <- getScanID(scanAnnot)
 
-data <- GenotypeReader(config["nc_geno_file"])
+data <- GenotypeReader(config["geno_file"])
 genoData <- GenotypeData(data, scanAnnot=scanAnnot)
 
 # are there any scans to exclude?
@@ -42,8 +46,16 @@ if (!is.na(config["annot_scan_hapmapCol"])) {
 }
 length(scan.exclude)
 
-batchFisherTest(genoData, batchVar=config["annot_scan_batchCol"],
-               scan.exclude=scan.exclude, return.by.snp=TRUE,
-               outfile=config["out_fisher_file"])
+if (type == "chisq") {
+    batchChisqTest(genoData, batchVar=config["annot_scan_batchCol"],
+                   scan.exclude=scan.exclude, return.by.snp=TRUE,
+                   outfile=config["out_batch_prefix"])
+} else if (type == "fisher") {
+    batchFisherTest(genoData, batchVar=config["annot_scan_batchCol"],
+                    scan.exclude=scan.exclude, return.by.snp=TRUE,
+                    outfile=config["out_batch_prefix"])
+} else {
+    stop("test type must be chisq or fisher")
+}
 
 close(genoData)

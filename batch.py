@@ -15,7 +15,7 @@ HapMaps are always excluded.
 Required config parameters:
 annot_scan_file     scan annotation file
 annot_scan_raceCol  column of race in scan annotation
-nc_geno_file        genotype file (netCDF or GDS)
+geno_file           genotype file (netCDF or GDS)
 inten_file          mean intensity file (created by gender_check.py)
 
 Optional config parameters [default]:
@@ -24,8 +24,7 @@ annot_scan_hapmapCol        [geno.cntl]                    column of hapmap (0/1
 annot_scan_missAutoCol      [miss.e1.auto]                 column of autosomal MCR in scan annotation
 annot_scan_redoCol          [Redo.Processing.Plate]        column of redo plate (Y/N) in scan annotation
 scan_exclude_file           [NA]                           vector of scanID to exclude
-out_chisq_file              [batch_chisq]                  output prefix for chisq test results
-out_fisher_file             [batch_fisher]                 output prefix for fisher test results
+out_batch_prefix            [batch_test]                   output prefix for test results
 out_hist_plot               [batch_nscan_hist.pdf]         output nscan histogram
 out_inten_plot              [batch_chr1inten.pdf]          output chrom 1 intensity boxplot
 out_lambda_race_plot        [batch_lambda_race.pdf]        output lambda vs race frac plot
@@ -45,8 +44,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
                   help="cluster queue name [default %default]")
-parser.add_option("-t", "--type", dest="type", default="chisq",
-                  help="test type [chisq (default) or fisher]")
+parser.add_option("-t", "--type", dest="type", default="fisher",
+                  help="test type [fisher (default) or chisq]")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -64,15 +63,10 @@ import QCpipeline
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-if (type == "chisq"):
-    job = "batch_chisq"
-elif (type == "fisher"):
-    job = "batch_fisher"
-else:
-    sys.exit("test type must be chisq or fisher")
 
+job = "batch_test"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid["batch_test"] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], queue=qname, email=email)
 
 job = "batch_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
