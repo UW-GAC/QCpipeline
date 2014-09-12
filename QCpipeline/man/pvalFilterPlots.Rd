@@ -7,8 +7,8 @@
   different filter levels
 }
 \usage{
-qqPlotPng(pval, filters, outfile, ncol=2, addText="", ...)
-manhattanPlotPng(pval, chromosome, filters, outfile, addText="", ...)
+qqPlotPng(pval, filters, outfile, ncol=2, addText="", main=NULL, ...)
+manhattanPlotPng(pval, chromosome, filters, outfile, addText="", main=NULL, ...)
 }
 \arguments{
   \item{pval}{p values to plot}
@@ -20,6 +20,7 @@ manhattanPlotPng(pval, chromosome, filters, outfile, addText="", ...)
   \item{outfile}{name of output png file}
   \item{ncol}{number of columns in QQ plot}
   \item{addText}{string to add to the upper left corner of the plot}
+  \item{main}{main title to add above all plots}
   \item{...}{other parameters passed to \code{\link{qqPlot}} or \code{\link{manhattanPlot}}}
 }
 \details{
@@ -28,6 +29,7 @@ manhattanPlotPng(pval, chromosome, filters, outfile, addText="", ...)
   where each panel has the filtering provided in the corresponding
   element of \code{filters} and the names of \code{filters} are the plot
   titles.
+  If \code{main} is specified, then the outer margins will be adjusted to fit the title.
 }
 \author{Stephanie Gogarten}
 \seealso{\code{\link{qqPlot}}, \code{\link{manhattanPlot}}}
