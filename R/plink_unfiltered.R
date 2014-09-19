@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file",
-              "annot_snp_file", "nc_samp_geno_file", "out_plink_prefix", "out_log_prefix")
+              "annot_snp_file", "samp_geno_file", "out_plink_prefix", "out_log_prefix")
 optional <- c("annot_scan_subjectCol", "annot_snp_alleleACol", "annot_snp_alleleBCol",
               "annot_snp_rsIDCol")
 default <- c("subjectID", "alleleA", "alleleB", "rsID")
@@ -27,7 +27,7 @@ snpAnnot <- getobj(config["annot_snp_file"])
 snpAnnot <- SnpAnnotationDataFrame(pData(snpAnnot),
                                    alleleACol=config["annot_snp_alleleACol"],
                                    alleleBCol=config["annot_snp_alleleBCol"])
-data <- GenotypeReader(config["nc_samp_geno_file"])
+data <- GenotypeReader(config["samp_geno_file"])
 genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 scan.exclude <- scanAnnot$scanID[!scanAnnot$subj.plink]

@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", 
-              "annot_snp_file", "nc_subj_geno_file", "out_plink_prefix", "out_log_prefix")
+              "annot_snp_file", "subj_geno_file", "out_plink_prefix", "out_log_prefix")
 optional <- c("annot_scan_subjectCol", "annot_snp_alleleACol", "annot_snp_alleleBCol",
               "annot_snp_rsIDCol")
 default <- c("subjectID", "alleleA", "alleleB", "rsID")
@@ -22,7 +22,7 @@ config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 scanAnnot <- getobj(config["annot_scan_file"])
-data <- GenotypeReader(config["nc_subj_geno_file"])
+data <- GenotypeReader(config["subj_geno_file"])
 # take subset to match gds file -- some subjects in the subject level may have been dropped later
 scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)), ]
 snpAnnot <- getobj(config["annot_snp_file"])
