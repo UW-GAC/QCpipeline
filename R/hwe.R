@@ -13,13 +13,13 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "nc_geno_file", "scan_include_file")
+required <- c("annot_scan_file", "geno_file", "scan_include_file")
 optional <- c("out_hwe_prefix", "scan_chrom_filter")
 default <- c("hwe", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-data <- GenotypeReader(config["nc_geno_file"])
+data <- GenotypeReader(config["geno_file"])
 scanAnnot <- getobj(config["annot_scan_file"])
 # take subset of annotation to match netCDF
 scanAnnot <- scanAnnot[match(getScanID(data), getScanID(scanAnnot)),]

@@ -20,9 +20,9 @@ flanking 1e-4.
 Required config parameters:
 annot_scan_file    scan annotation file
 annot_snp_file     snp annotation file
-nc_geno_file       genotype file (netCDF or GDS, filtered subject-level recommended)
-nc_samp_geno_file  sample-level genotype file (netCDF or GDS) for plots
-nc_samp_xy_file    sample-level XY intensity netCDF file for plots
+geno_file          genotype file (netCDF or GDS, filtered subject-level recommended)
+samp_geno_file     sample-level genotype file (netCDF or GDS) for plots
+samp_xy_file       sample-level XY intensity file (netCDF or GDS) for plots
 scan_include_file  vector of scanID to include in HWE
 out_hwe_prefix     output prefix for HWE results
 
