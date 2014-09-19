@@ -6,6 +6,7 @@
   writes to a new file}
 \usage{
 gdsMerge(genoDataList, sampleList=NULL, snpList=NULL,
+         match.snps.on="position", snpNameList=NULL,
          sortByScanID=TRUE, newSnpID=TRUE, outPrefix="new")
 
 gdsMergeCheck(genoDataList, outPrefix="new")
@@ -15,6 +16,8 @@ gdsMergeCheck(genoDataList, outPrefix="new")
     list names will be used to identify datasets in output snp annotation}
   \item{sampleList}{optional list of scanIDs to include - list names same as genoDataList}
   \item{snpList}{optional list of snpIDs to include - list names same as genoDataList}
+  \item{match.snps.on}{One or more of ("position", "name") indicating how to match SNPs.  "position" will match SNPs on chromosome and position, and "name" will match on the columns give in \code{snpNameList}.  The same alleles are always required for matching (but A/B designations need not be the same).}
+  \item{snpNameList}{list of SNP annotation columns to match on if \code{match.snps.on="name"} - list names same as genoDataList}
   \item{sortByScanID}{\code{TRUE} if scanIDs should be sorted in new GDS file (\code{FALSE} writes scans
     from each file in blocks)}
   \item{newSnpID}{\code{TRUE} if snpIDs in new file should be 1:n.  If

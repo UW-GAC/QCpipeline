@@ -3,9 +3,12 @@
 ## TO-DO: add another option - columns to preserve from original snp/scan annotations?
 ## TO-DO: log file for mismatched SNPs
 gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
+                     match.snps.on="position", snpNameList=NULL,
                      sortByScanID=TRUE, newSnpID=TRUE, outPrefix="new") {
   if (is.null(names(genoDataList))) stop("Please supply names for genoDataList")
 
+  stopifnot(all(match.snps.on %in% c("position", "name")))
+  
   ## scanIDs from sampleList, or all
   if (!is.null(sampleList)) {
     stopifnot(all(names(sampleList) == names(genoDataList)))
@@ -44,12 +47,19 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
                       position=getPosition(genoDataList[[x]], index=index),
                       alleleA=alleleA,
                       alleleB=alleleB,
-                      alleles=paste(pmin(alleleA, alleleB), pmax(alleleA, alleleB)),
+                      alleles=pasteSorted(alleleA, alleleB),
                       stringsAsFactors=FALSE)
+    if (!is.null(snpNameList))
+        snpList[[x]][["name"]] <- getSnpVariable(genoDataList[[x]], snpNameList[[x]],
+                                                 index=index)
   }
   snp <- snpList[[1]]
+  ## add chromosome if matching on position
+  if ("position" %in% match.snps.on) match.snps.on <- c("chromosome", match.snps.on)
+  ## always match on alleles
+  match.snps.on <- c(match.snps.on, "alleles")
   for (x in names(snpList)[-1]) {
-    snp <- merge(snp, snpList[[x]], by=c("chromosome", "position", "alleles"),
+    snp <- merge(snp, snpList[[x]], by=match.snps.on,
                  suffixes=c("", paste0(".", x)), sort=FALSE)
   }
   names(snp)[names(snp) == "snpID"] <- paste0("snpID.", names(snpList)[1])
@@ -60,7 +70,7 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
   } else {
       snp$snpID <- snp[[paste0("snpID.", names(snpList)[1])]]
   }
-  message(nrow(snp), " SNPs with matching chromosome, position, and alleles")
+  message(nrow(snp), " SNPs matched on ", paste(match.snps.on, collapse=", "))
 
   ## use first object as allele coding.
   ## make an index for A/B swaps (C/T in one file, T/C in other).
@@ -109,8 +119,12 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
   cleanup.gds(gdsfile)
 
   message("Saving annotation")
-  cols <- c("snpID", "chromosome", "position", "alleleA", "alleleB",
-            names(snp)[grep("snpID.", names(snp), fixed=TRUE)])
+  cols <- c("snpID", "chromosome", "position", "alleleA", "alleleB", "name",
+            names(snp)[grep("snpID.", names(snp), fixed=TRUE)],
+            names(snp)[grep("chromosome.", names(snp), fixed=TRUE)],
+            names(snp)[grep("position.", names(snp), fixed=TRUE)],
+            names(snp)[grep("name.", names(snp), fixed=TRUE)])
+  cols <- intersect(cols, names(snp))
   snpAnnot <- SnpAnnotationDataFrame(snp[,cols])
   save(snpAnnot, file=paste0(outPrefix, "_snpAnnot.RData"))
 
