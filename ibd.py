@@ -19,14 +19,13 @@ Identity by Descent with the following steps:
 Required config parameters:
 annot_scan_file    scan annotation file
 gds_geno_file      genotype GDS file
-out_ibd_kc32_file  output file with data frame of pairs with KC > 1/32
 out_snp_file       output file of pruned snps  (if file exists, pruning step is skipped)
 
 Optional config parameters [default]:
 annot_scan_familyCol       [NA]                      column of familyID in scan annotation; if not NA, used when ibd_method="KING" to calculate kinship coefficients within families differently
 annot_scan_subjectCol      [subjectID]               column of subjectID in scan annotation
 exp_rel_file               [NA]                      file with data frame of expected relationships
-ibd_method                 [MoM]                     IBD method (MoM, MLE, or KING)
+ibd_method                 [KING]                    IBD method (MoM, MLE, or KING)
 ld_r_threshold             [0.32]                    r threshold for LD pruning (0.32 = sqrt(0.1))
 ld_win_size                [10]                      size of sliding window for LD pruning (in Mb)
 maf_threshold              [0.05]                    minimum MAF for non-monomorphic SNPs to consider in LD pruning
@@ -37,6 +36,7 @@ out_ibd_con_file           [ibd_connectivity.RData]  output connectivity data fi
 out_ibd_con_plot           [ibd_connectivity.pdf]    output connectivity plot
 out_ibd_exp_plot           [ibd_expected.pdf]        output IBD plot color-coded by expected relationships
 out_ibd_file               [ibd.RData]               output file of full IBD results
+out_ibd_kc32_file          [ibd_kc32.RData]          output file with data frame of pairs with KC > 1/32
 out_ibd_obs_plot           [ibd_observed.pdf]        output IBD plot color-coded by observed relationships
 out_ibd_rel_file           [ibd_obsrel.RData]        output file of observed relationships
 out_ibd_unexp_plot         [ibd_unexpected.pdf]      output IBD plot color-coded by expected relationships, and different symbols for unexpected with KC > 0.1
@@ -53,6 +53,9 @@ parser.add_option("-q", "--queue", dest="qname", default="gcc.q",
                   help="cluster queue name [default %default]")
 parser.add_option("-m", "--multithread", dest="multithread", default=None,
                   help="number of cores to use; either a number (e.g, 1) or a range of numbers (e.g., 1-4) [default 1 core]")
+parser.add_option("-i", "--inbreed", dest="inbreed",
+                  action="store_true", default=False,
+                  help="calculate individual inbreeding coefficients (not for use with KING)")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -63,6 +66,7 @@ pipeline = options.pipeline
 email = options.email
 qname = options.qname
 multithread = options.multithread
+inbreed = options.inbreed
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -104,7 +108,7 @@ rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd']], queue=qname, email=email)
 
 # don't run inbreed_coeff for KING.
-if configdict["ibd_method"] != "KING":
+if inbreed:
     job = "inbreed_coeff"
     if waitLD:
         holdid = [jobid['ibd_snp_sel']]

@@ -17,7 +17,7 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "gds_geno_file", "out_snp_file")
 optional <- c("annot_scan_familyCol", "ibd_method", "out_ibd_file",
               "out_ibd_kc32_file", "scan_ibd_include_file")
-default <- c(NA, "MoM", "ibd.RData", "ibd_kc32.RData", NA)
+default <- c(NA, "KING", "ibd.RData", "ibd_kc32.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

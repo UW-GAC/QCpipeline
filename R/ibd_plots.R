@@ -13,13 +13,15 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 ## check config and set defaults
-required <- c("annot_scan_file", "out_ibd_kc32_file")
-optional <- c("annot_scan_subjectCol", "exp_rel_file", "out_ibd_con_file",
+required <- c("annot_scan_file")
+optional <- c("annot_scan_subjectCol", "exp_rel_file", "ibd_method",
+              "out_ibd_kc32_file", "out_ibd_con_file",
               "out_ibd_con_plot", "out_ibd_exp_plot", "out_ibd_obs_plot",
               "out_ibd_rel_file", "out_ibd_unexp_plot",
               "out_ibd_unobs_dup_file", "out_ibd_unobs_rel_file",
               "scan_ibd_include_file")
-default <- c("subjectID", NA, "ibd_connectivity.RData", "ibd_connectivity.pdf",
+default <- c("subjectID", NA, "KING", "ibd_kc32.RData",
+             "ibd_connectivity.RData", "ibd_connectivity.pdf",
              "ibd_expected.pdf", "ibd_observed.pdf", "ibd_obsrel.RData",
              "ibd_unexpected.pdf",
              "ibd_unobs_dup.RData", "ibd_unobs_rel.RData", NA)
