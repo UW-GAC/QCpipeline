@@ -19,7 +19,7 @@ annot_scan_raceCol  column of race in scan annotation
 annot_snp_file      snp annotation file
 baf_mean_file       mean of BAF file (created by chrom_anomalies.py)
 baf_sd_file         SD of BAF file (created by chrom_anomalies.py)
-nc_bl_file          BAF/LRR netCDF file
+bl_file             BAF/LRR file (netCDF or GDS)
 
 Optional config parameters [default]:
 annot_scan_hetACol    [het.A]             column of autosomal heterozygosity in scan annotation

@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file",
-              "baf_mean_file", "baf_sd_file", "nc_bl_file")
+              "baf_mean_file", "baf_sd_file", "bl_file")
 optional <- c("annot_scan_hetACol", "annot_snp_missingCol", "ibd_con_file",
               "out_baf_sd_boxplot", "out_het_boxplot", "out_flagged_file", "out_plot_prefix",
               "plot_all_unknown", "race_unknown", "range_het", "range_sd")
@@ -33,8 +33,8 @@ snpID <- getSnpID(snpAnnot)
 snp.exclude <- snpID[getVariable(snpAnnot, config["annot_snp_missingCol"]) == 1]
 
 # IntensityData
-blnc <- NcdfIntensityReader(config["nc_bl_file"])
-blData <- IntensityData(blnc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+bl <- IntensityReader(config["bl_file"])
+blData <- IntensityData(bl, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
 # list for storing scanIDs of flagged samples
 flagged <- list()
