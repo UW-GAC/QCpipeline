@@ -64,17 +64,17 @@ if (config["ibd_method"] == "KING") {
   cols <- c("k0", "k1", "kinship")
 }
 ibd <- ibd[,c("ID1", "ID2", "Individ1", "Individ2", cols)]
-ibd$ii <- paste(pmin(ibd$Individ1, ibd$Individ2),
-                pmax(ibd$Individ1, ibd$Individ2))
+ibd$ii <- pasteSorted(ibd$Individ1, ibd$Individ2)
 
 if (!is.na(config["exp_rel_file"])) {
   relprs <- getobj(config["exp_rel_file"])
+  message("expected relative pairs (subjects)")
   print(table(relprs$relation))
-  relprs$ii <- paste(pmin(relprs$Individ1, relprs$Individ2),
-                     pmax(relprs$Individ1, relprs$Individ2))
+  relprs$ii <- pasteSorted(relprs$Individ1, relprs$Individ2)
 
   ibd <- merge(ibd, relprs[,c("ii","relation")], all.x=TRUE)
   names(ibd)[names(ibd) == "relation"] <- "exp.rel"
+  message("expected relative pairs (samples)")
   print(table(ibd$exp.rel, useNA="ifany"))
 } else {
   ibd$exp.rel <- NA
@@ -82,6 +82,7 @@ if (!is.na(config["exp_rel_file"])) {
 
 ibd$exp.rel[ibd$Individ1 == ibd$Individ2] <- "Dup"
 ibd$exp.rel[is.na(ibd$exp.rel)] <- "U"
+message("expected relative pairs (including dups)")
 table(ibd$exp.rel)
 
 
@@ -116,6 +117,7 @@ if (config["ibd_method"] == "KING") {
 
   ## assign observed relationships (duplicates)
   ibd$obs.rel <- ibdAssignRelatednessKing(ibd$IBS0, ibd$kinship)
+  message("observed relative pairs")
   print(table(ibd$obs.rel, useNA="ifany"))
   
   plotfile(config["out_ibd_obs_plot"])
@@ -135,6 +137,7 @@ if (config["ibd_method"] == "KING") {
   deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
   deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
   unexp <- unexp & !deg2 & !deg3
+  message("unexpected relative pairs")
   print(table(ibd$obs.rel[unexp]))
   
   
@@ -164,6 +167,7 @@ if (config["ibd_method"] == "KING") {
 
   ## assign observed relationships
   ibd$obs.rel <- ibdAssignRelatedness(ibd$k0, ibd$k1)
+  message("observed relative pairs")
   print(table(ibd$obs.rel))
 
   plotfile(config["out_ibd_obs_plot"])
@@ -176,6 +180,7 @@ if (config["ibd_method"] == "KING") {
   deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
   deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
   unexp <- unexp & !deg2 & !deg3
+  message("unexpected relative pairs")
   print(table(ibd$obs.rel[unexp]))
 
   plotfile(config["out_ibd_unexp_plot"])
