@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "covar.list", "covars_as_factor",
-              "gene_action", "model_type", "nc_geno_file", "outcome")
+              "gene_action", "model_type", "geno_file", "outcome")
 optional <- c("ivar.list", "out_assoc_prefix",
               "scan_chrom_filter", "scan_exclude", "robust")
 default <- c(NA, "assoc", NA, NA, FALSE)
@@ -30,7 +30,7 @@ chromosome.set
 # make genotypedata
 scanAnnot <- getobj(config["annot_scan_file"])
 
-data <- GenotypeReader(config["nc_geno_file"])
+data <- GenotypeReader(config["geno_file"])
 sid <- getScanID(data)
 scanAnnot <- scanAnnot[scanAnnot$scanID %in% sid,] 
 stopifnot(all(scanAnnot$scanID==sid))

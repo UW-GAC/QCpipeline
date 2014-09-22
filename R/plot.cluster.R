@@ -14,7 +14,7 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "out_assoc_prefix", "covar.list",
-              "gene_action", "model_type", "nc_samp_geno_file", "nc_samp_xy_file",
+              "gene_action", "model_type", "samp_geno_file", "samp_xy_file",
               "outcome")
 optional <- c("annot_snp_rsIDCol", "plot_chroms", "out_plot_prefix")
 default <- c("rsID", NA, "assoc")
@@ -50,10 +50,10 @@ snpAnnot <- getobj(config["annot_snp_file"])
 snpID <- getSnpID(snpAnnot)
 chrom <- getChromosome(snpAnnot)
 rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"])
-nc <- GenotypeReader(config["nc_samp_geno_file"])
-(genoData <- GenotypeData(nc, scanAnnot=scanAnnot, snpAnnot=snpAnnot)) 
-xync <- NcdfIntensityReader(config["nc_samp_xy_file"])
-(xyData <- IntensityData(xync, scanAnnot=scanAnnot, snpAnnot=snpAnnot))
+geno <- GenotypeReader(config["samp_geno_file"])
+(genoData <- GenotypeData(geno, scanAnnot=scanAnnot, snpAnnot=snpAnnot)) 
+xy <- IntensityReader(config["samp_xy_file"])
+(xyData <- IntensityData(xy, scanAnnot=scanAnnot, snpAnnot=snpAnnot))
 
 
 for (i in 1:length(actions)) {
