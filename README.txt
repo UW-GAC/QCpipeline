@@ -14,23 +14,23 @@ and "group" is geneva/olga/cidr/etc.)
 (save as ScanAnnotationDataFrame and SnpAnnotationDataFrame)
 
 3e) Check that the Sample ID - file mapping is correct using the
-netcdf config file:
-> R -q --vanilla --args ncdf.config outfile < sample_id_from_files.R
+config file:
+> R -q --vanilla --args create_datafiles.config outfile < sample_id_from_files.R
 
-9-10) Create NetCDF and GDS files
+9-10) Create netCDF or GDS files
 test 5 samples first:
-> netcdf.py --email user@uw.edu --test ncdf.config
+> create_datafiles.py --email user@uw.edu --test create_datafiles.config
 (where "user@uw.edu" is your email address)
 
 run all:
-> netcdf.py --email user@uw.edu ncdf.config
+> create_datafiles.py --email user@uw.edu create_datafiles.config
 Check output to make sure creation was successful and all checks were passed
 Pay attention to sections marked "MANUAL REVIEW"
 
 Quality score will only be included in "xy" file if raw_qCol is not NA.
 
 Use option "--checkPlink" to check a CIDR-generated PLINK file (with
-A/B coding) against the newly created netCDF file.
+A/B coding) against the newly created netCDF/GDS file.
 
 
 13-15) Gender check (heterozygosity and mean intensity)
@@ -69,9 +69,9 @@ does not make sense to use options --baf --stats together without
 
 21) Batch quality checks (allele frequency test and plots)
 > batch.py --email user@uw.edu batch.config
-Default is chisq test (--type chisq).  
-For Fisher test:
-> batch.py --type fisher --email user@uw.edu batch.config
+Default is fisher test (--type fisher).  
+For chisq test (arrays with < 2.5M SNPs):
+> batch.py --type chisq --email user@uw.edu batch.config
 
 
 25-27) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
@@ -101,7 +101,7 @@ on which the samples were shipped to the genotyping center.
 > missing.py --email user@uw.edu missing.config
 
 
-38) Create subject-level NetCDF or GDS genotype file with anomalies filtered
+38) Create subject-level netCDF/GDS genotype file with anomalies filtered
 > geno_filt_subset.py --email user@uw.edu ncdf_subset.config
 
 
@@ -143,7 +143,7 @@ iv-vi) Allele frequency, duplicate discordance and Mendelian errors
 > snp_filt.py --email user@uw.edu snp_filt.config
 use option --MAconc for minor allele concordance 
 
-Allele frequency, mendelian errors, and dupSNP will be run using the filtered subject-level netCDF.
+Allele frequency, mendelian errors, and dupSNP will be run using the filtered subject-level netCDF/GDS.
 
 use option --dupSNP for duplicate SNP discordance - snp annotation
 needs a column with integer ids for duplicate SNPs (and NA for
@@ -156,7 +156,7 @@ set corr.by.snp=TRUE in the config file to calculate correlation by
 SNP (this is slow)
 
 
-vii-viii) Allele frequency and heterozygosity by ethnic group and sex. Run using the filtered subject-level netcdf.
+vii-viii) Allele frequency and heterozygosity by ethnic group and sex. Run using the filtered subject-level netCDF/GDS.
 > snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
 (repeat with different config files for mutiple ethnic groups)
 

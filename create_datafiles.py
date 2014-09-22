@@ -1,6 +1,6 @@
 #! /usr/local/bin/python2.7
 
-"""Create NetCDF and GDS files"""
+"""Create NetCDF or GDS files"""
 
 import sys
 import os
@@ -9,8 +9,7 @@ from optparse import OptionParser
 
 usage = """%prog [options] config
 
-Create genotype, XY intensity, and BAF/LRR netCDF files, 
-and genotype GDS file.
+Create genotype, XY intensity, and BAF/LRR netCDF or GDS files.
 
 Required config parameters:
 annot_scan_file  scan annotation file
