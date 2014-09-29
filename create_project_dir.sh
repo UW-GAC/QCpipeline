@@ -14,6 +14,7 @@ cd $proj
 mkdir gds
 mkdir gds/samples
 mkdir gds/subjects
+mkdir gds/with_hapmap
 
 mkdir plink
 mkdir plink/samples
