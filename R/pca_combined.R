@@ -14,14 +14,13 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "ext_annot_scan_file", "out_comb_annot_scan_file",
-              "out_comb_gds_geno_file", "out_pruned_file",
-              "study_unduplicated_file")
+required <- c("annot_scan_file", "ext_annot_scan_file", "out_comb_prefix",
+              "out_pruned_file", "study_unduplicated_file")
 optional <- c("annot_scan_hapmapCol", "annot_scan_subjectCol", "annot_scan_unrelCol",
               "ext_annot_scan_unrelCol", "num_evs_to_plot", "out_corr_file",
-              "out_disc_file", "out_pca_file")
+              "out_pca_file")
 default <- c("geno.cntl", "subjectID", "unrelated",
-             "unrelated", 12, "pca_combined_corr.RData", NA, "pca_combined.RData")
+             "unrelated", 12, "pca_combined_corr.RData", "pca_combined.RData")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -35,7 +34,7 @@ snp.ids <- getobj(config["out_pruned_file"])
 length(snp.ids)
 
 # excluded scans?
-comb.scanAnnot <- getobj(config["out_comb_annot_scan_file"])
+comb.scanAnnot <- getobj(paste0(config["out_comb_prefix"], "_scanAnnot.RData"))
 scanAnnot <- getobj(config["annot_scan_file"])
 scanAnnot <- scanAnnot[scanAnnot$scanID %in% comb.scanAnnot$scanID,]
 ext.scanAnnot <- getobj(config["ext_annot_scan_file"])
@@ -88,7 +87,7 @@ if (!is.na(config["out_disc_file"])) {
   undup.scans <- comb.scan.ids
 }
 
-gdsobj <- openfn.gds(config["out_comb_gds_geno_file"])
+gdsobj <- openfn.gds(paste0(config["out_comb_prefix"], ".gds"))
 pca <- snpgdsPCA(gdsobj, sample.id=undup.scans, snp.id=snp.ids, num.thread=nThreads)
 save(pca, file=config["out_pca_file"])
 

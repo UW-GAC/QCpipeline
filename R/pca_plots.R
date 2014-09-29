@@ -14,28 +14,45 @@ args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
-# check config and set defaults
-required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file",
-              "out_corr_file", "out_pca_file")
-optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
-              "ext_annot_scan_raceCol",
-              "num_evs_to_plot", "out_comb_annot_snp_file",
-              "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
-              "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot",
-              "out_parcoord_plot",
-              "out_ev12_plot_hapmap", "out_ev12_plot_study",
-              "parcoord_vars", "out_parcoord_var_prefix")
-default <- c(NA, "rsID", NA, "pop.group", 12, NA, "pca_corr", NA, "pca_dens.pdf",
-             "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
-             "pca_parcoord.png",
-             "pca_ev12_hapmap.pdf", "pca_ev12_study.pdf",
-             "", "pca_parcoord")
-config <- setConfigDefaults(config, required, optional, default)
-print(config)
-
 # check for type
 if (length(args) < 2) stop("missing pca type (study or combined)")
 type <- args[2]
+
+# check config and set defaults
+if (type == "study") {
+    required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file")
+    optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol",
+                  "num_evs_to_plot", "out_corr_file", "out_pca_file",
+                  "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
+                  "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot",
+                  "out_parcoord_plot",
+                  "parcoord_vars", "out_parcoord_var_prefix")
+    default <- c(NA, "rsID", 12, "pca_study_corr.RData", "pca.RData", 
+                 "pca_corr", NA, "pca_dens.pdf",
+                 "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
+                 "pca_parcoord.png",
+                 "", "pca_parcoord")
+    snpfile <- config["annot_snp_file"]
+} else if (type == "combined"){
+    required <- c("annot_scan_file", "annot_scan_raceCol", "out_comb_prefix")
+    optional <- c("annot_scan_ethnCol", "annot_snp_rsIDCol", "ext_annot_scan_file",
+                  "ext_annot_scan_raceCol", 
+                  "num_evs_to_plot", "out_corr_file", "out_pca_file",
+                  "out_corr_plot_prefix", "out_corr_pruned_plot_prefix",
+                  "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot",
+                  "out_parcoord_plot",
+                  "out_ev12_plot_hapmap", "out_ev12_plot_study",
+                  "parcoord_vars", "out_parcoord_var_prefix")
+    default <- c(NA, "rsID", NA, "pop.group", 12, "pca_combined_corr.RData",
+                 "pca_combined.RData", "pca_corr", NA, "pca_dens.pdf",
+                 "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
+                 "pca_parcoord.png",
+                 "pca_ev12_hapmap.pdf", "pca_ev12_study.pdf",
+                 "", "pca_parcoord")
+    snpfile <- paste0(config["out_comb_prefix"], "_snpAnnot.RData")
+}
+config <- setConfigDefaults(config, required, optional, default)
+print(config)
 
 
 # functions for parallel coordinate plots later
@@ -243,11 +260,7 @@ plot2DwithHist(pca$eigenvect[zorder,1], pca$eigenvect[zorder,2], xlab=lbls[1], y
 dev.off()
 
 #plot SNP-PC correlation
-if (type == "combined")  {
-  snpAnnot <- getobj(config["out_comb_annot_snp_file"])
-} else {
-  snpAnnot <- getobj(config["annot_snp_file"])
-}
+snpAnnot <- getobj(snpfile)
 corr <- getobj(config["out_corr_file"])
 snp <- snpAnnot[match(corr$snp.id, getSnpID(snpAnnot)),]
 chrom <- getChromosome(snp, char=TRUE)
