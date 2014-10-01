@@ -148,7 +148,7 @@ if combined:
     holdid = [jobid['combine_gds']]
     if waitLD:
         holdid.append(jobid['ld_pruning'])
-    jobid["pca"] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
+    jobid['pca'] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
 
 else:
     job = "pca_study"
@@ -157,7 +157,7 @@ else:
         holdid = [jobid['ld_pruning']]
     else:
         holdid = None
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
+    jobid['pca'] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
 
 job = "pca_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")

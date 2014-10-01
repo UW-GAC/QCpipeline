@@ -27,6 +27,8 @@ print(config)
 # multithreading on pearson?
 nSlots <- Sys.getenv("NSLOTS")
 nThreads <- ifelse(is.na(strtoi(nSlots) >= 1), 1, strtoi(nSlots))
+## allow running outside the cluster environment
+if (nThreads == 0) nThreads <- 1
 print(paste("Running with", nThreads,"thread(s)."))
 
 # pruned SNPs
@@ -87,7 +89,7 @@ if (!is.na(config["out_disc_file"])) {
   undup.scans <- comb.scan.ids
 }
 
-gdsobj <- openfn.gds(paste0(config["out_comb_prefix"], ".gds"))
+gdsobj <- snpgdsOpen(paste0(config["out_comb_prefix"], ".gds"))
 pca <- snpgdsPCA(gdsobj, sample.id=undup.scans, snp.id=snp.ids, num.thread=nThreads)
 save(pca, file=config["out_pca_file"])
 
@@ -95,4 +97,4 @@ nev <- as.integer(config["num_evs_to_plot"])
 pca.corr <- snpgdsPCACorr(pca, gdsobj, eig.which=1:nev, num.thread=nThreads)
 save(pca.corr, file=config["out_corr_file"])
 
-closefn.gds(gdsobj)
+snpgdsClose(gdsobj)

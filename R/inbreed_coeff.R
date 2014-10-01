@@ -37,8 +37,8 @@ if (config["ibd_method"] == "MoM") {
 }
 method
 
-gdsobj <- openfn.gds(config["gds_geno_file"])
+gdsobj <- snpgdsOpen(config["gds_geno_file"])
 inbrd.coeff <- snpgdsIndInb(gdsobj, snp.id=snp.sel, sample.id=scan.sel, method=method)
-closefn.gds(gdsobj)
+snpgdsClose(gdsobj)
 
 save(inbrd.coeff, file=config["out_inbrd_file"])

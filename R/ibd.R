@@ -24,6 +24,8 @@ print(config)
 # multithreading on pearson?
 nSlots <- Sys.getenv("NSLOTS")
 nThreads <- ifelse(is.na(strtoi(nSlots) >= 1), 1, strtoi(nSlots))
+## allow running outside the cluster environment
+if (nThreads == 0) nThreads <- 1
 print(paste("Running with", nThreads,"thread(s)."))
 
 
@@ -49,7 +51,7 @@ if (!is.na(config["annot_scan_familyCol"])) {
 }
 
 
-gdsobj <- openfn.gds(config["gds_geno_file"])
+gdsobj <- snpgdsOpen(config["gds_geno_file"])
 if (config["ibd_method"] == "MoM") {
   ibd <- snpgdsIBDMoM(gdsobj, sample.id=scan.ids, snp.id=snp.ids, num.thread=nThreads)
 } else if (config["ibd_method"] == "MLE") {
@@ -61,7 +63,7 @@ if (config["ibd_method"] == "MoM") {
 } else {
   stop("ibd method not recognized")
 }
-closefn.gds(gdsobj)
+snpgdsClose(gdsobj)
 
 save(ibd, file=config["out_ibd_file"])
 
