@@ -3,6 +3,25 @@
 # Usage: R --args config.file < plot.qq.manh.R
 ##########
 
+
+## Some notes:
+# to calculate df for interaction terms (if you are going to pvals for them, future reader of this code)
+# Main effect: df = 1 (always)
+# interaction terms (say you want interactions between genotype and race and between genotype and gengrp):
+#   df for race is k-1, so if k=3 then df=2
+#   df for gengrp is also k-1, so if k=6 then df=5
+# joint: everythhing having to do with genotype
+#   for a model with main effect and race, gengrp interactions:
+#   df = df_mainEffect + df_raceInteraction + df_gengrpInteraction
+#   e.g., df = 1 + (3-1) + (6-1) = 8
+# NOTE if you are doing an interaction with a quantitative term, then df=1 for that interaction
+
+# assocTestRegression returns the Wald stat as Wald.Stat = (Beta / SE)^2. It also returns a likelihood ratio statistic, LR.Stat, which is 2*[ log(likelihood of model with genotype) - log(likelihood of null) ]
+# 
+# That means we can use the same formula, e.g., median(Wald.Stat) / qchisq(0.5, df=1) and median(LR.Stat) / qchisq(0.5, df=1), for both types of test.
+
+# a possibly helpful reference: PMC3093379 (Voorman et al 2011)
+
 library(GWASTools)
 library(QCpipeline)
 sessionInfo()
@@ -75,12 +94,14 @@ for (i in 1:length(actions)) {
 
   for (type in c("LR", "Wald")) { 
     varp <- paste(type,"pval", sep=".")    
+    varstat <- paste(type, "Stat", sep=".")
+    
     ## no LR test for models with interactions
     if (!(varp %in% names(combined))) next
   
     ## filtering
     assoc <- combined[!is.na(combined[,varp]),
-                      c(varp, "chromosome", "composite.filter", "comp.maf.filter")]
+                      c(varp, varstat, "chromosome", "composite.filter", "comp.maf.filter")]
     names(assoc)[1] <- "pval"
     title.no.filt <- paste("no filter\n", nrow(assoc), "SNPs")
     qual.filt <- which(assoc$composite.filter)
@@ -93,9 +114,12 @@ for (i in 1:length(actions)) {
     names(filters) <- c(title.no.filt, title.qual.filt, title.mafhi.filt, title.maflo.filt)
     
   
+    ## The wald.stat and lr.stat have 1 degree of freeom
+    ## if we were plotting joint p-values from a model with interactions, it would be higher (2 or more)
+    
     # QQ plots
     outfile <- paste(qqfname,"_model_", i, "_",actions[i],"_qq_",type,".png",sep="")
-    qqPlotPng(assoc$pval, filters, outfile)
+    qqPlotPng(assoc$pval, stat=assoc[[varstat]], df=1, filters, outfile)
   
     # Manhattan plots
     outfile <- paste(qqfname,"_model_", i, "_",actions[i],"_manh_",type,".png",sep="")

@@ -32,5 +32,6 @@ export(readConfig, writeConfig, setConfigDefaults,
        chromToChar, chromToInt,
        gdsUpdateBuild,
        filterImputationSegments,
-       getAnomSegOverlap
+       getAnomSegOverlap,
+       calculateLambda
        )

@@ -6,7 +6,7 @@
   create text files appropriate for posting on dbGaP.}
 \usage{
 dbgapScanAnnotation(scanAnnot, dir=".",
-   consentVar="consent", subjVar="subj.plink", dupVar="dup.post", omitVar="no.post",
+   consentVar=NULL, subjVar="subj.plink", dupVar="dup.post", omitVar="no.post",
    annotationCol="annotation", analysisCol="analysis")
 
 dbgapSnpAnnotation(snpAnnot, dir=".",
@@ -17,7 +17,7 @@ dbgapSnpAnnotation(snpAnnot, dir=".",
   \item{snpAnnot}{A \code{\link{SnpAnnotationDataFrame}}.}
   \item{dir}{A character string with the directory for file output.}
   \item{consentVar}{The variable in \code{scanAnnot} containing consent
-    levels.}
+    levels. If \code{NULL}, the output files will not be split by consent level.}
   \item{subjVar}{The logical variable in \code{scanAnnot} indicating unique
     subjects to post.}
   \item{dupVar}{The logical variable in \code{scanAnnot} indicating

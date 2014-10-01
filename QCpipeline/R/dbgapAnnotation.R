@@ -4,7 +4,7 @@
 #  dir - directory for output (default current)
 
 dbgapScanAnnotation <- function(scanAnnot, dir=".",
-   consentVar="consent", subjVar="subj.plink", dupVar="dup.post", omitVar="no.post",
+   consentVar=NULL, subjVar="subj.plink", dupVar="dup.post", omitVar="no.post",
    annotationCol="annotation", analysisCol="analysis") {
 
   stopifnot(is(scanAnnot, "ScanAnnotationDataFrame"))
@@ -12,8 +12,10 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
   stopifnot(all(c(annotationCol, analysisCol) %in% names(varMetadata(scanAnnot))))
   
   # consent levels
-  conslev <- unique(scanAnnot[[consentVar]])
-
+  if (!is.null(consentVar)){
+    conslev <- unique(scanAnnot[[consentVar]])
+  }
+  
   # annotation and analysis
   for (type in c("annotation", "analysis")) {
   
@@ -21,9 +23,7 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
     annotfile <- paste(dir, "/Sample_", type, ".csv", sep="")
     dupfile <- paste(dir, "/Sample_", type, "_duplicates.csv", sep="")
     ddfile <- paste(dir, "/Sample_", type, "_DD.txt", sep="")
-    consent.annotfiles <- paste(dir, "/Sample_", type, "_consent_", conslev, ".csv", sep="")
-    consent.dupfiles <- paste(dir, "/Sample_", type, "_duplicates_consent_", conslev, ".csv", sep="")
-
+    
     # variables to include in sample annotation file
     if (type == "annotation") thistype <- annotationCol else thistype <- analysisCol
     sann <- varLabels(scanAnnot)[varMetadata(scanAnnot)[[thistype]]]
@@ -52,15 +52,20 @@ dbgapScanAnnotation <- function(scanAnnot, dir=".",
     write.table(dd, file=ddfile, sep="\t", quote=FALSE, row.names=FALSE, na="")
 
     # Divide samples by consent group
-    if (type == "annotation") {
-      for (i in 1:length(conslev)) {
-        s <- subj[subj[[consentVar]] == conslev[i],]
-        write.csv(s, file=consent.annotfiles[i], quote=FALSE, row.names=FALSE, na="")
-      }
-
-      for (i in 1:length(conslev)) {
-        s <- dups[dups[[consentVar]] == conslev[i],]
-        write.csv(s, file=consent.dupfiles[i], quote=FALSE, row.names=FALSE, na="")
+    if (!is.null(consentVar)){
+      consent.annotfiles <- paste(dir, "/Sample_", type, "_consent_", conslev, ".csv", sep="")
+      consent.dupfiles <- paste(dir, "/Sample_", type, "_duplicates_consent_", conslev, ".csv", sep="")
+      
+      if (type == "annotation") {
+        for (i in 1:length(conslev)) {
+          s <- subj[subj[[consentVar]] == conslev[i],]
+          write.csv(s, file=consent.annotfiles[i], quote=FALSE, row.names=FALSE, na="")
+        }
+        
+        for (i in 1:length(conslev)) {
+          s <- dups[dups[[consentVar]] == conslev[i],]
+          write.csv(s, file=consent.dupfiles[i], quote=FALSE, row.names=FALSE, na="")
+        }
       }
     }
   }

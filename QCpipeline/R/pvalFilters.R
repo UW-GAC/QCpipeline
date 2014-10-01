@@ -8,9 +8,14 @@ quadSolveMAF <- function(X, N) {
 }
 
 
+calculateLambda <- function(stat, df){
+  if (any(sum(stat < 0, na.rm=T))) stop("no negative values allowed in stat (does beta/se need to be squared?)")
+  median(stat, na.rm=TRUE) / qchisq(0.5, df=df)
+}
+
 
 ## filters - named list with 4 sets of filters (names are plot titles) (can have < 4)
-qqPlotPng <- function(pval, filters, outfile, ncol=2, addText="", main=NULL, ...) {
+qqPlotPng <- function(pval, stat, df, filters, outfile, ncol=2, addText="", main=NULL, ...) {
   nrow <- ceiling(length(filters) / ncol)
   png(outfile, width=360*ncol, height=360*nrow) # maybe need to calculate padding here too
   
@@ -24,7 +29,7 @@ qqPlotPng <- function(pval, filters, outfile, ncol=2, addText="", main=NULL, ...
   for (i in 1:length(filters)) {
     filt <- filters[[i]]
     title <- names(filters)[i]
-    lambda <- median(-2*log(pval[filt]), na.rm=TRUE) / 1.39
+    lambda <- calculateLambda(stat[filt], df)
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
     qqPlot(pval[filt], main=title, sub=subtitle, ...)
 
