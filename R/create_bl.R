@@ -150,9 +150,6 @@ stopifnot(all(res$snp.chk == 1))
 table(res$chk, useNA="ifany")
 stopifnot(all(res$chk == 1))
 
-table(res$snp.order, useNA="ifany")
-stopifnot(all(res$snp.order == 1))
-
 table(res$inten.chk$BAlleleFreq, useNA="ifany")
 stopifnot(all(res$inten.chk$ballelefreq == 1))
 

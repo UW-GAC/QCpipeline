@@ -155,9 +155,6 @@ stopifnot(all(res$snp.chk == 1))
 table(res$chk, useNA="ifany")
 stopifnot(all(res$chk == 1))
 
-table(res$snp.order, useNA="ifany")
-stopifnot(all(res$snp.order == 1))
-
 table(res$geno.chk, useNA="ifany")
 stopifnot(all(res$geno.chk == 1))
 
