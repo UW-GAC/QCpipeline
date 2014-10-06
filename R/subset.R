@@ -1,6 +1,6 @@
 ##########
 # Subset a netCDF file
-# Usage: R --args config.file < ncdf_subset.R
+# Usage: R --args config.file < subset.R
 ##########
 
 library(GWASTools)
@@ -79,12 +79,14 @@ parent.file <- config["in_file"]
 sub.file <- config["out_file"]
 ext <- file_ext(parent.file)
 if (ext == "nc") {
-  ncdfSetMissingGenotypes(parent.file, sub.file, anom, sample.include=scan.include)
+    type <- "ncdf"
 } else if (ext == "gds") {
-  gdsSetMissingGenotypes(parent.file, sub.file, anom, sample.include=scan.include)
+    type <- "gds"
 } else {
   stop("in_file must end in .nc or .gds")
 }
+setMissingGenotypes(parent.file, sub.file, anom, file.type=type,
+                    sample.include=scan.include)
 
 # check it against the source
 nc1 <- GenotypeReader(parent.file)

@@ -105,7 +105,7 @@ on which the samples were shipped to the genotyping center.
 
 
 35) Create subject-level netCDF/GDS genotype file with anomalies filtered
-> geno_filt_subset.py --email user@uw.edu ncdf_subset.config
+> geno_filt_subset.py --email user@uw.edu subset.config
 
 
 37) PCA

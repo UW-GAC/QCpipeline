@@ -46,6 +46,6 @@ import QCpipeline
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()
-job = "ncdf_subset"
+job = "subset"
 rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
