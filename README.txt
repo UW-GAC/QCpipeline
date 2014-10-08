@@ -111,6 +111,11 @@ on which the samples were shipped to the genotyping center.
 37) PCA
 First round, unduplicated study samples + external hapmaps:
 > pca.py --email user@uw.edu pca.config --combined
+
+Make sure both datasets are using the same alleles (e.g.. TOP, PLUS).
+Set columns to use for alleles A and B in the config file (defaults to 
+"alleleA" and "alleleB" for both datasets).
+
 Second round, unrelated study samples:
 > pca.py --email user@uw.edu pca.config
 

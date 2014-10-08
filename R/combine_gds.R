@@ -16,11 +16,13 @@ config <- readConfig(args[1])
 required <- c("annot_scan_file", "annot_snp_file", "ext_annot_scan_file",
               "ext_annot_snp_file", "ext_geno_file", "gds_geno_file")
 optional <- c("annot_scan_subjectCol", "annot_snp_rsIDCol",
+              "annot_snp_alleleACol", "annot_snp_alleleBCol", 
               "comb_scan_exclude_file", "comb_snp_exclude_file",
               "ext_annot_scan_subjectCol", "ext_annot_snp_rsIDCol",
+              "ext_annot_snp_alleleACol", "ext_annot_snp_alleleBCol", 
               "out_comb_prefix", "remove_discordant")
-default <- c("subjectID", "rsID", NA, NA, "subjectID", "rsID",
-             "comb_geno", TRUE)
+default <- c("subjectID", "rsID", "alleleA", "alleleB", NA, NA, "subjectID", "rsID",
+             "alleleA", "alleleB", "comb_geno", TRUE)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -29,6 +31,10 @@ scanAnnot <- getobj(config["annot_scan_file"]); dim(scanAnnot)
 geno <- GenotypeReader(config["gds_geno_file"])
 scanAnnot <- scanAnnot[match(getScanID(geno), getScanID(scanAnnot)),]; dim(scanAnnot)
 snpAnnot <- getobj(config["annot_snp_file"])
+# remake snpAnnot object with alleles A and B
+snpAnnot <- SnpAnnotationDataFrame(pData(snpAnnot),
+                                   alleleACol=config["annot_snp_alleleACol"],
+                                   alleleBCol=config["annot_snp_alleleBCol"])
 genoData <- GenotypeData(geno, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
 
 ext.scanAnnot <- getobj(config["ext_annot_scan_file"]); dim(ext.scanAnnot)
@@ -36,6 +42,9 @@ ext.scanAnnot <- getobj(config["ext_annot_scan_file"]); dim(ext.scanAnnot)
 ext.geno <- GenotypeReader(config["ext_geno_file"])
 ext.scanAnnot <- ext.scanAnnot[match(getScanID(ext.geno), getScanID(ext.scanAnnot)),]; dim(ext.scanAnnot)
 ext.snpAnnot <- getobj(config["ext_annot_snp_file"])
+ext.snpAnnot <- SnpAnnotationDataFrame(pData(ext.snpAnnot),
+                                       alleleACol=config["ext_annot_snp_alleleACol"],
+                                       alleleBCol=config["ext_annot_snp_alleleBCol"])
 ext.genoData <- GenotypeData(ext.geno, snpAnnot=ext.snpAnnot, scanAnnot=ext.scanAnnot)
 
 genoDataList <- list("study"=genoData, "ext"=ext.genoData)

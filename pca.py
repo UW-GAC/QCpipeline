@@ -42,12 +42,16 @@ annot_scan_ethnCol           [NA]                   column of ethnicity in scan 
 annot_scan_hapmapCol         [geno.cntl]            column of hapmap (0/1) in scan annotation
 annot_scan_subjectCol        [subjectID]            column of subjectID in scan annotation
 annot_scan_unrelCol          [unrelated]            column of unrelated (T/F) in scan annotation
+annot_snp_alleleACol         [alleleA]              column of allele A in snp annotation
+annot_snp_alleleBCol         [alleleB]              column of allele B in snp annotation
 annot_snp_rsIDCol            [rsID]                 column of rsID in snp annotation
 comb_scan_exclude_file       [NA]                   vector of scanID (study and/or external) to exclude from combined GDS
 comb_snp_exclude_file        [NA]                   vector of snpID (in study annotation) to exclude from combined GDS
 ext_annot_scan_raceCol       [pop.group]            column of race in external scan annotation
-ext_annot_scan_subjectCol    [subjectID]            column of subjectID in external scan annoatation
-ext_annot_scan_unrelCol      [unrelated]            column of unrelated (T/F) in external scan annoatation
+ext_annot_scan_subjectCol    [subjectID]            column of subjectID in external scan annotation
+ext_annot_scan_unrelCol      [unrelated]            column of unrelated (T/F) in external scan annotation
+ext_annot_snp_alleleACol     [alleleA]              column of allele A in external snp annotation
+ext_annot_snp_alleleBCol     [alleleB]              column of allele B in external snp annotation
 ext_annot_snp_rsIDCol        [rsID]                 column of rsID in external snp annotation
 ld_r_threshold               [0.32]                 r threshold for LD pruning (0.32 = sqrt(0.1))
 ld_win_size                  [10]                   size of sliding window for LD pruning (in Mb)
