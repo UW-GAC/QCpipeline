@@ -14,7 +14,8 @@ convertBuild(snpAnnot, chain.file, snp.include = NULL, verbose = TRUE)
 \arguments{
   \item{snpAnnot}{
 A SNP annotation object (object of class SnpAnnotationDataFrame) with
-\dQuote{chromosome} (integer chromosome code) and \dQuote{position} columns in original build 
+\dQuote{chromosome} (integer chromosome code) and \dQuote{position} columns in original build,
+and column "rsID" 
 }
   \item{chain.file}{
 Path to UCSC chain file, from original build to target build

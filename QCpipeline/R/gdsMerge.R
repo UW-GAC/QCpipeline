@@ -2,9 +2,9 @@
 ## function to combine two (or more) gds files.
 ## TO-DO: add another option - columns to preserve from original snp/scan annotations?
 ## TO-DO: log file for mismatched SNPs
-gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
+gdsMerge <- function(genoDataList, outPrefix="new", sampleList=NULL, snpList=NULL,
                      match.snps.on="position", snpNameList=NULL,
-                     sortByScanID=TRUE, newSnpID=TRUE, outPrefix="new") {
+                     sortByScanID=TRUE, newSnpID=TRUE, verbose=TRUE) {
   if (is.null(names(genoDataList))) stop("Please supply names for genoDataList")
 
   stopifnot(all(match.snps.on %in% c("position", "name")))
@@ -23,7 +23,7 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
   if (sortByScanID) scanID.all <- sort(scanID.all)
 
   for (i in 1:length(sampleList)) {
-    message(length(sampleList[[i]]), " samples included from ", names(sampleList)[i])
+    if (verbose) message(length(sampleList[[i]]), " samples included from ", names(sampleList)[i])
   }
 
   ## snpIDs from snpList, or all
@@ -36,7 +36,7 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
   ## align snps on chromosome, position, and alleles
   ## TO-DO: currently this gets only the minimum info - also merge other columns?
   ## TO-DO: make log file with list of snps matching on chrom and position but not alleles.
-  message("Matching SNPs...")
+  if (verbose) message("Matching SNPs...")
   for (x in names(snpList)) {
     snpID <- getSnpID(genoDataList[[x]])
     index <- snpID %in% snpList[[x]]
@@ -62,6 +62,7 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
     snp <- merge(snp, snpList[[x]], by=match.snps.on,
                  suffixes=c("", paste0(".", x)), sort=FALSE)
   }
+  if (nrow(snp) == 0) stop("No matching SNPs found!")
   names(snp)[names(snp) == "snpID"] <- paste0("snpID.", names(snpList)[1])
   snp <- snp[order(snp$chromosome, snp$position),]
 
@@ -70,17 +71,17 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
   } else {
       snp$snpID <- snp[[paste0("snpID.", names(snpList)[1])]]
   }
-  message(nrow(snp), " SNPs matched on ", paste(match.snps.on, collapse=", "))
+  if (verbose) message(nrow(snp), " SNPs matched on ", paste(match.snps.on, collapse=", "))
 
   ## use first object as allele coding.
   ## make an index for A/B swaps (C/T in one file, T/C in other).
   for (x in names(snpList)[-1]) {
     snp[[paste("swap", x, sep=".")]] <- snp[[paste("alleleA", x, sep=".")]] != snp$alleleA
-    message(sum(snp[[paste("swap", x, sep=".")]]), " alleles swapped for ", x)
+    if (verbose) message(sum(snp[[paste("swap", x, sep=".")]]), " alleles swapped for ", x)
   }
 
   ## create new gds file
-  message("Creating new GDS file with ", length(scanID.all), " samples and ", nrow(snp), " SNPs")
+  if (verbose) message("Creating new GDS file with ", length(scanID.all), " samples and ", nrow(snp), " SNPs")
 
   gdsfile <- paste0(outPrefix, ".gds")
   gds <- createfn.gds(gdsfile)
@@ -101,7 +102,7 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
 
   for (i in 1:length(genoDataList)) {
     set <- names(genoDataList)[i]
-    message("Reading genotypes from ", set)
+    if (verbose) message("Reading genotypes from ", set)
     snpID.col <- paste0("snpID.", set)
     snp.index <- match(snp[[snpID.col]], getSnpID(genoDataList[[i]]))
     swap <- snp[[paste0("swap.", set)]]
@@ -114,11 +115,11 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
       write.gdsn(geno.node, geno, start=c(1, which(scanID.all == s)), count=c(-1,1))
     }
   }
-  message("Cleaning up")
+  if (verbose) message("Cleaning up")
   closefn.gds(gds)
-  cleanup.gds(gdsfile)
+  cleanup.gds(gdsfile, verbose=FALSE)
 
-  message("Saving annotation")
+  if (verbose) message("Saving annotation")
   cols <- c("snpID", "chromosome", "position", "alleleA", "alleleB", "name",
             names(snp)[grep("snpID.", names(snp), fixed=TRUE)],
             names(snp)[grep("chromosome.", names(snp), fixed=TRUE)],
@@ -134,7 +135,7 @@ gdsMerge <- function(genoDataList, sampleList=NULL, snpList=NULL,
 }
 
 
-gdsMergeCheck <- function(genoDataList, outPrefix="new") {
+gdsMergeCheck <- function(genoDataList, outPrefix="new", verbose=TRUE) {
   snpAnnot <- getobj(paste0(outPrefix, "_snpAnnot.RData"))
   genoData <- GenotypeData(GdsGenotypeReader(paste0(outPrefix, ".gds")),
                            snpAnnot=snpAnnot)
@@ -142,7 +143,7 @@ gdsMergeCheck <- function(genoDataList, outPrefix="new") {
 
   for (i in 1:length(genoDataList)) {
     set <- names(genoDataList)[i]
-    message("Reading genotypes from ", set)
+    if (verbose) message("Reading genotypes from ", set)
     snpID.col <- paste0("snpID.", set)
     snp.index <- match(snpAnnot[[snpID.col]], getSnpID(genoDataList[[i]]))
     scanID.set <- getScanID(genoDataList[[i]])
@@ -154,5 +155,6 @@ gdsMergeCheck <- function(genoDataList, outPrefix="new") {
       stopifnot(allequal(geno, geno.new))
     }
   }
+  if (verbose) message("All genotypes match!")
   close(genoData)
 }

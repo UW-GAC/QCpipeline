@@ -91,10 +91,10 @@ gdsUpdateBuild <- function(genoData, map, outPrefix="new", remove.unmapped=TRUE,
     }
 
     closefn.gds(gds)
-    cleanup.gds(gdsfile)
+    cleanup.gds(gdsfile, verbose=FALSE)
     
     cols <- c("snpID", "chromosome", "position", "rsID")
-    snp <- snp[,c(paste0("new.", cols), "alleleA", "alleleB")]
+    snp <- snp[,c(paste0("new.", cols), "alleleA", "alleleB", "old.snpID")]
     names(snp)[1:4] <- cols
     snpAnnot <- SnpAnnotationDataFrame(snp)
     save(snpAnnot, file=paste0(outPrefix, "_snpAnnot.RData"))

@@ -13,10 +13,10 @@ gdsUpdateBuild(genoData, map, outPrefix="new", remove.unmapped=TRUE,
 \item{outPrefix}{output file prefix (will append ".gds," and "_snpAnnot.RData")}
 \item{remove.unmapped}{Logical for whether to remove unmapped SNPs.}
 \item{update.alleles}{Logical for whether to update the alleles at the same time.  This option requires additional columns in \code{map}: ("old.alleleA", "old.alleleB", "new.alleleA", "new.alleleB")}
-\item{block.size}{Number of SNPs to process at once}
+\item{block.size}{Number of samples to process at once}
 }
 \details{
-Takes a GenotypeData object and converts from one build to another based on a user-specified map.  Writes a new GDS file with the updated build.  Alleles can optionally be updated as well.
+Takes a GenotypeData object and converts from one build to another based on a user-specified map.  Writes a new GDS file and SNP annotation with the updated build.  Alleles can optionally be updated as well.
 
 \code{genoData} must contain a SNP annotation column "rsID" with no duplicate values.
 

@@ -5,15 +5,17 @@
 \description{Merges multiple GenotypeData objects on common SNPs and
   writes to a new file}
 \usage{
-gdsMerge(genoDataList, sampleList=NULL, snpList=NULL,
+gdsMerge(genoDataList, outPrefix="new", sampleList=NULL, snpList=NULL,
          match.snps.on="position", snpNameList=NULL,
-         sortByScanID=TRUE, newSnpID=TRUE, outPrefix="new")
+         sortByScanID=TRUE, newSnpID=TRUE, verbose=TRUE)
 
-gdsMergeCheck(genoDataList, outPrefix="new")
+gdsMergeCheck(genoDataList, outPrefix="new", verbose=TRUE)
 }
 \arguments{
   \item{genoDataList}{named list of GenotypeData objects.
     list names will be used to identify datasets in output snp annotation}
+  \item{outPrefix}{output file prefix (will append ".gds,"
+    "_snpAnnot.RData," and "_scanAnnot.RData.")}
   \item{sampleList}{optional list of scanIDs to include - list names same as genoDataList}
   \item{snpList}{optional list of snpIDs to include - list names same as genoDataList}
   \item{match.snps.on}{One or more of ("position", "name") indicating how to match SNPs.  "position" will match SNPs on chromosome and position, and "name" will match on the columns give in \code{snpNameList}.  The same alleles are always required for matching (but A/B designations need not be the same).}
@@ -22,8 +24,7 @@ gdsMergeCheck(genoDataList, outPrefix="new")
     from each file in blocks)}
   \item{newSnpID}{\code{TRUE} if snpIDs in new file should be 1:n.  If
     \code{FALSE}, snpIDs will be taken from the first object in \code{genoDataList}.}
-  \item{outPrefix}{output file prefix (will append ".gds,"
-    "_snpAnnot.RData," and "_scanAnnot.RData.")}
+  \item{verbose}{logical for whether to print messages}
 }
 \details{
 \code{gdsMerge} merges SNPs that match on chromosome, position, and
