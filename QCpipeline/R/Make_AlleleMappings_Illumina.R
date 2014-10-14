@@ -9,6 +9,7 @@
 ## Updated July 14, 2014 to output indels vcf file as side effect (Tin Louie)
 ## Updated Aug 1, 2014 to fix bugs/enhance previous update
 ## Updated Sep 7, 2014 to fix bugs/enhance indels.vcfout feature
+## Updated Oct 14, 2014 to report missing columns early on in script (S Nelson)
 
 ################################# CONTENT
 ## Example allele mappings table:
@@ -367,6 +368,20 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
   ## Check that SNP name is unique and appropriate to use as the identifier in allele mappings
   if (any(duplicated(snp.dat$Name))) {
   	stop(sum(duplicated(snp.dat$Name)), " SNP names are duplicated; need alternate identifier to make Allele Mappings file")
+  }
+
+  ## Check for presence of minimum required columns
+  cols.needed <- c("IlmnID","Name","SNP","IlmnStrand")
+  cols.missing <- setdiff(cols.needed, names(snp.dat))
+  if(length(cols.missing > 0)) {
+    stop("SNP input is missing columns(s) ",paste(cols.missing, collapse=" "),"\n")
+  }
+
+  # If indels.vcfout=TRUE, also need Chr and Mapinfo
+  cols.vcf <- c("Chr","MapInfo")
+  cols.missing <- setdiff(cols.vcf, names(snp.dat))
+  if(length(cols.missing > 0) & indels.vcfout ) {
+    stop("Indel VCF requested, but SNP input is missing columns(s) ",paste(cols.missing,collapse=" "),"\n")
   }
 
   ## detect if snp.dat contains "RefStrand" - if not, print warning message that plus(+) alleles will not be written out
@@ -745,6 +760,14 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
   cols.keep <- c("IlmnID","Name","IlmnStrand","SNP",
                  "design.A","design.B","alle1.revcomp","alle2.revcomp","top.A","top.B","order")
 
+  message("snp.dat has columns", paste(names(snp.dat),collapse=" "))
+  
+ ## for debugging - find which of "cols.keep" may be missing from snp.dat
+  cols.missing <- setdiff(cols.keep, names(snp.dat))
+  if(length(cols.missing > 0)) {
+    warning("snp.dat is missing columns(s) ",paste(cols.missing, collapse=" "),"\n")
+  }
+  
   if (print.plus) cols.keep <- c("RefStrand",cols.keep)
   
   if (length(indels) > 0) {
