@@ -53,6 +53,7 @@ ext_annot_scan_unrelCol      [unrelated]            column of unrelated (T/F) in
 ext_annot_snp_alleleACol     [alleleA]              column of allele A in external snp annotation
 ext_annot_snp_alleleBCol     [alleleB]              column of allele B in external snp annotation
 ext_annot_snp_rsIDCol        [rsID]                 column of rsID in external snp annotation
+include_study_hapmaps        [TRUE]                 logical for whether to include study HapMaps in combined PCA
 ld_r_threshold               [0.32]                 r threshold for LD pruning (0.32 = sqrt(0.1))
 ld_win_size                  [10]                   size of sliding window for LD pruning (in Mb)
 num_evs_to_plot              [12]                   number of eigenvectors for correlation and scree plots

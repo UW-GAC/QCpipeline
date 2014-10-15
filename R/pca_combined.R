@@ -18,9 +18,10 @@ required <- c("annot_scan_file", "ext_annot_scan_file", "out_comb_prefix",
               "out_pruned_file", "study_unduplicated_file")
 optional <- c("annot_scan_hapmapCol", "annot_scan_subjectCol", "annot_scan_unrelCol",
               "ext_annot_scan_unrelCol", "num_evs_to_plot", "out_corr_file",
-              "out_pca_file")
+              "out_pca_file", "include_study_hapmap")
 default <- c("geno.cntl", "subjectID", "unrelated",
-             "unrelated", 12, "pca_combined_corr.RData", "pca_combined.RData")
+             "unrelated", 12, "pca_combined_corr.RData", "pca_combined.RData",
+             TRUE)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -67,27 +68,18 @@ stopifnot(is.logical(ext.unrel))
 ext.scan.ids <- getScanID(ext.scanAnnot)[ext.unrel]
 length(ext.scan.ids)
 
-comb.scan.ids <- unique(c(study.scan.ids, hm.unrel.ids, ext.scan.ids))
+## might not want study HapMaps if they are related to external samples
+if (as.logical(config["include_study_hapmaps"])) {
+    comb.scan.ids <- unique(c(study.scan.ids, hm.unrel.ids, ext.scan.ids))
+} else {
+    comb.scan.ids <- unique(c(study.scan.ids, ext.scan.ids))
+}
 length(comb.scan.ids)
 
 # remove duplicate scans between study and external (if any)
-if (!is.na(config["out_disc_file"])) {
-  discord <- getobj(config["out_disc_file"])
-  disc <- discord$discordance.by.subject
-  dups <- vector()
-  for (i in 1:length(disc)) {
-    all.scans <- unlist(dimnames(disc[[i]]))
-    sel.scan <- intersect(study.scan.ids, all.scans)
-    if (length(sel.scan) == 0) sel.scan <- all.scans[1]
-    dups <- append(dups, setdiff(all.scans, sel.scan))
-  }
-  dups <- as.integer(dups)
-
-  undup.scans <- setdiff(comb.scan.ids, dups)
-  length(undup.scans)
-} else {
-  undup.scans <- comb.scan.ids
-}
+dups <- comb.scanAnnot$scanID[duplicated(comb.scanAnnot$subjectID)]
+undup.scans <- setdiff(comb.scan.ids, dups)
+length(undup.scans)
 
 gdsobj <- snpgdsOpen(paste0(config["out_comb_prefix"], ".gds"))
 pca <- snpgdsPCA(gdsobj, sample.id=undup.scans, snp.id=snp.ids, num.thread=nThreads)

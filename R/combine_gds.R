@@ -116,8 +116,10 @@ gdsMerge(genoDataList, sampleList=sampleList, snpList=snpList,
 # sample information
 samp.info1 <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"], "sex"))
 names(samp.info1)[2] <- "subjectID"
+samp.info1$source <- "study"
 samp.info2 <- getVariable(ext.scanAnnot, c("scanID", config["ext_annot_scan_subjectCol"], "sex"))
 names(samp.info2)[2] <- "subjectID"
+samp.info2$source <- "ext"
 samp.info <- rbind(samp.info1, samp.info2)
 
 scanfile <- paste0(config["out_comb_prefix"], "_scanAnnot.RData")

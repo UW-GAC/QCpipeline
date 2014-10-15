@@ -27,7 +27,7 @@ if (type == "study") {
                   "out_dens_plot", "out_ev12_plot", "out_pairs_plot", "out_scree_plot",
                   "out_parcoord_plot",
                   "parcoord_vars", "out_parcoord_var_prefix")
-    default <- c(NA, "rsID", 12, "pca_study_corr.RData", "pca.RData", 
+    default <- c(NA, "rsID", 12, "pca_corr.RData", "pca.RData", 
                  "pca_corr", NA, "pca_dens.pdf",
                  "pca_ev12.pdf", "pca_pairs.png", "pca_scree.pdf",
                  "pca_parcoord.png",
@@ -161,7 +161,8 @@ plot(pca$eigenvect[zorder,1], pca$eigenvect[zorder,2], xlab=lbls[1], ylab=lbls[2
 #}
 legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn),
        col=c(config[race], rep("black", length(ethn))),
-       pch=c(rep(1, length(race)), as.integer(config[ethn])))
+       pch=c(rep(1, length(race)), as.integer(config[ethn])),
+       ncol=ifelse(length(race) + length(ethn) > 8, 2, 1))
 dev.off()
 
 # parallel coordinates plot
@@ -236,10 +237,11 @@ if (type == "combined"){
 	ext.sel <- zorder[(samp$scanID[zorder] %in% ext.scanAnnot$scanID) | (scanAnnot$geno.cntl[match(samp$scanID[zorder], scanAnnot$scanID)] %in% 1)] # get external or study hapmaps
 	ext.race <- as.character(sort(unique(samp$race[ext.sel])))
 	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
-  points(pca$eigenvect[ext.sel,1], pca$eigenvect[ext.sel,2], col=samp$plotcol[ext.sel], pch=samp$plotsym[ext.sel])
+        points(pca$eigenvect[ext.sel,1], pca$eigenvect[ext.sel,2], col=samp$plotcol[ext.sel], pch=samp$plotsym[ext.sel])
 	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c("Study", ext.race, ext.ethn),
-		   col=c("gray", config[ext.race], rep("black", length(ext.ethn))),
-		   pch=c(rep(1, length(ext.race)+1), as.integer(config[ext.ethn])))
+               col=c("gray", config[ext.race], rep("black", length(ext.ethn))),
+               pch=c(rep(1, length(ext.race)+1), as.integer(config[ext.ethn])),
+               ncol=ifelse(length(ext.race) + length(ext.ethn) > 8, 2, 1))
 	dev.off()
 
 	pdf(config["out_ev12_plot_study"], width=6, height=6)
@@ -249,8 +251,9 @@ if (type == "combined"){
 	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
 	points(pca$eigenvect[ext.sel,1], pca$eigenvect[ext.sel,2], col=samp$plotcol[ext.sel], pch=samp$plotsym[ext.sel])
 	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(ext.race, ext.ethn),
-		   col=c(config[ext.race], rep("black", length(ext.ethn))),
-		   pch=c(rep(1, length(ext.race)), as.integer(config[ext.ethn])))
+               col=c(config[ext.race], rep("black", length(ext.ethn))),
+               pch=c(rep(1, length(ext.race)), as.integer(config[ext.ethn])),
+               ncol=ifelse(length(ext.race) + length(ext.ethn) > 8, 2, 1))
 	dev.off()
 }
 
