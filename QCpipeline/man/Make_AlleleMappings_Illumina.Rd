@@ -12,7 +12,9 @@ make.allele.annotation(map, alleles=c("top", "design", "fwd", "plus"))
   \item{snp.dat}{a data frame made from a SNP Illumina
     annotation file (e.g., "HumanOmni2.5-4v1_D.csv"), with the following
     required fields: "IlmnID", "Name", "IlmnStrand", "SNP", and "SourceSeq"; 
-	and the following optional fields:"SourceStrand" and "RefStrand"
+	and the following optional fields: "SourceStrand" and
+	"RefStrand". Note that if \code{indels.vcfout} is \code{TRUE},
+	fields "Chr" and "MapInfo" will additionally be required.
    }
   \item{indels.verbose}{if \code{FALSE}, alleles for insertion/deletion
     variants (indels) will be
