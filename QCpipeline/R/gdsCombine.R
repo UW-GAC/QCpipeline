@@ -12,7 +12,7 @@ gdsCombine <- function(gdsGenoList,
   # check that scanIDs are the same -- this is a requirement
   scanID <- getScanID(gdsGenoList[[1]])
   storage <- getNodeDescription(gdsGenoList[[1]], "genotype")$storage
-  miss.val <- getAttribute(gdsGenoList[[1]], "miss.val", "genotype")
+  miss.val <- getAttribute(gdsGenoList[[1]], "missing.value", "genotype")
   for (x in gdsGenoList){
     if (!allequal(scanID, getScanID(x))) stop("scanIDs are not all equal!")
     if (!allequal(scanID, getScanID(x))) stop("storage modes are not all equal!")
