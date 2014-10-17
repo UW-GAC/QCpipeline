@@ -18,7 +18,7 @@ gdsCombine <- function(gdsGenoList,
     if (!allequal(scanID, getScanID(x))) stop("storage modes are not all equal!")
     if (!allequal(order(getSnpID(x)), 1:nsnp(x))) stop("snpIDs are not sorted!")
     if (!allequal(order(getChromosome(x), getPosition(x)), 1:nsnp(x))) stop("snps are not sorted!")
-    if (!all.equal(miss.val, getAttribute(x, "miss.val", "genotype"))) stop("miss.vals are different!") # need all.equal for null
+    if (!all.equal(miss.val, getAttribute(x, "missing.value", "genotype"))) stop("missing.values are different!") # need all.equal for null
   }
   if (is.null(miss.val)) miss.val <- 3 # standard for bit2...
   
@@ -211,7 +211,7 @@ checkGdsCombine <- function(genoData, gdsGenoList, snp, snpExcludeList=NULL, ver
       geno.set <- getGenotype(gdsGenoList[[n]], scan=c(i,1), snp=c(1,-1))
       idx <- snp.map[[n]]
       idx.set <- snp.set.map[[n]]
-      if (!allequal(geno.set[idx.set], geno[idx])) stop(paste("genotypes not equal for dataset", n))
+      if (!allequal(geno.set[idx.set], geno[idx])) stop(paste("genotypes not equal for scanID", sid, "for dataset", n))
     }
   }
   
