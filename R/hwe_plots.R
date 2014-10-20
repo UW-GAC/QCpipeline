@@ -13,9 +13,12 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "samp_geno_file", "samp_xy_file", "out_hwe_prefix")
-optional <- c("annot_snp_missingCol", "annot_snp_rsIDCol", "out_clust_prefix", "out_inbrd_plot", "out_maf_plot", "out_qq_plot", "out_sim_prefix")
-default <- c("missing.n1", "rsID", "hwe_clust", "hwe_inbrd.pdf", "hwe_maf.png", "hwe_qq.png", "hwe_sim")
+required <- c("annot_snp_file", "samp_geno_file", "samp_xy_file")
+optional <- c("annot_snp_missingCol", "annot_snp_rsIDCol", "out_clust_prefix",
+              "out_inbrd_plot", "out_maf_plot", "out_qq_plot",
+              "out_hwe_prefix", "out_sim_prefix")
+default <- c("missing.n1", "rsID", "hwe_clust", "hwe_inbrd.pdf",
+             "hwe_maf.png", "hwe_qq.png", "hwe", "hwe_sim")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

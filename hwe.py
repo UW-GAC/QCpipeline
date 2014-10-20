@@ -24,13 +24,13 @@ geno_file          genotype file (netCDF or GDS, filtered subject-level recommen
 samp_geno_file     sample-level genotype file (netCDF or GDS) for plots
 samp_xy_file       sample-level XY intensity file (netCDF or GDS) for plots
 scan_include_file  vector of scanID to include in HWE
-out_hwe_prefix     output prefix for HWE results
 
 Optional config parameters [default]:
 annot_snp_missingCol  [missing.n1]     column of missing call rate in snp annotation
 annot_snp_rsIDCol     [rsID]           column of rsID in snp annotation
 scan_chrom_filter     [NA]             scan-chromosome filter matrix
 out_clust_prefix      [hwe_clust]      output prefix for cluster plots
+out_hwe_prefix        [hwe]            output prefix for HWE results
 out_inbrd_plot        [hwe_inbrd.pdf]  output histogram of inbreeding coefficients
 out_maf_plot          [hwe_maf.png]    output plot of MAF vs p value
 out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)
