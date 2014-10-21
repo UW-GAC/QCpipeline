@@ -18,7 +18,7 @@ required <- c("annot_scan_file", "ext_annot_scan_file", "out_comb_prefix",
               "out_pruned_file", "study_unduplicated_file")
 optional <- c("annot_scan_hapmapCol", "annot_scan_subjectCol", "annot_scan_unrelCol",
               "ext_annot_scan_unrelCol", "num_evs_to_plot", "out_corr_file",
-              "out_pca_file", "include_study_hapmap")
+              "out_pca_file", "include_study_hapmaps")
 default <- c("geno.cntl", "subjectID", "unrelated",
              "unrelated", 12, "pca_combined_corr.RData", "pca_combined.RData",
              TRUE)
