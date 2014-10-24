@@ -150,7 +150,7 @@ gdsCombine <- function(gdsGenoList,
 
 
 # this checks sample by sample
-checkGdsCombine <- function(genoData, gdsGenoList, snp, snpExcludeList=NULL, verbose=TRUE){
+checkGdsCombine <- function(genoData, gdsGenoList, snp, snpExcludeList=NULL, verbose=TRUE, bySnp=TRUE, blockSize=5000){
   
   if (is.null(names(gdsGenoList))) stop("Please supply names for gdsGenoList")
   
@@ -185,34 +185,100 @@ checkGdsCombine <- function(genoData, gdsGenoList, snp, snpExcludeList=NULL, ver
   }
   message("ok!")
   
-  # set up snp-mapping
-  snp.map <- list()
-  snp.set.map <- list()
+  nsamp <- nscan(genoData)
+  
+  # check excluded snps
   for (n in names(gdsGenoList)){
     snpID.set <- getSnpID(gdsGenoList[[n]])
-    snpID.set.incl <- setdiff(snpID.set, snpExcludeList[[n]])
-    j <- match(paste(n, snpID.set.incl), snp$id)
-    snp.map[[n]] <- j
-    k <- match(snpID.set.incl, snpID.set)
-    snp.set.map[[n]] <- k
+    snp.set <- snp[snp$dataset %in% n, ]
+    if (!setequal(snp.set$snpID.original, setdiff(snpID.set, snpExcludeList[[n]]))) stop(paste("included snpIDs are different for dataset", n))
   }
   
   message("Checking genotype data...")
-  # loop over samples
-  for (i in 1:length(scanID)){
+  if (bySnp){
     
-    if (verbose & (i %% 10 == 0)) message(paste("  Sample", i, "of", length(scanID)))
-    sid <- scanID[i]
+    # hack until getGenotypeSelection is finished -- interact with the gds file directly
     
-    geno <- getGenotype(genoData, scan=c(i,1), snp=c(1,-1))
+    nblocks <- ceiling(nrow(snp)/blockSize)
     
-    # check each individual dataset
+    counter <- 1
+    
+    for (block in 1:nblocks){
+      
+      snp.start <- counter
+      snp.end <- counter + blockSize-1
+      if (snp.end > nrow(snp)) snp.end <- nrow(snp)
+      snp.block <- snp[snp.start:snp.end, ]
+      nsnp.block <- snp.end - snp.start + 1
+      
+      if (verbose) message(paste("Block", block, "of", nblocks))
+      
+      geno <- getGenotype(genoData, snp=c(snp.start, nsnp.block), scan=c(1,-1))
+      if (class(geno) != "matrix") geno <- t(as.matrix(geno))
+      
+      for (n in names(gdsGenoList)){
+        genoDataSet <- gdsGenoList[[n]] # because we will use it later...
+        ggeno <- index.gdsn(genoDataSet@handler, "genotype")
+        miss.val <- get.attr.gdsn(ggeno)$missing.value
+        if (is.null(miss.val)) miss.val <- 3 # our default
+        snpID <- getSnpID(genoDataSet)
+        
+        # selection for combined set
+        sel.comb <- snp.block$dataset %in% n
+        
+        # selection for getting genotypes from the gds file
+        sel.n <- snpID %in% snp.block$snpID.original[snp.block$dataset %in% n]
+        
+        # make sure that snps are ordered properly -- there is no remapping here
+        stopifnot(allequal(snpID[sel.n], snp.block$snpID.original[snp.block$dataset %in% n]))
+        
+        if (sum(sel.n) == 0){
+          # no snps in this dataset for this block
+          next
+        }
+        
+        # read the genotypes
+        geno.set <- t(readex.gdsn(ggeno, sel=list(rep(TRUE, nsamp), sel.n)))
+        geno.set[geno.set == miss.val] <- NA
+        
+        chk <- allequal(geno[sel.comb, ], geno.set)
+        if (!chk) stop(paste("genotypes not equal for dataset", n, "for SNPs", snp.start, "-", snp.end))
+      } 
+      counter <- snp.end + 1
+      
+    }
+  } else {
+    
+    # check snpExclude
+    # set up snp-mapping for checking by sample
+    # also check snp exclude?
+    snp.map <- list()
+    snp.set.map <- list()
     for (n in names(gdsGenoList)){
-      geno.set <- getGenotype(gdsGenoList[[n]], scan=c(i,1), snp=c(1,-1))
-      idx <- snp.map[[n]]
-      idx.set <- snp.set.map[[n]]
-      if (!allequal(geno.set[idx.set], geno[idx])) stop(paste("genotypes not equal for scanID", sid, "for dataset", n))
+      snpID.set <- getSnpID(gdsGenoList[[n]])
+      snpID.set.incl <- setdiff(snpID.set, snpExcludeList[[n]])
+      j <- match(paste(n, snpID.set.incl), snp$id)
+      snp.map[[n]] <- j
+      k <- match(snpID.set.incl, snpID.set)
+      snp.set.map[[n]] <- k
+    }
+    
+    # loop over samples
+    for (i in 1:length(scanID)){
+      
+      if (verbose & (i %% 10 == 0)) message(paste("  Sample", i, "of", length(scanID)))
+      sid <- scanID[i]
+      
+      geno <- getGenotype(genoData, scan=c(i,1), snp=c(1,-1))
+      
+      # check each individual dataset
+      for (n in names(gdsGenoList)){
+        geno.set <- getGenotype(gdsGenoList[[n]], scan=c(i,1), snp=c(1,-1))
+        idx <- snp.map[[n]]
+        idx.set <- snp.set.map[[n]]
+        if (!allequal(geno.set[idx.set], geno[idx])) stop(paste("genotypes not equal for scanID", sid, "for dataset", n))
+      }
+      
     }
   }
-  
 }

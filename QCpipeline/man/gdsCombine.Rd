@@ -15,17 +15,18 @@ gdsCombine(gdsGenoList,
                        snpExcludeList=NULL,
                        verbose=TRUE,
                        dryRun=FALSE)
-checkGdsCombine(genoData, gdsGenoList, snp, snpExcludeList=NULL, verbose=TRUE)
+checkGdsCombine(genoData, gdsGenoList, snp, snpExcludeList=NULL, verbose=TRUE, bySnp = TRUE, blockSize = 5000)
 }
 \arguments{
   \item{gdsGenoList}{Named list of \code{\link{GdsGenotypeReader}} objects.}
   \item{filename}{Filename of combined GDS file to create.}
-  \item{blockSize}{Block size to operate on}
+  \item{blockSize}{Number of SNPs to operate on at a time (ignored in \code{checkGdsCombine} if \code{bySnp=FALSE})}
   \item{snpExcludeList}{list with snpIDs to exclude for each dataset, if any}
   \item{verbose}{logical: report progress info?}
   \item{dryRun}{logical indicator for whether to write output file (dryRun=TRUE) or just test (dryRun=FALSE)}
   \item{genoData}{\code{\link{GdsGenotypeReader}} or \code{\link{GenotypeData}} object of combined GDS file.}
   \item{snp}{Output from \code{gdsCombine}: SNP data frame mapping SNPs to original dataset.}
+  \item{bySnp}{logical: check by snp?}
 }
 \details{
 \code{gdsCombine} combined multiple GDS files into a single file. The component files in \code{genoDataList} are required to have the same scanIDs. All SNPs from the component files are included in the component file.

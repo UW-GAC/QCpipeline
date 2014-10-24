@@ -14,7 +14,7 @@
     snp.df$snpID <- sort(sample(1:(nrow(snp.df)*10), nrow(snp.df)))
   }
   
-
+  
   geno <- matrix(sample(0:3, nsnp*nchr*nsamp, replace=T), nrow=nsamp)
   
   if (file.exists(filename)) stop(paste("filename", filename, "already exists!"))
@@ -83,7 +83,7 @@ test_gdsCombine <- function(){
     }
     
     lapply(gdsList, close)
-
+    
     unlink(fileA)
     unlink(fileB)
     unlink(fileC)
@@ -115,55 +115,58 @@ test_checkGdsCombine <- function() {
   # combine them
   snp <- gdsCombine(gdsList, filename)  
   
-  # make sure it works
-  gds <- GdsGenotypeReader(filename)
-  checkGdsCombine(gds, gdsList, snp)
-  close(gds)
-  
-  # change a snp chromosome
-  file.copy(filename, filename.fail)
-  gds <- openfn.gds(filename.fail, readonly=F)
-  write.gdsn(index.gdsn(gds, "snp.chromosome"), val=30, start=1, count=1)
-  closefn.gds(gds)
-  # make sure it fails
-  genoData <- GdsGenotypeReader(filename.fail)
-  checkException(checkGdsCombine(genoData, gdsList, snp))
-  close(genoData)
-  unlink(filename.fail)
-  
-  # change a genotype
-  file.copy(filename, filename.fail)
-  gds <- openfn.gds(filename.fail, readonly=F)
-  gGeno <- index.gdsn(gds, "genotype")
-  geno <- read.gdsn(gGeno)
-  i.na <- which(geno == get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
-  # change the first one to non-zero
-  write.gdsn(gGeno, val=1, start=(i.na[1, ]), count=c(1,1))
-  closefn.gds(gds)
-  # make sure it fails
-  genoData <- GdsGenotypeReader(filename.fail)
-  checkException(checkGdsCombine(genoData, gdsList, snp))
-  close(genoData)
-  unlink(filename.fail)
-  
-  # change a non-missing value to another non-missing value
-  geno.map <- c("0"=1, "1"=2, "2"=0)
-  file.copy(filename, filename.fail)
-  gds <- openfn.gds(filename.fail, readonly=F)
-  gGeno <- index.gdsn(gds, "genotype")
-  geno <- read.gdsn(gGeno)
-  i.na <- which(geno != get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
-  # change the first one to non-zero
-  oldval <- geno[i.na[2, "row"], i.na[2, "col"]]
-  newval <- geno.map[as.character(oldval)]
-  write.gdsn(gGeno, val=newval, start=(i.na[2, ]), count=c(1,1))
-  closefn.gds(gds)
-  # make sure it fails
-  genoData <- GdsGenotypeReader(filename.fail)
-  checkException(checkGdsCombine(genoData, gdsList, snp))
-  close(genoData)
-  unlink(filename.fail)
-  
+  for (bySnp in c(FALSE, TRUE)){
+    for (blockSize in c(5000, nrow(snp)-1)){
+      # make sure it works
+      gds <- GdsGenotypeReader(filename)
+      checkGdsCombine(gds, gdsList, snp, bySnp = bySnp, blockSize=blockSize)
+      close(gds)
+      
+      # change a snp chromosome
+      file.copy(filename, filename.fail)
+      gds <- openfn.gds(filename.fail, readonly=F)
+      write.gdsn(index.gdsn(gds, "snp.chromosome"), val=30, start=1, count=1)
+      closefn.gds(gds)
+      # make sure it fails
+      genoData <- GdsGenotypeReader(filename.fail)
+      checkException(checkGdsCombine(genoData, gdsList, snp, bySnp = bySnp, blockSize=blockSize))
+      close(genoData)
+      unlink(filename.fail)
+      
+      # change a genotype
+      file.copy(filename, filename.fail)
+      gds <- openfn.gds(filename.fail, readonly=F)
+      gGeno <- index.gdsn(gds, "genotype")
+      geno <- read.gdsn(gGeno)
+      i.na <- which(geno == get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
+      # change the first one to non-zero
+      write.gdsn(gGeno, val=1, start=(i.na[1, ]), count=c(1,1))
+      closefn.gds(gds)
+      # make sure it fails
+      genoData <- GdsGenotypeReader(filename.fail)
+      checkException(checkGdsCombine(genoData, gdsList, snp, bySnp = bySnp, blockSize=blockSize))
+      close(genoData)
+      unlink(filename.fail)
+      
+      # change a non-missing value to another non-missing value
+      geno.map <- c("0"=1, "1"=2, "2"=0)
+      file.copy(filename, filename.fail)
+      gds <- openfn.gds(filename.fail, readonly=F)
+      gGeno <- index.gdsn(gds, "genotype")
+      geno <- read.gdsn(gGeno)
+      i.na <- which(geno != get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
+      # change the first one to non-zero
+      oldval <- geno[i.na[2, "row"], i.na[2, "col"]]
+      newval <- geno.map[as.character(oldval)]
+      write.gdsn(gGeno, val=newval, start=(i.na[2, ]), count=c(1,1))
+      closefn.gds(gds)
+      # make sure it fails
+      genoData <- GdsGenotypeReader(filename.fail)
+      checkException(checkGdsCombine(genoData, gdsList, snp, bySnp = bySnp, blockSize=blockSize))
+      close(genoData)
+      unlink(filename.fail)
+    } 
+  }
   
   lapply(gdsList, close)
   
@@ -268,54 +271,60 @@ test_checkGdsCombine_snpExclude <- function() {
   # combine them
   snp <- gdsCombine(gdsList, filename, snpExcludeList=snp.exclude)  
   
-  # make sure it works
-  gds <- GdsGenotypeReader(filename)
-  checkGdsCombine(gds, gdsList, snp, snpExcludeList=snp.exclude)
-  # different order for snp exclude list
-  checkGdsCombine(gds, gdsList, snp, snpExcludeList=snp.exclude[c("C", "B", "A")])
   
-  # try running without the snpExcludeList
-  checkException(checkGdsCombine(gds, gdsList, snp))
-  
-  # try permuting the snpExcludeList
-  snp.exclude.fail <- snp.exclude
-  names(snp.exclude.fail) <-c("C", "A")
-  checkException(checkGdsCombine(gds, gdsList, snp, snpExcludeList = snp.exclude.fail))
-  close(gds)
-    
-  # change a genotype
-  file.copy(filename, filename.fail)
-  gds <- openfn.gds(filename.fail, readonly=F)
-  gGeno <- index.gdsn(gds, "genotype")
-  geno <- read.gdsn(gGeno)
-  i.na <- which(geno == get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
-  # change the first one to non-zero
-  write.gdsn(gGeno, val=1, start=(i.na[1, ]), count=c(1,1))
-  closefn.gds(gds)
-  # make sure it fails
-  genoData <- GdsGenotypeReader(filename.fail)
-  checkException(checkGdsCombine(genoData, gdsList, snp, snpExcludeList = snp.exclude))
-  close(genoData)
-  unlink(filename.fail)
-  
-  # change a non-missing value to another non-missing value
-  geno.map <- c("0"=1, "1"=2, "2"=0)
-  file.copy(filename, filename.fail)
-  gds <- openfn.gds(filename.fail, readonly=F)
-  gGeno <- index.gdsn(gds, "genotype")
-  geno <- read.gdsn(gGeno)
-  i.na <- which(geno != get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
-  # change the first one to non-zero
-  oldval <- geno[i.na[2, "row"], i.na[2, "col"]]
-  newval <- geno.map[as.character(oldval)]
-  write.gdsn(gGeno, val=newval, start=(i.na[2, ]), count=c(1,1))
-  closefn.gds(gds)
-  # make sure it fails
-  genoData <- GdsGenotypeReader(filename.fail)
-  checkException(checkGdsCombine(genoData, gdsList, snp, snpExcludeList = snp.exclude))
-  close(genoData)
-  unlink(filename.fail)
-  
+  for (bySnp in c(FALSE, TRUE)){
+    for (blockSize in c(5000, nrow(snp)-1)){
+      
+      # make sure it works
+      gds <- GdsGenotypeReader(filename)
+      checkGdsCombine(gds, gdsList, snp, snpExcludeList=snp.exclude, bySnp=bySnp, blockSize=blockSize)
+
+      # different order for snp exclude list
+      checkGdsCombine(gds, gdsList, snp, snpExcludeList=snp.exclude[c("C", "B", "A")], bySnp=bySnp, blockSize=blockSize)
+      
+      # try running without the snpExcludeList
+      checkException(checkGdsCombine(gds, gdsList, snp, bySnp=bySnp, blockSize=blockSize))
+      
+      # try permuting the snpExcludeList
+      snp.exclude.fail <- snp.exclude
+      names(snp.exclude.fail) <-c("C", "A")
+      checkException(checkGdsCombine(gds, gdsList, snp, snpExcludeList = snp.exclude.fail, bySnp=bySnp, blockSize=blockSize))
+      close(gds)
+      
+      # change a genotype
+      file.copy(filename, filename.fail)
+      gds <- openfn.gds(filename.fail, readonly=F)
+      gGeno <- index.gdsn(gds, "genotype")
+      geno <- read.gdsn(gGeno)
+      i.na <- which(geno == get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
+      # change the first one to non-zero
+      write.gdsn(gGeno, val=1, start=(i.na[1, ]), count=c(1,1))
+      closefn.gds(gds)
+      # make sure it fails
+      genoData <- GdsGenotypeReader(filename.fail)
+      checkException(checkGdsCombine(genoData, gdsList, snp, snpExcludeList = snp.exclude, bySnp=bySnp, blockSize=blockSize))
+      close(genoData)
+      unlink(filename.fail)
+      
+      # change a non-missing value to another non-missing value
+      geno.map <- c("0"=1, "1"=2, "2"=0)
+      file.copy(filename, filename.fail)
+      gds <- openfn.gds(filename.fail, readonly=F)
+      gGeno <- index.gdsn(gds, "genotype")
+      geno <- read.gdsn(gGeno)
+      i.na <- which(geno != get.attr.gdsn(gGeno)$missing.value, arr.ind=T)
+      # change the first one to non-zero
+      oldval <- geno[i.na[2, "row"], i.na[2, "col"]]
+      newval <- geno.map[as.character(oldval)]
+      write.gdsn(gGeno, val=newval, start=(i.na[2, ]), count=c(1,1))
+      closefn.gds(gds)
+      # make sure it fails
+      genoData <- GdsGenotypeReader(filename.fail)
+      checkException(checkGdsCombine(genoData, gdsList, snp, snpExcludeList = snp.exclude, bySnp=bySnp, blockSize=blockSize))
+      close(genoData)
+      unlink(filename.fail)
+    }
+  }
   
   lapply(gdsList, close)
   
