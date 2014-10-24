@@ -10,7 +10,8 @@
 ## Updated Aug 1, 2014 to fix bugs/enhance previous update
 ## Updated Sep 7, 2014 to fix bugs/enhance indels.vcfout feature
 ## Updated Oct 14, 2014 to report missing columns early on in script (S Nelson)
-
+## Updated Oct 24, 2014 better message about the number of indels with chr0 chrMT pos0
+##
 ################################# CONTENT
 ## Example allele mappings table:
 #                 snp alle.AB alle.design alle.top alle.fwd alle.plus
@@ -490,17 +491,19 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 				a$MapInfo = indels.dat$MapInfo
 				# cannot evaluate chr0 or chrMT or position 0, so drop them
 				# (hg19 MT inaccessible via R library currently used) 
-				# message("number of indels before eliminating chromosome 0, MT, position 0: ", nrow(a))
+				num.indels = nrow(a)
 				a = a[!is.na(a$chr) & !is.na(a$MapInfo) & is.element(a$chr, c(1:22, "X", "Y", "XY")) & a$MapInfo != 0,] 
+				num.eliminated = num.indels - nrow(a)
+				if (num.eliminated > 0) {
+					message("\tn.b. ", num.eliminated, " indels won't appear in output due to chrMT chr0 position0")
+				}
 
 				a$chr      = ifelse(a$chr == "XY", "X", a$chr)
 				a$chr.name = paste0("chr", a$chr)
 
 				iteration1.results = NULL
 				for (iteration in 1:2) {
-					if (iteration == 1) {
-						message("\tnumber of indels excluding chrMT chr0 pos0 is ", nrow(a))
-					} else {
+					if (iteration == 2) {
 						message("\tre-try ", nrow(a), " indels by using reverse complement")
 					}
 					
