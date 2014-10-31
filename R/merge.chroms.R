@@ -13,10 +13,11 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "out_assoc_prefix", "model_type", "gene_action")
+required <- c("annot_snp_file", "model_type", "gene_action")
 optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "maf.filter.type",
-              "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold")
-default <- c("quality.filter", "rsID", "snp.specific", 0.02, 30, 50)
+              "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold",
+              "out_assoc_prefix")
+default <- c("quality.filter", "rsID", "snp.specific", 0.02, 30, 50, "assoc")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

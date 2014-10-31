@@ -15,8 +15,8 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "geno_file")
 optional <- c("annot_scan_subjectCol", "annot_snp_missingCol", "corr.by.snp",
-              "out_disc_file", "disc_scan_exclude_file")
-default <- c("subjectID", "missing.n1", FALSE, "dup_disc.RData", NA)
+              "out_disc_file", "out_disc_prob_file", "disc_scan_exclude_file")
+default <- c("subjectID", "missing.n1", FALSE, "dup_disc.RData", "dup_disc_prob.RData", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -65,6 +65,7 @@ disc$correlation.by.pair <- corr.subj
 # give output data frame the same dimensions as snp annotation
 snp <- merge(data.frame(snpID), disc$discordance.by.snp, all.x=TRUE)
 disc$discordance.by.snp <- snp
+save(disc, file=config["out_disc_file"])
 
 # probability of discordance for various error rates
 (N <- max(disc$discordance.by.snp$npair, na.rm=TRUE))
@@ -77,6 +78,5 @@ num <- rep(NA, ncat)
 discordant <- disc$discordance.by.snp$discordant
 for(i in 1:ncat) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
 prob.tbl <- cbind(prob.disc, num)
-disc$probability <- prob.tbl
+save(disc, file=config["out_disc_prob_file"])
 
-save(disc, file=config["out_disc_file"])

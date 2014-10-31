@@ -13,58 +13,38 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_scan_file", "annot_snp_file", "out_assoc_prefix", "covar.list",
-              "gene_action", "model_type", "samp_geno_file", "samp_xy_file",
-              "outcome")
-optional <- c("annot_snp_rsIDCol", "plot_chroms", "out_plot_prefix")
-default <- c("rsID", NA, "assoc")
+required <- c("annot_snp_file", "gene_action", "samp_geno_file", "samp_xy_file")
+optional <- c("annot_snp_rsIDCol", "plot_chroms", "out_assoc_prefix", "out_plot_prefix")
+default <- c("rsID", NA, "assoc", "assoc")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 
 # variables
-pathprefix <- config["out_assoc_prefix"]
-pathprefix
-actions <-  config["gene_action"]
-actions <- unlist(strsplit(actions," "))
-actions
-qqfname <- config["out_plot_prefix"]
-qqfname
-outcome <- config["outcome"]
-outcome <- unlist(strsplit(outcome," "))
-outcome
-covar.list <- getobj(config["covar.list"])
-covar.list
-model.type <- config["model_type"]
-model.type <- unlist(strsplit(model.type," "))
-stopifnot(all(model.type %in% c("logistic", "linear", "Logistic", "Linear")))
-model.type
+(pathprefix <- config["out_assoc_prefix"])
+(actions <- unlist(strsplit(config["gene_action"]," ")))
+(qqfname <- config["out_plot_prefix"])
 if (!is.na(config["plot_chroms"])) {
-  plotchroms <- getobj(config["plot_chroms"])
-  plotchroms
+  (plotchroms <- getobj(config["plot_chroms"]))
 }
 
 # make genotypedata and intensityData
-scanAnnot <- getobj(config["annot_scan_file"])
 snpAnnot <- getobj(config["annot_snp_file"])
 snpID <- getSnpID(snpAnnot)
 chrom <- getChromosome(snpAnnot)
 rsID <- getVariable(snpAnnot, config["annot_snp_rsIDCol"])
 geno <- GenotypeReader(config["samp_geno_file"])
-(genoData <- GenotypeData(geno, scanAnnot=scanAnnot, snpAnnot=snpAnnot)) 
+(genoData <- GenotypeData(geno,  snpAnnot=snpAnnot)) 
 xy <- IntensityReader(config["samp_xy_file"])
-(xyData <- IntensityData(xy, scanAnnot=scanAnnot, snpAnnot=snpAnnot))
+(xyData <- IntensityData(xy, snpAnnot=snpAnnot))
 
 
 for (i in 1:length(actions)) {
-      test <- paste(outcome[i],"~", paste(covar.list[[i]], collapse=" + "), "-", model.type[i])
-      print(test)
       fname <- paste(pathprefix, ".model.", i, ".",actions[i], ".combined.qual.filt.RData", sep="")
       print(fname)
       combined <- getobj(fname)
       if (!is.na(config["plot_chroms"])) {
-         sub <- combined$snpID %in% snpID[chrom %in% plotchroms]
-         combined <- combined[sub,]
+         combined <- combined[combined$chromosome %in% plotchroms,]
       }
       combined <- combined[combined$composite.filter,]
       

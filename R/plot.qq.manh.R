@@ -32,11 +32,12 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("annot_snp_file", "out_assoc_prefix", "covar.list", "gene_action",
+required <- c("annot_snp_file", "covar.list", "gene_action",
               "model_type", "outcome")
 optional <- c("plot_chroms", "out_plot_prefix", "signif_line", "maf.filter.type",
-              "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold")
-default <- c(NA, "assoc", 5e-8, "snp.specific", 0.02, 30, 50)
+              "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold",
+              "out_assoc_prefix")
+default <- c(NA, "assoc", 5e-8, "snp.specific", 0.02, 30, 50, "assoc")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

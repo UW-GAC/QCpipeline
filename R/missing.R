@@ -102,10 +102,10 @@ if (is.na(tf["Y"])) {
   
 if (!is.null(snp.io)) {
   snptbl <- rbind(np, io, tf, mf)
-  row.names(snptbl) <- c("number of probes", "intensity-only", "SNP tech failures", "missing>0.05")
+  row.names(snptbl) <- c("number of probes", "intensity-only", "SNP tech failures", "missing > 0.05")
 } else {
   snptbl <- rbind(np, tf, mf)
-  row.names(snptbl) <- c("number of probes", "SNP tech failures", "missing>0.05")
+  row.names(snptbl) <- c("number of probes", "SNP tech failures", "missing > 0.05")
 }
 save(snptbl, file=config["out_snp_summary"])
 

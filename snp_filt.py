@@ -31,30 +31,31 @@ mend.bin.start  start for error bins, e.g., "0 1 6"
 mend.bin.end    end for error bins, e.g., "1 5 10"
 
 Optional config parameters [default]:
-annot_scan_hapmapCol      [geno.cntl]           column of hapmap (0/1) in scan annotation
-annot_scan_subjectCol     [subjectID]           column of subjectID in scan annotation
-annot_snp_dupSnpCol       [dup.pos.id]          column of dup snp id in snp annotation
-annot_snp_missingCol      [missing.n1]          column of missing call rate in snp annotation
-annot_snp_rsIDCol         [rsID]                column of rsID in snp annotation
-corr.by.snp               [FALSE]               compute correlation by SNP? (slow)
-maf.bin                   [0.01]                bin for plotting results by minor allele frequency
-disc_scan_exclude_file    [NA]                  vector of scanID to exclude from dup sample discord
-dupsnp_scan_exclude_file  [NA]                  vector of scanID to exclude from dup snp discord
-mend_scan_exclude_file    [NA]                  vector of scanID to exclude from mendelian errors
-scan_exclude_file         [NA]                  vector of scanID to exclude from allele frequency
-out_afreq_file            [allele_freq.RData]   output file for allele frequency
-out_disc_file             [dup_disc.RData]      output file for duplicate sample discordance
-out_disc_maf_file         [dup_disc_maf.RData]  output file for minor allele discordance
-out_disc_plot             [dup_disc.pdf]        output plot of duplicate sample discordance
-out_dupsnp_file           [dup_snps.RData]      output file for duplicate snp discordance
-out_ma_conc_plot          [snp_ma_conc.pdf]     output plot of minor allele concordance
-out_maf_autosomes_plot    [maf_aut_hist.pdf]    output histogram of MAF for autosomes
-out_maf_plot              [maf_hist.pdf]        output hisotogram of MAF for all snps
-out_maf_xchrom_plot       [maf_x_hist.pdf]      output histogram of MAF for X chrom snps
-out_mend_clust_prefix     [mendel_clust]        output prefix for mendelian error cluster plots
-out_mend_file             [mendel_err.RData]    output file for mendelian errors
-out_snp_conc_plot         [snp_conc.pdf]        output plot of snp concordance
-out_snp_corr_plot         [snp_corr.pdf]        output plot of snp correlation"""
+annot_scan_hapmapCol      [geno.cntl]            column of hapmap (0/1) in scan annotation
+annot_scan_subjectCol     [subjectID]            column of subjectID in scan annotation
+annot_snp_dupSnpCol       [dup.pos.id]           column of dup snp id in snp annotation
+annot_snp_missingCol      [missing.n1]           column of missing call rate in snp annotation
+annot_snp_rsIDCol         [rsID]                 column of rsID in snp annotation
+corr.by.snp               [FALSE]                compute correlation by SNP? (slow)
+maf.bin                   [0.01]                 bin for plotting results by minor allele frequency
+disc_scan_exclude_file    [NA]                   vector of scanID to exclude from dup sample discord
+dupsnp_scan_exclude_file  [NA]                   vector of scanID to exclude from dup snp discord
+mend_scan_exclude_file    [NA]                   vector of scanID to exclude from mendelian errors
+scan_exclude_file         [NA]                   vector of scanID to exclude from allele frequency
+out_afreq_file            [allele_freq.RData]    output file for allele frequency
+out_disc_file             [dup_disc.RData]       output file for duplicate sample discordance
+out_disc_prob_file        [dup_disc_prob.RData]  output file for duplicate discordance probability table
+out_disc_maf_file         [dup_disc_maf.RData]   output file for minor allele discordance
+out_disc_plot             [dup_disc.pdf]         output plot of duplicate sample discordance
+out_dupsnp_file           [dup_snps.RData]       output file for duplicate snp discordance
+out_ma_conc_plot          [snp_ma_conc.pdf]      output plot of minor allele concordance
+out_maf_autosomes_plot    [maf_aut_hist.pdf]     output histogram of MAF for autosomes
+out_maf_plot              [maf_hist.pdf]         output hisotogram of MAF for all snps
+out_maf_xchrom_plot       [maf_x_hist.pdf]       output histogram of MAF for X chrom snps
+out_mend_clust_prefix     [mendel_clust]         output prefix for mendelian error cluster plots
+out_mend_file             [mendel_err.RData]     output file for mendelian errors
+out_snp_conc_plot         [snp_conc.pdf]         output plot of snp concordance
+out_snp_corr_plot         [snp_corr.pdf]         output plot of snp correlation"""
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
                   default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
