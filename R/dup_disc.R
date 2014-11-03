@@ -78,5 +78,5 @@ num <- rep(NA, ncat)
 discordant <- disc$discordance.by.snp$discordant
 for(i in 1:ncat) num[i] <- length(discordant[!is.na(discordant) & discordant>(i-1)])
 prob.tbl <- cbind(prob.disc, num)
-save(disc, file=config["out_disc_prob_file"])
+save(prob.tbl, file=config["out_disc_prob_file"])
 
