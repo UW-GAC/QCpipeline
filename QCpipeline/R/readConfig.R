@@ -1,9 +1,11 @@
 readConfig <- function(file, ...) {
   config.table <- read.table(file, as.is=TRUE, ...)
+  if (any(duplicated(config.table[, 1]))) stop("duplicated parameters in config file are not allowed!")
   config <- config.table[,2]
   names(config) <- config.table[,1]
   # recode tabs
   config[config %in% "\\t"] <- "\t"
+ 
   return(config)
 }
 
