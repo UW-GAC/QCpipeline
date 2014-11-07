@@ -2,14 +2,12 @@ import(GWASTools)
 import(IRanges)
 import(GenomicRanges)
 importFrom(gplots, plotCI) # used in boxplotMeanSD
-import(grid)
-import(gridBase)
-import(hexbin)
 import(BiocGenerics)
 import(Biostrings)
 import(tools)
-import(SRAdb)
 import(GWASExactHW)
+import(gdsfmt)
+importFrom(SRAdb, IGVclear, IGVgenome, IGVload, IGVgoto, IGVsort, IGVsnapshot, IGVcollapse)
 importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
 importFrom(stringr, str_sub) # used in checkABalleles
 
