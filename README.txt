@@ -33,16 +33,16 @@ Use option "--checkPlink" to check a CIDR-generated PLINK file (with
 A/B coding) against the newly created netCDF/GDS file.
 
 
-12-14) Gender check (heterozygosity and mean intensity)
+13-15) Gender check (heterozygosity and mean intensity)
 > gender_check.py --email user@uw.edu gender.config
 
 
-16-18) Missing call rate
+17-19) Missing call rate
 "round2" in config file should be FALSE
 > missing.py --email user@uw.edu missing.config
 
 
-19) Chromosome anomalies (need missing call rate first)
+20) Chromosome anomalies (need missing call rate first)
 test first:
 > chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5 \
 --baf --loh --stats
@@ -67,14 +67,14 @@ does not make sense to use options --baf --stats together without
 --loh.)
 
 
-20) Batch quality checks (allele frequency test and plots)
+21) Batch quality checks (allele frequency test and plots)
 > batch.py --email user@uw.edu batch.config
 Default is fisher test (--type fisher).  
 For chisq test (arrays with < 2.5M SNPs):
 > batch.py --type chisq --email user@uw.edu batch.config
 
 
-24) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
+25) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
 > ibd.py --email user@uw.edu ibd.config
 SNPs for IBD are selected with LD pruning.
 The LD pruning file will be used if it already exists, otherwise it
@@ -89,11 +89,11 @@ use the maximum number of cores available (between 1-4), and
 For family studies, provide a family variable in the config file.
 
 
-25) Sample quality check
+26) Sample quality check
 > sample_qualty.py --email user@uw.edu sample_quality.config
 
 
-26a) Plate layout maps
+27a) Plate layout maps
 "annot_scan_plateCol" and "annot_scan_wellCol" should refer to the plates
 on which the samples were shipped to the genotyping center.
 > plate_layout.py --email user@uw.edu plate_layout.config
@@ -108,7 +108,7 @@ on which the samples were shipped to the genotyping center.
 > geno_filt_subset.py --email user@uw.edu subset.config
 
 
-37) PCA
+36) PCA
 First round, unduplicated study samples + external hapmaps:
 > pca.py --email user@uw.edu pca.config --combined
 
@@ -135,7 +135,7 @@ use the maximum number of cores available (between 1-4), and
 "--multithread 4" will request 4 cores. Do not request more than 8 cores.
 
 
-41a)
+40a)
 iii) HWE
 > hwe.py --email user@uw.edu hwe.config
 (repeat with different config files for mutiple ethnic groups)
@@ -169,7 +169,7 @@ vii-viii) Allele frequency and heterozygosity by ethnic group and sex. Run using
 (repeat with different config files for mutiple ethnic groups)
 
 
-42d-e)
+41d-e)
 Association tests:
 
 # To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
