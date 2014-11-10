@@ -1,12 +1,12 @@
 Package: QCpipeline
-Version: 0.8.35
+Version: 0.9.0
 Type: Package
 Title: Utilities for the QC pipeline
 Description: Configuration and plotting code
 Author: Stephanie Gogarten, Cathy Laurie, Sarah Nelson, Jess Shen, Adrienne Stilp, Leila Zelnick, Tin Louie
 Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
 Depends: GWASTools
-Imports: gplots, BiocGenerics, Biostrings, tools, SRAdb, GWASExactHW, rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt
-Suggests: MSBVAR, GWASdata, BSgenome.Hsapiens.UCSC.hg19
+Imports: gplots, BiocGenerics, Biostrings, tools, GWASExactHW, rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt
+Suggests: SRAdb, MSBVAR, GWASdata, BSgenome.Hsapiens.UCSC.hg19
 License: Artistic-2.0
 LazyLoad: yes

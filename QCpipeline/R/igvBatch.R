@@ -35,6 +35,8 @@ igvPlot <- function(sock, chromosome, position, window=10,
                      bam, outdir="./", prefix="igv",
                      genome="hg19",
                      collapse=c("yes", "no", "both")) {
+  stopifnot(requireNamespace("SRAdb"))
+      
   stopifnot(length(chromosome) == length(position))
   collapse <- match.arg(collapse)
 
