@@ -87,11 +87,19 @@ for (i in 1:length(actions)) {
   maf.thresh <- switch(model.type[i],
                        linear=as.numeric(config["maf.linear.threshold"]),
                        logistic=as.numeric(config["maf.logistic.threshold"]))
+  
+  # snp-specific filtering for logistic is calculated the number of cases or controls, whichever is smaller
+  # for linear it is all samples
+  N <- switch(model.type[i],
+              linear=max(combined$n, na.rm=TRUE),
+              logistic=max( pmin( combined$nAA.cc0 + combined$nAB.cc0 + combined$nBB.cc0,
+                                  combined$nAA.cc1 + combined$nAB.cc1 + combined$nBB.cc1), na.rm=TRUE))
+  
   maf.filt <- switch(config["maf.filter.type"],
                      absolute=(!is.na(combined$MAF) &
                                combined$MAF > as.numeric(config["maf.absolute.threshold"])),
                      snp.specific=(!is.na(combined$MAF) & !is.na(combined$n) &
-                                   2*combined$MAF*(1-combined$MAF)*combined$n > maf.thresh))
+                                   2 * combined$MAF * (1 - combined$MAF) * N > maf.thresh))
   combined$comp.maf.filter <- combined$composite.filter & maf.filt
   
   print(dim(combined))
