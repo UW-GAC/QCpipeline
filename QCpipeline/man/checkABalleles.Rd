@@ -52,7 +52,7 @@ far to have this annotation issue.
 %}
 \examples{
 
-illumina <-  read.csv(file="/projects/geneva/gcc-fs2/SNP_annotation/Illumina/HumanOmni2.5_4v1/HumanOmni2.5-4v1_D.csv", skip=7, nrows=10000)
+illumina <-  read.csv(file="/projects/geneva/gcc-fs2/SNP_annotation/Illumina/HumanOmni2.5_4v1/HumanOmni2.5-4v1_D/HumanOmni2.5-4v1_D.csv", skip=7, nrows=10000)
 dim(illumina); names(illumina)
 out <- checkABalleles(illumina)
 dim(out); head(out)

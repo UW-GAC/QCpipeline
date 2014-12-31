@@ -60,9 +60,9 @@ getSnpNames <- function(snpAnnot, gds, chromosome, verbose=TRUE, extraSnptabVars
   sel.exception <- !grepl("MultipleAlignment", snptab$exceptions)
   sel.bases <- snptab$chromEnd - snptab$chromStart == 1
   sel <- sel.class & sel.exception & sel.bases
-  snptab$keep <- sel
+  snptab$snptab.valid <- sel
 
-  snptab.valid <- snptab[sel, !(names(snptab) %in% "keep")]
+  snptab.valid <- snptab[sel, ]
   
   # now the input snp annotation to match
   # must be on the same chromosome
@@ -73,13 +73,22 @@ getSnpNames <- function(snpAnnot, gds, chromosome, verbose=TRUE, extraSnptabVars
   sel <- sel.chromosome & sel.alleles
 
   snp.valid <- snp[sel, ]
+    
+  # only merge snp.valid on snpID and position, since we will merge again with the full snp annotation by snpID.
+  merged <- merge(snp.valid[, c("snpID", "position")], snptab.valid, by.x="position", by.y="chromEnd", all.x=T)
+  merged$snpAnnot.valid <- TRUE
+
+  # do not include position in "merged", since it was already merged with the valid snps by position.
+  merged2 <- merge(snp, merged[, !(names(merged) %in% "position")], , by="snpID", all.x=T)
+  merged2$snpAnnot.valid[is.na(merged2$snpAnnot.valid)] <- FALSE
+  sel <- is.na(merged2$snptab.valid) & merged2$position %in% snptab$chromEnd[!snptab$snptab.valid]
+  merged2$snptab.valid[sel] <- FALSE
+  sel <- is.na(merged2$snptab.valid) & merged2$position %in% snptab$chromEnd[snptab$snptab.valid]
+  merged2$snptab.valid[sel] <- TRUE  
+
+  if (any(duplicated(merged2$snpID))) warning("duplicated snpIDs in merged output! check them and determine which rsID you want to keep.")
   
-  # continue!
-  if (any(duplicated(snptab$position))) stop("duplicated snp positions")
-  
-  merged <- merge(snp.valid, snptab.valid, by.x="position", by.y="chromEnd", all.x=T)
-  
-  list("merged"=merged, "snptab"=snptab)
+  list("merged"=merged2, "snptab"=snptab)
 
 }
 
