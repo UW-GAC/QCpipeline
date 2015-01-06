@@ -46,6 +46,7 @@ Adrienne Stilp
 }
 \examples{
 \dontrun{
+library(gdsfmt)
 gds <- openfn.gds("snp_table.gds"")
 snpAnnot <- getobj(snpfile) # snp annotation for chromosome 1
 out <- getSnpNames(snpAnnot, gds, 1)
