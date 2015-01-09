@@ -31,7 +31,13 @@ qqPlotPng <- function(pval, stat, df, filters, outfile, ncol=2, addText="", main
     title <- names(filters)[i]
     lambda <- calculateLambda(stat[filt], df)
     subtitle <- paste("lambda =", format(lambda, digits=4, nsmall=3))
-    qqPlot(pval[filt], main=title, sub=subtitle, ...)
+   
+    if (length(filt) == 0){
+      plot(1, type="n", axes=F, xlab="", ylab="", main=title, sub=subtitle)
+      next
+    }
+
+    qqPlot(pval[filt], main=title, sub=subtitle)
 
     if (i == 1){
       mtext(side=3, line=-1, text=addText, padj=0.9, adj=0.02, outer=T, cex=1.5) 
@@ -59,6 +65,12 @@ manhattanPlotPng <- function(pval, chromosome, filters, outfile, addText="", mai
   for (i in 1:length(filters)) {
     filt <- filters[[i]]
     title <- names(filters)[i]
+
+     if (length(filt) == 0){
+      plot(1, type="n", axes=F, xlab="", ylab="", main=title)
+      next
+    }
+
     manhattanPlot(p=pval[filt], chromosome=chromosome[filt], main=title, ...)
     
     if (i == 1){
