@@ -32,26 +32,34 @@
 
 ################# 
 
-## ## values for testing: rm(list=objects()) options(stringsAsFactors = FALSE)
-## library(GWASTools) # will be loaded via NAMESPACE library(Biostrings) #
-## snpAnnot should be object already loaded in snpAnnot <-
-## getobj('/projects/geneva/gcc-fs2/OLGA/genotype/freeze2/amstilp/results/gds/freeze2_v01/freeze2_snpAnnot_chr22_tmp.RData')
-## # supp_snpAnnot should be object already loaded in supp_snpAnnot <-
-## getobj('/projects/geneva/gcc-fs2/OLGA/genotype/freeze2/sarahcn/results/alleleMappings/SoL_freeze2_indels_VCFconventions.RData')
+## ## values for testing:
+## rm(list=objects())
+## options(stringsAsFactors = FALSE)
+## library(GWASTools) # will be loaded via NAMESPACE
+## library(Biostrings)
+## # snpAnnot should be object already loaded in
+## snpAnnot <- getobj("/projects/geneva/gcc-fs2/OLGA/genotype/freeze2/amstilp/results/gds/freeze2_v01/freeze2_snpAnnot_chr22_tmp.RData")
+## # supp_snpAnnot should be object already loaded in
+## supp_snpAnnot <- getobj("/projects/geneva/gcc-fs2/OLGA/genotype/freeze2/sarahcn/results/alleleMappings/SoL_freeze2_indels_VCFconventions.RData")
 
-## #### adjust snpID to match primary annot snpID (temporary kluge) supp.dat <-
-## pData(supp_snpAnnot) supp.dat$snpID <- NA # get indel positions on chr22
-## snp.dat <- pData(snpAnnot) snp.dat$indel <- nchar(snp.dat$alleleA)>1 |
-## nchar(snp.dat$alleleB)>1 indels <- snp.dat[snp.dat$indel,] supp.dat <-
-## supp.dat[supp.dat$chromosome==22,] supp.dat$snpID <-
-## indels$snpID[match(supp.dat$position, indels$position)]
-## sum(!is.na(supp.dat$snpID)) # filled in 18 - reduce to just those supp.dat <-
-## supp.dat[!is.na(supp.dat$snpID),]; dim(supp.dat) supp_snpAnnot <-
-## SnpAnnotationDataFrame(supp.dat, YchromCode=as.integer(24))
-## YchromCode(supp_snpAnnot) # I assigned Y chrom variants to chromosome==24 ###
+## #### adjust snpID to match primary annot snpID (temporary kluge)
+## supp.dat <- pData(supp_snpAnnot)
+## supp.dat$snpID <- NA
+## # get indel positions on chr22
+## snp.dat <- pData(snpAnnot)
+## snp.dat$indel <- nchar(snp.dat$alleleA)>1 | nchar(snp.dat$alleleB)>1
+## indels <- snp.dat[snp.dat$indel,]
+## supp.dat <- supp.dat[supp.dat$chromosome==22,]
+## supp.dat$snpID <- indels$snpID[match(supp.dat$position, indels$position)]
+## sum(!is.na(supp.dat$snpID)) # filled in 18 - reduce to just those
+## supp.dat <- supp.dat[!is.na(supp.dat$snpID),]; dim(supp.dat)
+## supp_snpAnnot <- SnpAnnotationDataFrame(supp.dat, YchromCode=as.integer(24))
+## YchromCode(supp_snpAnnot) # I assigned Y chrom variants to chromosome==24 
+## ###
 
-## supp_snpIDs <- supp.dat$snpID[1:5] supp_alleleAcol <- alleleAcol <- 'alleleA'
-## supp_alleleBcol <- alleleBcol <- 'alleleB'
+## supp_snpList <- supp.dat$snpID[1:5]
+## supp_alleleAcol <- alleleAcol <- "alleleA"
+## supp_alleleBcol <- alleleBcol <- "alleleB"
 
 ################# Start function definition
 
@@ -148,10 +156,14 @@ defineDupVars <- function(snpAnnot, alleleAcol = "alleleA", alleleBcol = "allele
     
     # concatenate chrom and bp position into variable 'map'
     snp.dat$map <- paste(snp.dat$chromosome, snp.dat$position)
-    # exclude unmapped variants (where either chrom or position is unknown).  assumes
-    # 27 as unknown chrom code
-    dup.pos <- unique(snp.dat$map[duplicated(snp.dat$map) & !is.element(snp.dat$map, 
-        "27 0")])
+    # exclude unmapped variants (where either chrom or position is unknown).
+    # determine integer code for uknown chrom
+    chr.unknown <- getChromosome(snpAnnot,char=TRUE) %in% "U"
+    chr.unknown.int <- unique(snp.dat$chromosome[chr.unknown])
+
+    # assumes unknown position=0
+    dup.pos <- unique(snp.dat$map[duplicated(snp.dat$map) &
+                                  !is.element(snp.dat$map, paste(chr.unknown.int,"0"))])
     ndup <- length(dup.pos)
     nvar <- sum(is.element(snp.dat$map, dup.pos))
     message("Based on position alone, detected ", prettyNum(ndup, big.mark = ","), 
