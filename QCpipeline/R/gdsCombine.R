@@ -1,11 +1,10 @@
 # this breaks many rules of object-oriented coding because something we need is not implemented yet, and we don't have time to implement it before we need this function. It will be fixed once getGenotypeSelection is implemented...
-gdsCombine <- function(gdsGenoList,
-                       filename,
-                       blockSize=5000,
-                       snpExcludeList=NULL,
-                       verbose=TRUE,
-                       dryRun=FALSE) {
-  
+
+gdsCombine <- function(gdsGenoList,filename,
+                           blockSize=5000,
+                           snpExcludeList=NULL,
+                           verbose=TRUE,
+                           dryRun=FALSE){
   
   if (is.null(names(gdsGenoList))) stop("Please supply names for gdsGenoList")
   
@@ -15,12 +14,12 @@ gdsCombine <- function(gdsGenoList,
   miss.val <- getAttribute(gdsGenoList[[1]], "missing.value", "genotype")
   for (x in gdsGenoList){
     if (!allequal(scanID, getScanID(x))) stop("scanIDs are not all equal!")
-    if (!allequal(scanID, getScanID(x))) stop("storage modes are not all equal!")
+    if (!allequal(storage, getNodeDescription(x, "genotype")$storage)) stop("storage modes ar enot all equal!")
     if (!allequal(order(getSnpID(x)), 1:nsnp(x))) stop("snpIDs are not sorted!")
     if (!allequal(order(getChromosome(x), getPosition(x)), 1:nsnp(x))) stop("snps are not sorted!")
-    if (!all.equal(miss.val, getAttribute(x, "missing.value", "genotype"))) stop("missing.values are different!") # need all.equal for null
+    if (!all.equal(miss.val, getAttribute(x, "missing.value", "genotype"))) stop("missing.values are different!")
   }
-  if (is.null(miss.val)) miss.val <- 3 # standard for bit2...
+  if (is.null(miss.val)) miss.val <- 3 # standard for bit2 files
   
   # check snpExcludeList
   if (!is.null(snpExcludeList)){
@@ -29,8 +28,8 @@ gdsCombine <- function(gdsGenoList,
   
   nsamp <- length(scanID)
   
-  # extract snp information
   snpInfoList <- list()
+  # extract snp information
   for (n in names(gdsGenoList)) {
     x <- gdsGenoList[[n]]
     snp.df <- data.frame(snpID.original=getSnpID(x),
@@ -44,25 +43,17 @@ gdsCombine <- function(gdsGenoList,
     }
     snp.df <- snp.df[!(snp.df$snpID.original %in% snpExcludeList[[n]]),]
     snpInfoList[[n]] <- snp.df
-  }
-  rm(snp.df)
-  
-  # hack until getGenotypeSelection is finished -- interact with the gds file directly
-  # make sure that it's stored scan x snp
-  for (n in names(gdsGenoList)){
-    gds <- gdsGenoList[[n]]@handler
-    # check dimensions for scan x snp
-    nsamp.n <- nscan(gdsGenoList[[n]])
-    nsnp.n <- nsnp(gdsGenoList[[n]])
-    if (!allequal(c(nsamp.n, nsnp.n), objdesp.gdsn(index.gdsn(gds, "genotype"))$dim)) stop("gds files must be scan x snp")
+    rm(snp.df)
   }
   
+  # order snps
   snp <- do.call(rbind, snpInfoList)
   snp <- snp[order(snp$chromosome, snp$position), ]
   snp$snpID <- 1:nrow(snp)
-  snp$id <- paste(snp$dataset, snp$snpID.original) # unique id for merging later
+  snp$id <- paste(snp$dataset, snp$snpID.original) # unique id for merging later.. do we still need this? probably
   
   if (!dryRun){
+    # create the new file
     # create the new file
     if (file.exists(filename)) stop(paste("filename", filename, "already exists!"))
     gfile <- createfn.gds(filename)
@@ -71,10 +62,16 @@ gdsCombine <- function(gdsGenoList,
     add.gdsn(gfile, "snp.chromosome", snp$chromosome)
     add.gdsn(gfile, "snp.position", snp$position)
     add.gdsn(gfile, "snp.allele", paste(snp$alleleA, snp$alleleB, sep="/"))
+    
+    valdim <- c(length(scanID), nrow(snp))
     gGeno <- add.gdsn(gfile, "genotype", valdim=c(length(scanID), nrow(snp)), storage=storage)
+    
+    # add order for gds file
+    put.attr.gdsn(gGeno, "sample.order")
     
     # add missing value
     put.attr.gdsn(gGeno, "missing.value", miss.val)
+    
   }
   
   nblocks <- ceiling(nrow(snp)/blockSize)
@@ -82,16 +79,12 @@ gdsCombine <- function(gdsGenoList,
   counter <- 1
   
   if (verbose){
-    
-    if (dryRun){
-      message("Looping over SNPs..")
-    } else {
-      message("Writing genotypes..")
-    }
+    if (dryRun) message("Looping over SNPs...") else message("Writing genotypes...")
   }
+  
   for (block in 1:nblocks){
     snp.start <- counter
-    snp.end <- counter + blockSize-1
+    snp.end <- counter + blockSize - 1
     if (snp.end > nrow(snp)) snp.end <- nrow(snp)
     snp.block <- snp[snp.start:snp.end, ]
     nsnp.block <- snp.end - snp.start + 1
@@ -100,31 +93,21 @@ gdsCombine <- function(gdsGenoList,
     
     geno <- matrix(NA, ncol=nsnp.block, nrow=nsamp)
     
+    # create the combined genotype array for this block
     for (n in names(gdsGenoList)){
-      genoData <- gdsGenoList[[n]] # because we will use it later...
-      ggeno <- index.gdsn(genoData@handler, "genotype")
-      snpID <- getSnpID(genoData)
+      genoData <- gdsGenoList[[n]]
       
-      # selection for combined set
+      # which SNPs are in this dataset?
       sel.comb <- snp.block$dataset %in% n
       
-      # selection for getting genotypes from the gds file
-      sel.n <- snpID %in% snp.block$snpID.original[snp.block$dataset %in% n]
+      # select those SNPs in the gds file
+      sel.set <- getSnpID(genoData) %in% snp.block$snpID.orig[sel.comb]
+      # read them
+      ggeno <- getGenotypeSelection(genoData, snp=sel.set, transpose=TRUE)
       
-      # make sure that snps are ordered properly -- there is no remapping here
-      stopifnot(allequal(snpID[sel.n], snp.block$snpID.original[snp.block$dataset %in% n]))
+      # put them in the combined matrix
+      geno[, sel.comb] <- ggeno
       
-      if (sum(sel.n) == 0){
-        # no snps in this dataset for this block
-        next
-      }
-      
-      # read the genotypes
-      geno.set <- readex.gdsn(ggeno, sel=list(rep(TRUE, nsamp), sel.n))
-      
-      geno[, sel.comb] <- geno.set
-      ### OLD
-
     }
     
     # set NAs to missing value for gds
@@ -143,9 +126,10 @@ gdsCombine <- function(gdsGenoList,
   if (!dryRun){
     closefn.gds(gfile)
   }
+  
   return(snp)
+  
 }
-
 
 
 
@@ -197,7 +181,7 @@ checkGdsCombine <- function(genoData, gdsGenoList, snp, snpExcludeList=NULL, ver
   message("Checking genotype data...")
   if (bySnp){
     
-    # hack until getGenotypeSelection is finished -- interact with the gds file directly
+    
     
     nblocks <- ceiling(nrow(snp)/blockSize)
     
@@ -217,31 +201,16 @@ checkGdsCombine <- function(genoData, gdsGenoList, snp, snpExcludeList=NULL, ver
       if (class(geno) != "matrix") geno <- t(as.matrix(geno))
       
       for (n in names(gdsGenoList)){
+        
         genoDataSet <- gdsGenoList[[n]] # because we will use it later...
-        ggeno <- index.gdsn(genoDataSet@handler, "genotype")
-        miss.val <- get.attr.gdsn(ggeno)$missing.value
-        if (is.null(miss.val)) miss.val <- 3 # our default
-        snpID <- getSnpID(genoDataSet)
         
-        # selection for combined set
-        sel.comb <- snp.block$dataset %in% n
+        # snp selection
+        sel.block <- snp.block$dataset %in% n
         
-        # selection for getting genotypes from the gds file
-        sel.n <- snpID %in% snp.block$snpID.original[snp.block$dataset %in% n]
+        snp.sel <- getSnpID(genoDataSet) %in% snp.block$snpID.original[sel.block]
+        geno.set <- getGenotypeSelection(genoDataSet, snp=snp.sel)
         
-        # make sure that snps are ordered properly -- there is no remapping here
-        stopifnot(allequal(snpID[sel.n], snp.block$snpID.original[snp.block$dataset %in% n]))
-        
-        if (sum(sel.n) == 0){
-          # no snps in this dataset for this block
-          next
-        }
-        
-        # read the genotypes
-        geno.set <- t(readex.gdsn(ggeno, sel=list(rep(TRUE, nsamp), sel.n)))
-        geno.set[geno.set == miss.val] <- NA
-        
-        chk <- allequal(geno[sel.comb, ], geno.set)
+        chk <- allequal(geno.set, geno[sel.block, ])
         if (!chk) stop(paste("genotypes not equal for dataset", n, "for SNPs", snp.start, "-", snp.end))
       } 
       counter <- snp.end + 1

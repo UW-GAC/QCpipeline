@@ -1,3 +1,4 @@
+library(gdsfmt)
 
 .makeTestGds <- function(filename, nsamp=50, nsnp=100, scanBySnp=T, snpIDtype="diff1"){
   
@@ -115,8 +116,8 @@ test_checkGdsCombine <- function() {
   # combine them
   snp <- gdsCombine(gdsList, filename)  
   
-  for (bySnp in c(FALSE, TRUE)){
-    for (blockSize in c(5000, nrow(snp)-1)){
+  for (blockSize in c(5000, nrow(snp)-1)){
+    for (bySnp in c(FALSE, TRUE)){
       # make sure it works
       gds <- GdsGenotypeReader(filename)
       checkGdsCombine(gds, gdsList, snp, bySnp = bySnp, blockSize=blockSize)
