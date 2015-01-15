@@ -198,10 +198,11 @@ defineDupVars <- function(snpAnnot, alleleAcol = "alleleA", alleleBcol = "allele
             
             # don't try to take reverse complement of alleles annotated as 'I','D', or '0'
             take.comp <- !is.element(snp.dup$alleleA, c("I", "D", "0", "<DEL>")) & 
-                !is.element(snp.dup$alleleB, c("I", "D", "0", "<DEL>"))
+                !is.element(snp.dup$alleleB, c("I", "D", "0", "<DEL>")) &
+                !grepl("<", snp.dup$alleleA, fixed=T) & !grepl("<", snp.dup$alleleB, fixed=T)
             
             not.dna <- sum(!take.comp)
-            message("\tNot taking reverse complement of alleles at ", not.dna, " variants that have I, D, 0, or <DEL> as alleles\n")
+            message("\tNot taking reverse complement of alleles at ", not.dna, " variants that have I, D, 0, or anything containing '<' as alleles\n")
             
             # eventually wrap conversion to DNAStringSet with 'try' or 'tryCatch' so that an
             # error will cause script to exit yet still return SNP annotation with dup.var.id
