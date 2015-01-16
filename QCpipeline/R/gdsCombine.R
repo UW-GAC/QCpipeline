@@ -101,7 +101,7 @@ gdsCombine <- function(gdsGenoList,filename,
       sel.comb <- snp.block$dataset %in% n
       
       # select those SNPs in the gds file
-      sel.set <- getSnpID(genoData) %in% snp.block$snpID.orig[sel.comb]
+      sel.set <- getSnpID(genoData) %in% snp.block$snpID.original[sel.comb]
       # read them
       ggeno <- getGenotypeSelection(genoData, snp=sel.set, transpose=TRUE)
       
