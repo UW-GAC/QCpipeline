@@ -37,7 +37,7 @@ qqPlotPng <- function(pval, stat, df, filters, outfile, ncol=2, addText="", main
       next
     }
 
-    qqPlot(pval[filt], main=title, sub=subtitle)
+    qqPlot(pval[filt], main=title, sub=subtitle, ...)
 
     if (i == 1){
       mtext(side=3, line=-1, text=addText, padj=0.9, adj=0.02, outer=T, cex=1.5) 
