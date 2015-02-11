@@ -3,11 +3,11 @@ import(IRanges)
 import(GenomicRanges)
 importFrom(gplots, plotCI) # used in boxplotMeanSD
 import(BiocGenerics)
+import(Biobase)
 import(Biostrings)
 import(tools)
 import(GWASExactHW)
 import(gdsfmt)
-#importFrom(SRAdb, IGVclear, IGVgenome, IGVload, IGVgoto, IGVsort, IGVsnapshot, IGVcollapse)
 importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
 importFrom(stringr, str_sub) # used in checkABalleles
 
@@ -16,7 +16,7 @@ export(readConfig, writeConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
        dbgapScanAnnotation, dbgapSnpAnnotation,
        make.allele.mappings, make.allele.annotation,
-       defineFamilies, igvBatch, igvPlot,
+       defineFamilies,
        GenotypeReader, IntensityReader,
        plateLayoutPlot,
        findRelSet,

@@ -1,7 +1,10 @@
 \name{findRelSet}
 \alias{findRelSet}
 \title{Partition a Sample into an 'Unrelated Set' and a 'Related Set'}
-\description{\code{findRelSet} is used to partition a sample from a genetic study into an 'unrelated set' and a 'related set'.  The 'unrelated set' contains individuals who are all mutually unrelated to each other, and the 'related set' contains individuals who are related to someone in the 'unrealted set'.}
+\description{
+\code{findRelSet} is deprecated, use \code{\link[GENESIS]{pcairPartition}} in \pkg{\link[GENESIS]{GENESIS}} instead.
+
+\code{findRelSet} is used to partition a sample from a genetic study into an 'unrelated set' and a 'related set'.  The 'unrelated set' contains individuals who are all mutually unrelated to each other, and the 'related set' contains individuals who are related to someone in the 'unrealted set'.}
 \usage{
 findRelSet(kinMat, thresh, unrel.set = NULL)
 }

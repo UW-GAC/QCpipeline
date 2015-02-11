@@ -1,5 +1,7 @@
 findRelSet <-
 function(kinMat, thresh, unrel.set=NULL){
+
+    .Deprecated("pcairPartition", msg="'findRelSet' is deprecated. \nUse 'pcairPartition' in package 'GENESIS' instead.")
 	
 	# set diagonal to 0
 	diag(kinMat) <- 0
