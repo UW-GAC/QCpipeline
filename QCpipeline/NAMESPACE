@@ -8,6 +8,11 @@ import(Biostrings)
 import(tools)
 import(GWASExactHW)
 import(gdsfmt)
+import(VariantAnnotation) # used in defineExomeVars
+import(GenomicFeatures) # used in defineExomeVars
+import(reshape2) # used in defineExomeVars
+#import(TxDb.Hsapiens.UCSC.hg19.knownGene)
+#import(TxDb.Hsapiens.UCSC.hg18.knownGene)
 importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
 importFrom(stringr, str_sub) # used in checkABalleles
 
@@ -33,5 +38,6 @@ export(readConfig, writeConfig, setConfigDefaults,
        filterImputationSegments,
        getAnomSegOverlap,
        calculateLambda,
-       defineDupVars
+       defineDupVars,
+       defineExomeVars, getTxDb
        )
