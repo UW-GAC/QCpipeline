@@ -1,5 +1,6 @@
 import(GWASTools)
 import(IRanges)
+import(S4Vectors)
 import(GenomicRanges)
 importFrom(gplots, plotCI) # used in boxplotMeanSD
 import(BiocGenerics)
@@ -14,7 +15,7 @@ import(reshape2) # used in defineExomeVars
 #import(TxDb.Hsapiens.UCSC.hg19.knownGene)
 #import(TxDb.Hsapiens.UCSC.hg18.knownGene)
 importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
-importFrom(stringr, str_sub) # used in checkABalleles
+importFrom(stringr, str_sub, str_locate_all, str_replace_all, "str_sub<-") # used in checkABalleles, laiDosageFile
 
 
 export(readConfig, writeConfig, setConfigDefaults,
@@ -39,5 +40,6 @@ export(readConfig, writeConfig, setConfigDefaults,
        getAnomSegOverlap,
        calculateLambda,
        defineDupVars,
-       defineExomeVars, getTxDb
+       defineExomeVars, getTxDb,
+       laiDosageFile, checkLaiDosageFile
        )
