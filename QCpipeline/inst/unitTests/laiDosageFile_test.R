@@ -6,7 +6,7 @@ library(S4Vectors)
   # make the data
   dat <- data.frame(CHROM=rep(c(1,2), each=10), POS=rep(1:10, times=2), ID=paste0("rs", 1:20), REF="-", ALT="-", QUAL="-", FILTER="-", INFO="-", FORMAT="-")
   dat$zz100 <- c(rep("2/0", 5), rep("0/2", 11), rep("1/1", 4))
-  dat$zz101 <- c(rep("2/0", 19), "1/1")
+  dat$zz101 <- c(rep("2/0", 19), "./.")
   dat$zz102 <- "1/0"
   names(dat) <- gsub("^zz", "", names(dat))
   
@@ -82,6 +82,12 @@ test_ancestryDosage <- function(){
   checkEquals(chk$afr, matrix(2))
   checkEquals(chk$amer, matrix(0))
   
+  geno <- matrix("./.")
+  chk <- QCpipeline:::.ancestryDosage(geno, pops)
+  checkEquals(chk$eur, matrix(as.numeric(NA)))
+  checkEquals(chk$afr, matrix(as.numeric(NA)))
+  checkEquals(chk$amer, matrix(as.numeric(NA)))
+  
   
   geno <- matrix(c("0/0", "0/1", "0/2", "1/0", "1/1", "1/2", "2/0", "2/1", "2/2"), ncol=3)
   chk <- QCpipeline:::.ancestryDosage(geno, pops)
@@ -93,6 +99,13 @@ test_ancestryDosage <- function(){
   geno <- matrix(c("NA/NA", "0/1", "0/2"))
   checkException(QCpipeline:::.ancestryDosage(geno, pops))
   
+  geno <- matrix(c("./.", "0/1", "0/2"))
+  chk <- QCpipeline:::.ancestryDosage(geno, pops)
+  checkEquals(chk$eur, matrix(c(NA,1,1), nrow=3))
+  checkEquals(chk$afr, matrix(c(NA,1,0), nrow=3))
+  checkEquals(chk$amer, matrix(c(NA,0,1), nrow=3))
+  
+
   # check other exceptions
   checkException(QCpipeline:::.ancestryDosage(matrix(c("11")), pops))
   checkException(QCpipeline:::.ancestryDosage(matrix(c("3/3")), pops))

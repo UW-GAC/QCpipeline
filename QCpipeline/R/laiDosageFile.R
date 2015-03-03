@@ -5,7 +5,9 @@
   #append.gdsn(index.gdsn(gds, "snp.position"), val=snp$pos)
   append.gdsn(index.gdsn(gds, "snp.rs.id"), val=snp$rsID)
   for (a in names(geno.list)){
-    append.gdsn(index.gdsn(gds, paste0("dosage_", a)), val=t(geno.list[[a]]))
+    vals <- t(geno.list[[a]])
+    vals[is.na(vals)] <- 3
+    append.gdsn(index.gdsn(gds, paste0("dosage_", a)), val=vals)
   }
 }
 
@@ -35,9 +37,10 @@
   
   map <- expand.grid(a1=names(pops), a2=names(pops))
   map$pattern <- paste(pops[map$a1], pops[map$a2], sep="/")
+  map <- rbind(map, data.frame(a1="missing", a2="missing", pattern="./."))
   
   dat.list <- list()
-  for (n in names(pops)) {
+  for (n in c(names(pops), "missing")) {
     map$dos <- rowSums(map[, c("a1", "a2")] == n)
     geno.map <- setNames(map$dos, map$pattern)
     
@@ -49,6 +52,11 @@
   # make sure it all sums to 2
   
   if(!all(Reduce("+", dat.list) == 2)) stop("dosages for all ancestries sum do not sum to 2!")
+  
+  # set missing values
+  missing <- dat.list[["missing"]]
+  dat.list <- dat.list[1:length(pops)]
+  dat.list <- lapply(dat.list, "[<-", missing == 2, NA)
   
   dat.list
 }
@@ -92,8 +100,7 @@ laiDosageFile <- function(lafile,
                          onlyUnique=FALSE,
                          dryRun=FALSE){
   
-  #stopifnot(length(pops) == 3)
-  stopifnot(!is.null(names(pops)))
+  if (is.null(names(pops))) stop("pops must be a named vector")
   
   # pre-process input file
   la <- file(lafile, "r")

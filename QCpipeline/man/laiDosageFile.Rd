@@ -34,6 +34,8 @@ checkLaiDosageFile(lafile, genoDataList, pops, snps, blockSize=5000, onlyUnique=
 
 \code{pops} should be a named vector indicating the coding in the file, e.g. \code{pops=c("eur"=0, "afr"=1)}.
 
+Missing values of \code{"./."} are automatically detected and all ancestry dosages are set to missing for subject/variant combinations with pattern \code{"./."}.
+
 If \code{onlyUnique=FALSE}, all ancestries will be written to the gds file. If \code{onlyUnique=TRUE}, only ancestries that are not identical to the previous ancestry will be written to the gds file.
 
 }
@@ -53,6 +55,7 @@ If \code{onlyUnique=TRUE}, then two additional columns are returned:
 \itemize{
 \item{pos.start: first position with these ancestry values}
 \item{pos.end: last position with these ancestry values}
+\item{n.markers}: number of markers with this ancestry value}
 }
 Additionally, \code{position} is the average of \code{pos.start} and \code{pos.end}.
 
