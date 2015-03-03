@@ -55,7 +55,7 @@ If \code{onlyUnique=TRUE}, then two additional columns are returned:
 \itemize{
 \item{pos.start: first position with these ancestry values}
 \item{pos.end: last position with these ancestry values}
-\item{n.markers}: number of markers with this ancestry value}
+\item{n.markers: number of markers with this ancestry value}
 }
 Additionally, \code{position} is the average of \code{pos.start} and \code{pos.end}.
 
