@@ -149,18 +149,21 @@ laiDosageFile <- function(lafile,
         # THE SAME as previous - need to edit the snp annotation
         n.prev <- nrow(snp.list[[counter-1]])
         snp.list[[counter-1]]$pos.end[n.prev] <- pos[end(rle)[1]-1]
+        snp.list[[counter-1]]$n.markers[n.prev] <- snp.list[[counter-1]]$n.markers[n.prev] + runLength(rle)[1]-1
         next
       }
       
-      # get start and end values
-      start <- start(rle)[2:length(start(rle))] - 1
-      end <- end(rle)[2:length(end(rle))] - 1
+      # get start and end values - need to remove the first because that's the previous
+      start <- start(rle)[-1] - 1
+      end <- end(rle)[-1] - 1
+      lengths <- runLength(rle)[-1]
       
       # check if the first row of this block is the same as the last row of the last block
       if (start[1] != 1){
         # THE SAME as previous - need to edit the snp annotation
         n.prev <- nrow(snp.list[[counter-1]])
         snp.list[[counter-1]]$pos.end[n.prev] <- pos[end(rle)[1]-1]
+        snp.list[[counter-1]]$n.markers[n.prev] <- snp.list[[counter-1]]$n.markers[n.prev] + runLength(rle)[1]-1
       }
       
       
@@ -174,6 +177,7 @@ laiDosageFile <- function(lafile,
                               pos.start=pos[start],
                               pos.end=pos[end],
                               rsID=rsID[start],
+                              n.markers=lengths,
                               stringsAsFactors=FALSE)
       
       
@@ -406,9 +410,11 @@ checkLaiDosageFile <- function(lafile, genoDataList, pops, snps, blockSize=5000,
       geno.chk <- getGenotype(g.pop, snp=snp.sel, scan=c(1,-1), drop=FALSE)
       if (!isTRUE(all.equal(geno.chk[overlaps$subjectHits-minr+1, , drop=FALSE], dat[[n]]))) stop("genotypes are not equal for population ", n)
     }
+ 
+  }
 
-
-    
+  if (onlyUnique){
+    stopifnot(nlines == sum(snps$n.markers))
   }
   
   close(la)

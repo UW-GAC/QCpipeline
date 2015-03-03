@@ -191,6 +191,7 @@ test_laiDosageFile_onlyUnique <- function(){
     checkEquals(snps$pos.start, dat$position[keep.row])
     checkEquals(snps$pos.end, dat$position[c((keep.row-1)[2:length(keep.row)], keep.row[length(keep.row)])])
     checkEquals(snps$position, round((snps$pos.start + snps$pos.end)/2))
+    checkEquals(snps$n.markers, diff(c(keep.row, nrow(dat)+1)))
     
     gds <- openfn.gds(gdsfile)
     gds.eur <- GdsGenotypeReader(gds, genotypeVar="dosage_eur")
