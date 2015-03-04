@@ -6,7 +6,11 @@ Description: Configuration and plotting code
 Author: Stephanie Gogarten, Cathy Laurie, Sarah Nelson, Jess Shen, Adrienne Stilp, Leila Zelnick, Tin Louie
 Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
 Depends: GWASTools
-Imports: gplots, BiocGenerics, Biobase, Biostrings, tools, GWASExactHW, rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt, VariantAnnotation, GenomicFeatures, reshape2, S4Vectors
-Suggests: SRAdb, MSBVAR, GWASdata, BSgenome.Hsapiens.UCSC.hg19
+Imports: gplots, BiocGenerics, Biobase, Biostrings, tools, GWASExactHW,
+        rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt, S4Vectors
+Suggests: SRAdb, MSBVAR, GWASdata, BSgenome.Hsapiens.UCSC.hg19,
+        VariantAnnotation, GenomicFeatures, AnnotationDbi, reshape2,
+        TxDb.Hsapiens.UCSC.hg19.knownGene,
+        TxDb.Hsapiens.UCSC.hg18.knownGene
 License: Artistic-2.0
 LazyLoad: yes

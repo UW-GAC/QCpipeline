@@ -16,14 +16,18 @@
 # Notes - UCSC 'knownGene' table exists as the library 'TxDb.Hsapiens.UCSC.hg19.knownGene'
 # For other database tables, including refGene, requires making the TxDb object
 
-### need to add to NAMESPACE:
-# library(GenomicFeatures)
-# library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-# library(TxDb.Hsapiens.UCSC.hg18.knownGene) 
-
 ################# Start function definition
 
 getTxDb <- function(build, database_table) {
+
+  # check required packages
+  require(GenomicFeatures)
+
+  # check packages that may be required based on "database_table" argument
+  if(database_table=="knownGene") {
+      if(build=="hg19") {require(TxDb.Hsapiens.UCSC.hg19.knownGene)}
+      if(build=="hg18") {require(TxDb.Hsapiens.UCSC.hg18.knownGene)}    
+  }
 
   # check specified build
     if(!is.element(build, c("hg18","hg19")))

@@ -15,16 +15,6 @@
 # 4) geneID: Values returned from locateVariants. For genic SNPs, one or more Entrez GeneIDs; NA otherwise. If collapsed=TRUE, multiple records are concatenated by ";". 
 # 5) exomic: logical vector, TRUE where variant is located in exomic region (at least one loctype value of coding); FALSE if not located in exomic region; NA if not included in query (either because excl.chr=TRUE, excl.pos=TRUE, or no match found by locateVariants query)
 
-## # libraries to be loaded via NAMESPACE:
-## library(GWASTools)
-## library(IRanges)
-## library(GenomicRanges)
-## ### need to add to NAMESPACE:
-## library(VariantAnnotation)
-## library(TxDb.Hsapiens.UCSC.hg19.knownGene)
-## library(TxDb.Hsapiens.UCSC.hg18.knownGene) 
-## library(reshape2) 
-
 ## # values for testing:
 ## # rm(list=objects())
 ## snpAnnot <- getobj("/projects/cidr/Marazita_ofc/sample_snp_annot/Marazita_ofc_HumanCoreExomePlusCustom_Marazita_15050181_A_V13_scn.RData")
@@ -33,6 +23,14 @@
 ################# Start function definition
 
 defineExomeVars <- function(snpAnnot, txdb, collapsed=TRUE) {
+
+  # check required packages
+  require(VariantAnnotation)
+  require(GenomicFeatures) # probably already loaded in user exection of getTxDb
+  require(AnnotationDbi) # probably already loaded in user exection of getTxDb
+
+  # reshape2 only needed if collapsing results to one row per SNP
+  if(collapsed) {require(reshape2)}
 
     # check primary SNP annotation object
     stopifnot(class(snpAnnot) == "SnpAnnotationDataFrame")
