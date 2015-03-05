@@ -9,6 +9,7 @@ import(Biostrings)
 import(tools)
 import(GWASExactHW)
 import(gdsfmt)
+import(reshape2) # used in defineExomeVars, possibly other future functions
 importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
 importFrom(stringr, str_sub, str_locate_all, str_replace_all, "str_sub<-") # used in checkABalleles, laiDosageFile
 

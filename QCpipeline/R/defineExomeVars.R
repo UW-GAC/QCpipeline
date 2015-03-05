@@ -29,8 +29,8 @@ defineExomeVars <- function(snpAnnot, txdb, collapsed=TRUE) {
   require(GenomicFeatures) # probably already loaded in user exection of getTxDb
   require(AnnotationDbi) # probably already loaded in user exection of getTxDb
 
-  # reshape2 only needed if collapsing results to one row per SNP
-  if(collapsed) {require(reshape2)}
+  ## reshape2 only needed if collapsing results to one row per SNP
+  # if(collapsed) {require(reshape2)}
 
     # check primary SNP annotation object
     stopifnot(class(snpAnnot) == "SnpAnnotationDataFrame")
