@@ -47,15 +47,14 @@ if (!is.na(config["annot_scan_hapmapCol"])) {
 length(scan.exclude)
 
 if (type == "chisq") {
-    batchChisqTest(genoData, batchVar=config["annot_scan_batchCol"],
-                   scan.exclude=scan.exclude, return.by.snp=TRUE,
-                   outfile=config["out_batch_prefix"])
+    res <- batchChisqTest(genoData, batchVar=config["annot_scan_batchCol"],
+                   scan.exclude=scan.exclude, return.by.snp=TRUE)
 } else if (type == "fisher") {
-    batchFisherTest(genoData, batchVar=config["annot_scan_batchCol"],
-                    scan.exclude=scan.exclude, return.by.snp=TRUE,
-                    outfile=config["out_batch_prefix"])
+    res <- batchFisherTest(genoData, batchVar=config["annot_scan_batchCol"],
+                    scan.exclude=scan.exclude, return.by.snp=TRUE)
 } else {
     stop("test type must be chisq or fisher")
 }
+save(res, file=paste0(config["out_batch_prefix"], ".RData"))
 
 close(genoData)
