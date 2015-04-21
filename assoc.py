@@ -18,11 +18,10 @@ Preliminary association tests with the following steps:
 Required config parameters:
 annot_scan_file    scan annotation file
 annot_snp_file     snp annotation file
-covar.list         file with list of covariates for each model (e.g., list(c("sex"), c("sex", "race")))
+covars             covariates for each model, quoted and space delimited (e.g., "sex race")
 covars_as_factor   covariates to be cast as factors, quoted and space delimited (e.g., "sex race")
-gene_action        gene actions for each model (usually additive), quoted and space delimited
-model_type         model types (logistic or linear), quoted and space delimited
-outcome            outcome variable for logistic regression (0=control, 1=case), quoted and space delimited
+model_type         model type (logistic or linear)
+outcome            outcome variable (for logistic regression, coded as 0=control, 1=case)
 geno_file          genotype file (netCDF or GDS, filtered subject-level recommended)
 samp_geno_file     sample-level genotype file (netCDF or GDS) for plots
 samp_xy_file       sample-level XY intensity file (netCDF or GDS) for plots
@@ -30,14 +29,17 @@ samp_xy_file       sample-level XY intensity file (netCDF or GDS) for plots
 Optional config parameters [default]:    
 annot_snp_filtCol       [quality.filter]  column for quality filter (T/F) in snp annotation
 annot_snp_rsIDCol       [rsID]            column for rsID in snp annotation
-ivar.list               [NA]              file with list of interaction variables for each model
+block_size              [5000]            block size for reading in SNPs
+effect_allele           [minor]           effect allele ("minor" or "alleleA")
+gene_action             [additive]        gene action
+ivar                    [NA]              interaction variable
+lr_test                 [TRUE]            set to TRUE for LR test (in addition to Wald test)
 maf.filter.type         [snp.specific]    type of MAF filter to apply ("absolute" or "snp.specific")
 maf.absolute.threshold  [0.02]            absolute MAF filter threshold to apply to plots: MAF > x
 maf.linear.threshold    [30]              linear regression snp.specific filter threshold: 2*MAF*(1-MAF)*N > x
 maf.logistic.threshold  [50]              logistic regression snp.specific filter threshold: 2*MAF*(1-MAF)*N > x
-plot_chroms             [NA]              integer vector of chromosomes to plot (NA=all)
+plot_chroms             [NA]              chromosomes to plot, quoted and space delimited, ":" for range (e.g., "1:22 23 25") (NA=all)
 robust                  [FALSE]           set to TRUE for robust standard errors
-scan_chrom_filter       [NA]              scan-chromosome filter matrix
 scan_exclude            [NA]              vector of scanID to exclude
 signif_line             [5e-08]           genome-wide significance level for manhattan plot
 out_assoc_prefix        [assoc]           output prefix for association results       
@@ -83,9 +85,8 @@ if (len(args) != 3) and (assoc or merge):
 
 config = args[0]
 if len(args) > 1:
-    cStart = int(args[1]) 
-    cEnd = int(args[2]) 
-#    print cStart, cEnd
+    cStart = args[1] 
+    cEnd = args[2] 
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -93,59 +94,55 @@ import QCpipeline
 configdict = QCpipeline.readConfig(config)
 
 driver = os.path.join(pipeline, "runRscript.sh")
+driver_array = os.path.join(pipeline, "runRscript_array.sh")
 
 jobid = dict()
 
 if assoc:
     # run by chrom
-    job = "run.assoc"
+    job = "assoc_run"
     rscript = os.path.join(pipeline, "R", job + ".R")
     # range of chroms
-    chroms = []
-    if cStart <= cEnd:
-        chroms = range(cStart, cEnd+1)
+    if int(cStart) <= int(cEnd):
+        arrayRange = ":".join([cStart, cEnd])
     else:
         sys.exit("cEnd is smaller than cStart")
 
-    for ichrom in chroms:
-        jobid[job+"."+str(ichrom)] = QCpipeline.submitJob(job+".chrom"+str(ichrom), driver, [rscript, config, str(ichrom)], queue=qname, email=email, qsubOptions=qsubOptions)
+    jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions, arrayRange=arrayRange)
+
+    # fisher test for monomorphic in cases or controls
+    if configdict["model_type"] == "logistic":
+        job = "assoc_fisher"
+        rscript = os.path.join(pipeline, "R", job + ".R")
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
 if merge:
-    job = "merge.chroms"
+    job = "assoc_combine"
     rscript = os.path.join(pipeline, "R", job + ".R")
     # generate holdid list 
     if assoc: # need to wait till association tests finish running
-        holdid = []
-        for i in range(cStart, cEnd+1):
-            holdid = holdid + [jobid["run.assoc." + str(i)]]
-        #print "hold id for merge: "
-        #print holdid
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
+        holdid = ["assoc_run"]
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, cStart, cEnd], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     else: # assoc == False means association tests were run in a previous run and will not carry over holdids
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(cStart), str(cEnd)], queue=qname, email=email, qsubOptions=qsubOptions)
-    #print jobid
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, cStart, cEnd], queue=qname, email=email, qsubOptions=qsubOptions)
         
 if plotq:
-    job = "plot.qq.manh"
+    job = "plot_qq_manh"
     rscript = os.path.join(pipeline, "R", job + ".R")
     # generate holdid list 
     if merge:
-        holdid = [jobid["merge.chroms"]]
-        #print "hold id for plotq: "
-        #print holdid
+        holdid = [jobid["assoc_combine"]]
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     else:
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
 if plotc:
-    job = "plot.cluster"
+    job = "plot_cluster"
     rscript = os.path.join(pipeline, "R", job + ".R")
     # generate holdid list 
     holdid = []
     if merge:
-        holdid = [jobid["merge.chroms"]]
-        #print "hold id for plotc: "
-        #print holdid
+        holdid = [jobid["assoc_combine"]]
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     else:
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
