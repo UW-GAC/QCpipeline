@@ -32,11 +32,11 @@ if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
 # check config and set defaults
-required <- c("model_type")
-optional <- c("plot_chroms", "out_plot_prefix", "signif_line", "maf.filter.type",
+required <- c("model_type", "annot_scan_file", "geno_file", "covars_as_factor")
+optional <- c("ivar", "plot_chroms", "out_plot_prefix", "signif_line", "maf.filter.type",
               "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold",
-              "out_assoc_prefix")
-default <- c(NA, "assoc", 5e-8, "snp.specific", 0.02, 30, 50, "assoc")
+              "out_assoc_prefix", "scan_exclude")
+default <- c(NA, NA, "assoc", 5e-8, "snp.specific", 0.02, 30, 50, "assoc", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -83,11 +83,29 @@ if (config["maf.filter.type"] == "absolute") {
     maflo.string <- paste("- MAF <=", format(maf, digits=3))
 }
 
-for (type in c("LR", "Wald")) { 
+## for interaction, find degrees of freedom
+if (!is.na(config["ivar"])) {
+    ## get scan annotation with only samples used in testing
+    scanAnnot <- getobj(config["annot_scan_file"])
+    data <- GenotypeReader(config["geno_file"])
+    sid <- getScanID(data)
+    scanAnnot <- scanAnnot[match(sid, scanAnnot$scanID),]
+    close(data)
+    if (!is.na(config["scan_exclude"])) {
+        scan.exclude <- getobj(config["scan_exclude"])
+        scanAnnot <- scanAnnot[!(scanAnnot$scanID %in% scan.exclude),]
+    }
+    
+    ## if this is quantitative, df=1, otherwise, it's the number of levels in the factor - 1
+    ivar <- config["ivar"]
+    factors <- unlist(strsplit(config["covars_as_factor"], " ", fixed=TRUE))
+    ge.df <- ifelse(ivar %in% factors, nlevels(as.factor(scanAnnot[[ivar]])) - 1, 1)
+}
+
+for (type in c("LR", "Wald", "GxE", "Joint")) { 
     varp <- paste(type, "pval", sep=".")    
     varstat <- paste(type, "Stat", sep=".")
     
-    ## no LR test for models with interactions
     if (!(varp %in% names(combined))) next
     
     ## filtering
@@ -107,10 +125,11 @@ for (type in c("LR", "Wald")) {
     
     ## The wald.stat and lr.stat have 1 degree of freeom
     ## if we were plotting joint p-values from a model with interactions, it would be higher (2 or more)
+    df <- switch(type, Wald=1, LR=1, GxE=ge.df, Joint=ge.df+1)
     
     ## QQ plots
     outfile <- paste0(qqfname, "_qq_", type, ".png")
-    qqPlotPng(assoc$pval, stat=assoc[[varstat]], df=1, filters, outfile)
+    qqPlotPng(assoc$pval, stat=assoc[[varstat]], df=df, filters, outfile)
     
     ## Manhattan plots
     outfile <- paste0(qqfname, "_manh_", type, ".png")
