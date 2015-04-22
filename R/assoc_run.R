@@ -12,6 +12,13 @@ args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
+# read chromosome
+if (length(args) < 2) stop("missing chromosome")
+(chromosome <- as.integer(args[2]))
+
+## if (length(args) < 3) stop("missing segment")
+## (segment <- as.integer(args[3]))
+
 # check config and set defaults
 required <- c("annot_scan_file", "covars", "covars_as_factor",
               "model_type", "geno_file", "outcome")
@@ -20,13 +27,6 @@ optional <- c("effect_allele", "gene_action", "ivar", "out_assoc_prefix",
 default <- c("minor", "additive", NA, "assoc", NA, FALSE, TRUE, 5000, NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
-
-# read chromosome
-if (length(args) < 2) stop("missing chromosome")
-(chromosome <- as.numeric(args[2]))
-
-## if (length(args) < 3) stop("missing segment")
-## (segment <- as.numeric(args[3]))
 
 
 # make genotypedata

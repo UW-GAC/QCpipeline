@@ -121,7 +121,7 @@ if merge:
     rscript = os.path.join(pipeline, "R", job + ".R")
     # generate holdid list 
     if assoc: # need to wait till association tests finish running
-        holdid = ["assoc_run"]
+        holdid = [jobid["assoc_run"].split(".")[0]]
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, cStart, cEnd], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     else: # assoc == False means association tests were run in a previous run and will not carry over holdids
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, cStart, cEnd], queue=qname, email=email, qsubOptions=qsubOptions)

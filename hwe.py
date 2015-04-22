@@ -7,12 +7,10 @@ import os
 import subprocess
 from optparse import OptionParser
 
-usage = """%prog [options] config start end by
+usage = """%prog [options] config chromStart chromEnd
 
 Test for deviations from Hardy-Weinberg Equilbrium and plot results.
-start, end, by are optional chromosome numbers to run in parallel.
-If given, the results from all chromosomes are merged.  Chromosome
-values > 23 are ignored.
+chromStart, chromEnd are chromosome numbers to run in parallel (values > 23 are ignored).
 Cluster plots are randomly sampled SNPs from bins of pvalue.  There are
 3 sets of 9 SNPs from each bin and an additional 9*7 SNPs from the bins 
 flanking 1e-4.
@@ -28,7 +26,6 @@ scan_include_file  vector of scanID to include in HWE
 Optional config parameters [default]:
 annot_snp_missingCol  [missing.n1]     column of missing call rate in snp annotation
 annot_snp_rsIDCol     [rsID]           column of rsID in snp annotation
-scan_chrom_filter     [NA]             scan-chromosome filter matrix
 out_clust_prefix      [hwe_clust]      output prefix for cluster plots
 out_hwe_prefix        [hwe]            output prefix for HWE results
 out_inbrd_plot        [hwe_inbrd.pdf]  output histogram of inbreeding coefficients
@@ -42,11 +39,11 @@ parser.add_option("-p", "--pipeline", dest="pipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
-parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
+parser.add_option("-q", "--queue", dest="qname", default="all.q", 
                   help="cluster queue name [default %default]")
 (options, args) = parser.parse_args()
 
-if len(args) < 1 or len(args) > 4:
+if len(args) < 1 or len(args) > 3:
     parser.error("incorrect number of arguments")
 
 config = args[0]
@@ -54,54 +51,42 @@ pipeline = options.pipeline
 email = options.email
 qname = options.qname
 
-# if start and end arguments provided, split by chromosome
-split = False
 if len(args) > 1:
-    split = True
-    start = int(args[1])
-    end = int(args[2])
-    if end > 23:
-        end = 23
-
-    if len(args) > 3:
-        by = int(args[3])
-    else:
-        by = 1
-
-    cStart = range(start, end+1, by)
-    cEnd = [x+by-1 for x in cStart]
-    if cEnd[-1] > 23:
-        cEnd[-1] = 23
+    cStart = args[1] 
+    cEnd = args[2] 
+    if int(cEnd) > 23:
+        cEnd = "23"
+else:
+    cStart = "1"
+    cEnd = "23"
+    
+if int(cStart) <= int(cEnd):
+    arrayRange = ":".join([cStart, cEnd])
+else:
+    sys.exit("cEnd is smaller than cStart")
 
 sys.path.append(pipeline)
 import QCpipeline
 
 driver = os.path.join(pipeline, "runRscript.sh")
+driver_array = os.path.join(pipeline, "runRscript_array.sh")
 
 jobid = dict()
+
 job = "hwe"
 rscript = os.path.join(pipeline, "R", job + ".R")
-if split:
-    jobid[job] = []
-    for c in range(0,len(cStart)):
-        jobid[job].append(QCpipeline.submitJob(job+str(cStart[c]), driver, [rscript, config, str(cStart[c]), str(cEnd[c])], queue=qname, email=email))
-else:
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config], queue=qname, email=email, arrayRange=arrayRange)
 
-if split:
-    job = "hwe_merge"
-    rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, str(start), str(end), str(by)], holdid=jobid['hwe'], queue=qname, email=email)
+holdid = [jobid["hwe"].split(".")[0]]
+job = "hwe_combine"
+rscript = os.path.join(pipeline, "R", job + ".R")
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, cStart, cEnd], holdid=holdid, queue=qname, email=email)
 
 
-if split:
-    holdid = [jobid['hwe_merge']]
-else:
-    holdid = [jobid['hwe']]
+holdid = [jobid['hwe_combine']]
 job = "hwe_simulate"
 rscript = os.path.join(pipeline, "R", job + ".R")
 jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
-
 
 job = "hwe_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")

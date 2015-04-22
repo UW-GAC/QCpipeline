@@ -12,6 +12,11 @@ args <- commandArgs(trailingOnly=TRUE)
 if (length(args) < 1) stop("missing configuration file")
 config <- readConfig(args[1])
 
+# chromosomes to merge
+if (length(args) < 3) stop("missing start and end chromosomes")
+start <- as.integer(args[2])
+end <- as.integer(args[3])
+
 # check config and set defaults
 required <- c("annot_snp_file", "model_type")
 optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "maf.filter.type",
@@ -20,11 +25,6 @@ optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "maf.filter.type",
 default <- c("quality.filter", "rsID", "snp.specific", 0.02, 30, 50, "assoc")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
-
-# chromosomes to merge
-if (length(args) < 3) stop("missing start and end chromosomes")
-start <- as.integer(args[2])
-end <- as.integer(args[3])
 
 pathprefix <- config["out_assoc_prefix"]
 tmp <- list()

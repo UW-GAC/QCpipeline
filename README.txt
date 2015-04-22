@@ -139,12 +139,8 @@ use the maximum number of cores available (between 1-4), and
 iii) HWE
 > hwe.py --email user@uw.edu hwe.config
 (repeat with different config files for mutiple ethnic groups)
-
-To run chromosomes in parallel:
-> hwe.py --email user@uw.edu hwe.config start end by
-where start, end, by are chromosome numbers.  'by' is optional, if
-omitted chromosomes will be run individually.  Values of 'end' > 23 are
-ignored (in this case 'end' will be set to 23).
+Chomosomes 1-23 will be run in parallel. To specify a chromosome range:
+> hwe.py --email user@uw.edu hwe.config start_chrom end_chrom
 
 
 iv-vi) Allele frequency, duplicate discordance and Mendelian errors
@@ -172,12 +168,12 @@ vii-viii) Allele frequency and heterozygosity by ethnic group and sex. Run using
 41d-e)
 Association tests:
 
-# To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
+To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config \
 start_chrom end_chrom --assoc --merge --plotQQManh --plotClust --queue gcc.q --email netID@uw.edu
 
-# To run step by step:
+To run step by step:
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
 /projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config
 start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netID@uw.edu
@@ -191,7 +187,7 @@ start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netI
   default is gcc.q. Check qstat first to decide which queue to use for
   --assoc
         
-# If there are categorical covariates in the model(s), specify them in the config file so they will be converted into factors automatically.
+If there are categorical covariates in the model(s), specify them in the config file so they will be converted into factors automatically.
 
 
 dbGaP files:
