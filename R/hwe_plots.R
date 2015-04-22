@@ -22,26 +22,26 @@ default <- c("missing.n1", "rsID", "hwe_clust", "hwe_inbrd.pdf",
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-hwe <- getobj(paste(config["out_hwe_prefix"], "RData", sep="."))
+hwe <- getobj(paste0(config["out_hwe_prefix"], ".RData"))
 
 # qq plots
 # check if any X chrom p-values are valid (in case of all-male study)
-plotX <- sum(!is.na(hwe$p.value[hwe$chromosome == 23])) > 0
+plotX <- sum(!is.na(hwe$pval[hwe$chr == 23])) > 0
 if (plotX) nrow <- 2 else nrow <- 1
 png(config["out_qq_plot"], width=720, height=(360*nrow))
 par(mfrow=c(nrow,2), mar=c(5,5,4,2)+0.1, lwd=1.5,
     cex.axis=1.5, cex.lab=1.5, cex.sub=1.5, cex.main=1.5)
-qqPlot(hwe$p.value[hwe$chromosome < 23],  trunc=FALSE, main="Autosomes, all")
-qqPlot(hwe$p.value[hwe$chromosome < 23], trunc=TRUE, main="Autosomes, truncated")
+qqPlot(hwe$pval[hwe$chr < 23],  trunc=FALSE, main="Autosomes, all")
+qqPlot(hwe$pval[hwe$chr < 23], trunc=TRUE, main="Autosomes, truncated")
 if (plotX) {
-  qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=FALSE, main="X chromosome, all")
-  qqPlot(hwe$p.value[hwe$chromosome == 23], trunc=TRUE, main="X chromosome, truncated")
+  qqPlot(hwe$pval[hwe$chr == 23], trunc=FALSE, main="X chr, all")
+  qqPlot(hwe$pval[hwe$chr == 23], trunc=TRUE, main="X chromosome, truncated")
 }
 dev.off()
 
 
 # inbreeding coefficient
-aut <- hwe$chromosome < 23
+aut <- hwe$chr < 23
 summary(hwe$f)
 summary(hwe$f[aut])
 
@@ -61,7 +61,7 @@ d.sim <- density(sim$f.sim)
 xlim <- c(-0.2, 0.2)
 ylim <- c(0, max(d.obs$y, d.sim$y))
 main.txt <- paste("Simulated F -", nrow(sim), "SNPs - ", max(sim$N), "Samples")
-pdf(paste(config["out_sim_prefix"], "_f.pdf", sep=""))
+pdf(paste0(config["out_sim_prefix"], "_f.pdf"))
 plot(density(sim$f.obs), col="black", lwd=2, ylim=ylim, xlim=xlim, main=main.txt, xlab="F", type="n")
 abline(v=0, h=0, col="gray", lty=2)
 lines(density(sim$f.obs), col="black", lwd=2)
@@ -73,7 +73,7 @@ dev.off()
 png(config["out_maf_plot"], width=600, height=600)
 par(mar=c(5,5,4,2)+0.1, lwd=1.5,
     cex.axis=1.5, cex.lab=1.5, cex.main=1.5)
-plot(hwe$MAF[aut], -log10(hwe$p.value[aut]), xlab="MAF", ylab="-log10(p-value)",
+plot(hwe$MAF[aut], -log10(hwe$pval[aut]), xlab="MAF", ylab="-log10(p-value)",
      main="Autosomal SNPs")
 dev.off()
 
@@ -87,19 +87,19 @@ snp <- getVariable(snpAnnot, c("snpID", config["annot_snp_rsIDCol"], config["ann
 names(snp) <- c("snpID", "rsID", "missing")
 hwe <- merge(hwe, snp)
 # alog: autosomal snps with non-NA p values and an MCR < .05
-alog <- hwe$chromosome<23 & !is.na(hwe$p.value) & hwe$missing<0.05
+alog <- hwe$chr<23 & !is.na(hwe$pval) & hwe$missing<0.05
 table(alog)
 
 x <- c(0, 1e-24, 1e-12, 1e-6, 1e-4, 1e-2, 1e-1, 0.25, 0.50, 0.75, 1)
 bins <- rep(NA, (length(x)-1))
 ids <- list()
 for(i in 1:(length(x)-1)){
-  ids[[i]] <- hwe$snpID[ alog & hwe$p.value>=x[i] &
-                             hwe$p.value<x[i+1] ]
+  ids[[i]] <- hwe$snpID[ alog & hwe$pval>=x[i] &
+                             hwe$pval<x[i+1] ]
   
   # put indices of snps with pvalue = 1 in the last bin
   if(i==(length(x)-1)) {
-    ids[[i]] <- c(ids[[i]], hwe$snpID[alog & hwe$p.value==1])
+    ids[[i]] <- c(ids[[i]], hwe$snpID[alog & hwe$pval==1])
   }
 
   # number of snps in each bin
@@ -121,10 +121,10 @@ for(j in 1:3){  # independent sets of samples, each in a different png file
   sids <- unlist(sids)
   # retrieve all sampled data
   dat <- hwe[hwe$snpID %in% sids,
-                         c("snpID", "chromosome", "rsID", "p.value")]
-  dat <- dat[order(dat$p.value),] # ordered by pvalues
+                         c("snpID", "chr", "rsID", "pval")]
+  dat <- dat[order(dat$pval),] # ordered by pvalues
   
-  mtxt <- paste("Chr",dat$chromosome,dat$rsID, "\np-value", format(dat$p.value,digits=3))
+  mtxt <- paste("Chr",dat$chr,dat$rsID, "\np-value", format(dat$pval,digits=3))
   png(paste(config["out_clust_prefix"], "_",
             j,"%03d.png",sep=""),width=720,height=720)
   par(mfrow=c(3,3), mar=c(5,5,4,2)+0.1, lwd=1.5,
@@ -134,10 +134,10 @@ for(j in 1:3){  # independent sets of samples, each in a different png file
 }
 
 ## get snp counts based upon various thresholds
-sum(hwe$p.value < 1e-6, na.rm=TRUE)
-sum(hwe$p.value < 1e-5, na.rm=TRUE)
-sum(hwe$p.value < 1e-4, na.rm=TRUE)
-sum(hwe$p.value < 1e-3, na.rm=TRUE)
+sum(hwe$pval < 1e-6, na.rm=TRUE)
+sum(hwe$pval < 1e-5, na.rm=TRUE)
+sum(hwe$pval < 1e-4, na.rm=TRUE)
+sum(hwe$pval < 1e-3, na.rm=TRUE)
 
 #compare 1e-2 to 1e-4 versus 1e-4 to 1e-6
 #these are bins 4-5
@@ -149,10 +149,10 @@ for (i in 4:5) {
   if (length(sids) > 0) {
   # retrieve all sampled data
     dat <- hwe[hwe$snpID %in% sids,
-                         c("snpID", "chromosome", "rsID", "p.value")]
-    dat <- dat[order(dat$p.value),] # ordered by pvalues
+                         c("snpID", "chr", "rsID", "pval")]
+    dat <- dat[order(dat$pval),] # ordered by pvalues
 
-    mtxt <- paste("Chr",dat$chromosome,dat$rsID, "\np-value", format(dat$p.value,digits=3))
+    mtxt <- paste("Chr",dat$chr,dat$rsID, "\np-value", format(dat$pval,digits=3))
     png(paste(config["out_clust_prefix"], "_",
             pbin[i-3],"_%03d.png",sep=""),width=720,height=720)
     par(mfrow=c(3,3), mar=c(5,5,4,2)+0.1, lwd=1.5,
