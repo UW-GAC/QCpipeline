@@ -4,7 +4,7 @@
 ## TO-DO: log file for mismatched SNPs
 gdsMerge <- function(genoDataList, outPrefix="new", sampleList=NULL, snpList=NULL,
                      match.snps.on="position", snpNameList=NULL,
-                     sortByScanID=TRUE, newSnpID=TRUE, verbose=TRUE) {
+                     sortByScanID=TRUE, newSnpID=TRUE, dosage=FALSE, verbose=TRUE) {
   if (is.null(names(genoDataList))) stop("Please supply names for genoDataList")
 
   stopifnot(all(match.snps.on %in% c("position", "name")))
@@ -96,9 +96,11 @@ gdsMerge <- function(genoDataList, outPrefix="new", sampleList=NULL, snpList=NUL
   ## rsID???
   sync.gds(gds)
 
-  geno.node <- add.gdsn(gds, "genotype", storage="bit2",
+  geno.node <- add.gdsn(gds, "genotype", storage=ifelse(dosage, "float32", "bit2"),
                         valdim=c(nrow(snp), length(scanID.all)))
   put.attr.gdsn(geno.node, "snp.order")
+  miss.val <- ifelse(dosage, -1, 3)
+  put.attr.gdsn(geno.node, "missing.value", miss.val)
 
   for (i in 1:length(genoDataList)) {
     set <- names(genoDataList)[i]
@@ -111,7 +113,7 @@ gdsMerge <- function(genoDataList, outPrefix="new", sampleList=NULL, snpList=NUL
       geno <- getGenotype(genoDataList[[i]], scan=c(samp.index, 1), snp=c(1,-1))[snp.index]
       ## if alleles are swapped, new genotype is 2-genotype
       if (i > 1) geno[swap] <- 2 - geno[swap]
-      geno[is.na(geno)] <- 3
+      geno[is.na(geno)] <- miss.val
       write.gdsn(geno.node, geno, start=c(1, which(scanID.all == s)), count=c(-1,1))
     }
   }
