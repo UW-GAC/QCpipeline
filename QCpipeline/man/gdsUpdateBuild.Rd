@@ -24,5 +24,8 @@ If \code{remove.unmapped=FALSE}, all SNPs in \code{genoData} must have entries i
 }
 \author{Stephanie Gogarten}
 \seealso{\code{\link{convertBuild}}, \code{\link{gdsMerge}}}
-%\examples{
-%}
+\examples{
+\dontrun{
+See /projects/geneva/geneva_sata/QC_reports/SOPs/datasetMerging/exampleDatasets/dataMerging_example.pdf
+}
+}

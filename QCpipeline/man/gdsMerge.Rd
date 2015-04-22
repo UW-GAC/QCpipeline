@@ -7,7 +7,7 @@
 \usage{
 gdsMerge(genoDataList, outPrefix="new", sampleList=NULL, snpList=NULL,
          match.snps.on="position", snpNameList=NULL,
-         sortByScanID=TRUE, newSnpID=TRUE, verbose=TRUE)
+         sortByScanID=TRUE, newSnpID=TRUE, dosage=FALSE, verbose=TRUE)
 
 gdsMergeCheck(genoDataList, outPrefix="new", verbose=TRUE)
 }
@@ -24,6 +24,7 @@ gdsMergeCheck(genoDataList, outPrefix="new", verbose=TRUE)
     from each file in blocks)}
   \item{newSnpID}{\code{TRUE} if snpIDs in new file should be 1:n.  If
     \code{FALSE}, snpIDs will be taken from the first object in \code{genoDataList}.}
+  \item{dosage}{\code{TRUE} if any of the items in \code{genoDataList} are dosage files (genotypes stored in 'float32' instead of 'bit2' format). If \code{dosage=TRUE}, the output file will also be a dosage file.}
   \item{verbose}{logical for whether to print messages}
 }
 \details{
@@ -41,5 +42,9 @@ One can provide a list of scanIDs (\code{sampleList}) and snpIDs
 is to include all of them.
 }
 \author{Stephanie Gogarten}
-%\seealso{}
-%\examples{}
+\seealso{\code{\link{gdsCombine}}, \code{\link{gdsUpdateBuild}}}
+\examples{
+\dontrun{
+See /projects/geneva/geneva_sata/QC_reports/SOPs/datasetMerging/exampleDatasets/dataMerging_example.pdf
+}
+}
