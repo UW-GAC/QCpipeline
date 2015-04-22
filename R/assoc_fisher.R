@@ -75,7 +75,7 @@ dat <- data.frame(snpID = as.integer(rownames(out$pval)),
                   Fisher.OR_U95 = out$confint.high[,1],
                   Fisher.pval = out$pval[,1],
                   nA = out$allele.counts[,"nA"],
-                  nA = out$allele.counts[,"nB"])
+                  nB = out$allele.counts[,"nB"])
             
 save(dat, file=paste0(config["out_assoc_prefix"], "_fisher.RData"))
 
