@@ -30,6 +30,7 @@ print(config)
 
 
 # make genotypedata
+
 scanAnnot <- getobj(config["annot_scan_file"])
 
 data <- GenotypeReader(config["geno_file"])
@@ -51,10 +52,15 @@ genoData <- GenotypeData(data, scanAnnot=scanAnnot)
 (outcome <- config["outcome"])
 
 # covariates
-covars <- unlist(strsplit(config["covars"], " ", fixed=TRUE))
-# for Y when sex needs to be taken out of model
-if (chromosome == YchromCode(genoData)) {
-  covars <- setdiff(covars, "sex")
+if (!is.na(config["covars"])) {
+    covars <- unlist(strsplit(config["covars"], " ", fixed=TRUE))
+    ## for Y when sex needs to be taken out of model
+    if (chromosome == YchromCode(genoData)) {
+        covars <- setdiff(covars, "sex")
+    }
+} else {
+    warning("Are you sure you want to run without any covariates?")
+    covars <- NULL
 }
 covars
 
