@@ -37,10 +37,12 @@ sid <- getScanID(data)
 scanAnnot <- scanAnnot[match(sid, scanAnnot$scanID),] 
 stopifnot(all(scanAnnot$scanID==sid))
 
-# set categorical variables in association models as factor 
-factors <- unlist(strsplit(config["covars_as_factor"], " ", fixed=TRUE))
-for (i in factors) {
-  scanAnnot[[i]] <- as.factor(scanAnnot[[i]])
+# set categorical variables in association models as factor
+if (!is.na(config["covars_as_factor"])) {
+    factors <- unlist(strsplit(config["covars_as_factor"], " ", fixed=TRUE))
+    for (i in factors) {
+        scanAnnot[[i]] <- as.factor(scanAnnot[[i]])
+    }
 }
 
 genoData <- GenotypeData(data, scanAnnot=scanAnnot)
