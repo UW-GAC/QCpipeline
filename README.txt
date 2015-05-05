@@ -29,8 +29,7 @@ Pay attention to sections marked "MANUAL REVIEW"
 
 Quality score will only be included in "xy" file if raw_qCol is not NA.
 
-Use option "--checkPlink" to check a CIDR-generated PLINK file (with
-A/B coding) against the newly created netCDF/GDS file.
+Use option "--checkPlink" to check a CIDR-generated PLINK file against the newly created netCDF/GDS file.
 
 
 13-15) Gender check (heterozygosity and mean intensity)

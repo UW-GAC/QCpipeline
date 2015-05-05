@@ -30,18 +30,19 @@ annot_scan_nameCol    [Sample.Name]          column of raw data sample name in s
 annot_snp_nameCol     [rsID]                 column of raw data snp name in snp annotation
 raw_scanNameInFile    [1]                    1=repeated in column, -1=embedded in column heading, 0=none
 raw_sepType           [,]                    column separator in raw data (e.g. ",", "\t")
-raw_skipNum           [11]                   number of rows to skip (including header)
-raw_colTotal          [19]                   total number of columns in raw data files
+raw_skipNum           [12]                   number of rows to skip (including header)
+raw_colTotal          [14]                   total number of columns in raw data files
 raw_snpCol            [1]                    column number with snp name
-raw_sampleCol         [2]                    column number with scan name
-raw_a1Col             [10]                   column number with allele 1
-raw_a2Col             [11]                   column number with allele 2
+raw_sampleCol         [NA]                   column number with scan name
+raw_alleleCoding      [nucleotide]           whether genotypes are coded as "nucleotide" or "AB"
+raw_a1Col             [13]                   column number with allele 1
+raw_a2Col             [14]                   column number with allele 2
 raw_genoCol           [NA]                   column number with diploid genotype of allele1 and alelle2
 raw_qCol              [NA]                   column number with quality score (NA to omit)
-raw_xCol              [14]                   column number with X intensity
-raw_yCol              [15]                   column number with Y intensity
-raw_bafCol            [18]                   column number with BAF
-raw_lrrCol            [19]                   column number with LRR
+raw_xCol              [7]                    column number with X intensity
+raw_yCol              [8]                    column number with Y intensity
+raw_bafCol            [11]                   column number with BAF
+raw_lrrCol            [12]                   column number with LRR
 geno_file_type        [gds]                  type for genotype file (gds or ncdf)
 geno_checkFile        [geno_check.RData]     output file for genotype check
 geno_diagFile         [geno_diag.RData]      output file for genotype creation
@@ -68,7 +69,7 @@ parser.add_option("-o", "--overwrite", dest="overwrite",
                   help="overwrite existing files")
 parser.add_option("--checkPlink", dest="plink",
                   action="store_true", default=False,
-                  help="check AB-coded PLINK file")
+                  help="check PLINK file")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -120,5 +121,5 @@ if plink:
 
     job = "plink_check"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, "ABcoding"], holdid=holdid, queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
         

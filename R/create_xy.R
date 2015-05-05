@@ -21,7 +21,7 @@ optional <- c("annot_scan_fileCol", "annot_scan_nameCol", "annot_snp_nameCol",
               "raw_colTotal", "raw_sampleCol", "raw_scanNameInFile", "raw_sepType",
               "raw_skipNum", "raw_snpCol")
 default <- c("file", "Sample.Name", "rsID", "xy_check.RData", "xy_diag.RData", "gds",
-             NA, 14, 15, 19, 2, 1, ",", 11, 1)
+             NA, 7, 8, 14, NA, 0, ",", 12, 1)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 

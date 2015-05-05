@@ -17,11 +17,13 @@ required <- c("annot_scan_file", "annot_snp_file", "array_build", "array_name",
               "geno_file", "raw_path")
 optional <- c("annot_scan_fileCol", "annot_scan_nameCol", "annot_snp_nameCol",
               "geno_checkFile", "geno_diagFile", "geno_file_type",
+              "raw_alleleCoding",
               "raw_a1Col", "raw_a2Col", "raw_genoCol",
               "raw_colTotal", "raw_sampleCol", "raw_scanNameInFile", "raw_sepType",
               "raw_skipNum", "raw_snpCol")
 default <- c("file", "Sample.Name", "rsID", "geno_check.RData", "geno_diag.RData",
-             "gds", 10, 11, NA, 19, 2, 1, ",", 11, 1)
+             "gds", "nucleotide",
+             13, 14, NA, 14, NA, 0, ",", 12, 1)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -79,6 +81,7 @@ res <- createDataFile(path = config["raw_path"], filename = ncfile,
                       sep.type=config["raw_sepType"], skip.num=skip.num,
                       col.total=col.total,
                       col.nums=col.nums, scan.name.in.file=scan.name.in.file,
+                      allele.coding=config["raw_alleleCoding"],
                       array.name = config["array_name"],
                       genome.build = config["array_build"],
                       diagnostics.filename=config["geno_diagFile"])
@@ -131,6 +134,7 @@ res <- checkGenotypeFile(path = config["raw_path"], filename = ncfile,
                          col.total=col.total,
                          col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                          check.scan.index=1:nsamp, n.scans.loaded=nsamp,
+                         allele.coding=config["raw_alleleCoding"],
                          diagnostics.filename=config["geno_checkFile"])
 
 ########################################
