@@ -15,7 +15,7 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "geno_file", "plink_prefix")
 optional <- c("annot_scan_nameCol", "annot_snp_nameCol", "out_plink_logfile")
-default <- c("Sample.Name", "alleleA", "alleleB", "rsID", "plink_check.log")
+default <- c("Sample.Name", "rsID", "plink_check.log")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
