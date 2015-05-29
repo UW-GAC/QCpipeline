@@ -31,9 +31,6 @@ checkGdsCombine(genoData, gdsGenoList, snp, snpExcludeList=NULL, verbose=TRUE, b
 \details{
 \code{gdsCombine} combined multiple GDS files into a single file. The component files in \code{genoDataList} are required to have the same scanIDs. All SNPs from the component files are included in the component file.
 }
-\note{
-This function will need to be updated for getGenotypeSelection once it's implemented (instead of reading directly from the gds genotype node).
-}
 \value{
 If given, snpExcludeList should have a subset of the names of \code{gdsGenoList}.
 
