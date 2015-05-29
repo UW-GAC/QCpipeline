@@ -116,7 +116,7 @@ if plink:
         subprocess.call(["cp", prefix+".fam.unr", prefix+".fam"])
         job = "plink_bed2ped"
         arglist = ["--noweb", "--bfile", prefix, "--recode", "--out", prefix]
-        jobid[job] = QCpipeline.submitJob(job, "plink", arglist, options="-b y -j y -cwd", queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, "plink", arglist, qsubOptions="-b y -j y -cwd", queue=qname, email=email)
         holdid.append(jobid['plink_bed2ped'])
 
     job = "plink_check"

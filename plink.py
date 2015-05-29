@@ -60,7 +60,7 @@ jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, e
 
 job = "plink_bed"
 arglist = ["--noweb", "--make-bed", "--file", plinkfile, "--out", plinkfile]
-jobid[job] = QCpipeline.submitJob(job, "plink", arglist, options="-b y -j y -cwd",
+jobid[job] = QCpipeline.submitJob(job, "plink", arglist, qsubOptions="-b y -j y -cwd",
                                   holdid=[jobid["plink_from_geno"]], queue=qname, email=email)
 
 job = "plink_tar"
@@ -68,5 +68,5 @@ job = "plink_tar"
 if path == "":
     path = "."
 arglist = ["-cvz", "--directory", path, "-f", plinkfile+".tar.gz", file+".bed", file+".bim", file+".fam"]
-jobid[job] = QCpipeline.submitJob(job, "tar", arglist, options="-b y -j y -cwd",
+jobid[job] = QCpipeline.submitJob(job, "tar", arglist, qsubOptions="-b y -j y -cwd",
                                   holdid=[jobid["plink_bed"]], queue=qname, email=email)

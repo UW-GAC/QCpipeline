@@ -101,7 +101,7 @@ if waitLD:
 else:
     holdid = None
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, options=optionsMulti)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=optionsMulti)
 
 job = "ibd_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
