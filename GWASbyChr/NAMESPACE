@@ -1,0 +1,36 @@
+import(GWASTools)
+import(methods)
+import(gdsfmt)
+importFrom(QCpipeline, chromToChar)
+importFrom(gtools, mixedsort)
+importFrom(plyr, rbind.fill)
+
+exportClasses(GenotypeDataByChr, AnnotationByChr, AssocResultsByChr)
+
+export(
+    ## Class constructor functions
+    GenotypeDataByChr,
+    AnnotationByChr,
+    AssocResultsByChr,
+    
+    ## Ordinary functions (i.e., not generic)
+    simulateAnnotation,
+    simulateAssocResults,
+    simulateGenotypeFile,
+    simulateImputedGenotypeData
+)
+
+exportMethods(
+    ## methods associated with the generic functions defined in this package
+    getAssocResults,
+    getGenoData,
+    getGenotypeFileName,
+    getGenotypeFromSnpID,
+    getScanID,
+    getScanAnnotation,
+    getSnpAnnotation,
+    getSnpSegmentMap,
+    getValidChromosomes,
+    hasSnpID,
+    lookUpSnps
+)

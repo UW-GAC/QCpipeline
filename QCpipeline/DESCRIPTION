@@ -8,7 +8,7 @@ Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
 Depends: GWASTools
 Imports: gplots, BiocGenerics, Biobase, Biostrings, tools, GWASExactHW,
         rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt, S4Vectors, reshape2 
-Suggests: SRAdb, MSBVAR, GWASdata, BSgenome.Hsapiens.UCSC.hg19,
+Suggests: RUnit, SRAdb, MSBVAR, GWASdata, BSgenome.Hsapiens.UCSC.hg19,
         VariantAnnotation, GenomicFeatures, AnnotationDbi,
         TxDb.Hsapiens.UCSC.hg19.knownGene,
         TxDb.Hsapiens.UCSC.hg18.knownGene

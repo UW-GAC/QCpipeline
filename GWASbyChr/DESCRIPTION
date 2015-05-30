@@ -1,0 +1,19 @@
+Package: GWASbyChr
+Version: 0.1.0
+Type: Package
+Title: Utilities for managing GWAS data in separate files for each chromosome
+Description: Classes and methods to descrive GWAS genotype data, annotation, and association results stored in files by chromosome.
+Author: Stephanie Gogarten, Adrienne Stilp
+Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
+Depends: GWASTools
+Imports: methods, gdsfmt, QCpipeline, gtools, plyr
+Suggests: BiocGenerics, RUnit
+License: Artistic-2.0
+LazyLoad: yes
+Collate: Class-GenotypeDataByChr.R 
+	 Class-AnnotationByChr.R
+	 Class-AssocResultsByChr.R
+  	 lookUpSnps.R
+	 simulateData.R
+	 utils.R
+
