@@ -1,5 +1,5 @@
 Package: GWASbyChr
-Version: 0.1.0
+Version: 0.2.0
 Type: Package
 Title: Utilities for managing GWAS data in separate files for each chromosome
 Description: Classes and methods to descrive GWAS genotype data, annotation, and association results stored in files by chromosome.
@@ -10,9 +10,9 @@ Imports: methods, gdsfmt, QCpipeline, gtools, plyr
 Suggests: BiocGenerics, RUnit
 License: Artistic-2.0
 LazyLoad: yes
-Collate: Class-GenotypeDataByChr.R 
-	 Class-AnnotationByChr.R
+Collate: Class-AnnotationByChr.R
 	 Class-AssocResultsByChr.R
+	 Class-GenotypeDataByChr.R 
   	 lookUpSnps.R
 	 simulateData.R
 	 utils.R

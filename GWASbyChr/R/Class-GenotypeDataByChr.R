@@ -1,24 +1,31 @@
 setClass("GenotypeDataByChr",
          representation(directory = "character",
                         base = "character",
-                        chromSep = "character"),
+                        chromSep = "character",
+                        suffix = "character",
+                        annotation = "AnnotationByChr"),
          prototype(directory = "",
                    base = "",
-                   chromSep="_chr-"))
+                   chromSep="_chr-",
+                   suffix = ".gds"))
 
 
 # assumes gds
-GenotypeDataByChr <- function(directory, base, chromSep, ...) {
+GenotypeDataByChr <- function(directory, base, annotation, chromSep, suffix, ...) {
   if (!file_test("-d", directory)) stop(directory, " is not a directory")
-  # autodetect base?
   if (missing(chromSep)) chromSep <- "_chr-"
+  if (missing(suffix)) suffix <- ".gds"
+  # autodetect base?
   if (missing(base)) {
-    files <- list.files(directory, pattern="*.gds")
+    files <- list.files(directory, pattern=paste0(suffix, "$"))
     # probably not the best way to do this, but..
     base <- unique(matrix(unlist((strsplit(files, chromSep))), ncol=2, byrow=TRUE)[,1])
     if (length(base) > 1) stop("ambiguous base name in directory. provide base.") # maybe this belongs in validity method
   }
-  new("GenotypeDataByChr", directory=directory, base=base, chromSep=chromSep, ...)
+  if (missing(annotation)) {
+    annot <- AnnotationByChr(directory=directory, base=base, chromSep=chromSep, suffix="_snpAnnot.RData")
+  }
+  new("GenotypeDataByChr", directory=directory, base=base, chromSep=chromSep, suffix=suffix, annotation=annot, ...)
 }
 
 # to write -- what does it check?
@@ -41,9 +48,9 @@ setValidity("GenotypeDataByChr",
               if (!file.exists(getSnpSegmentMap(object))) stop("snp segment mapping file does not exist")
               
               # check that all gds files have a snp annotation
-              x <- getValidChromosomes(object)
-              snp.files <- file.path(object@directory, paste(object@base, object@chromSep, x, "_snpAnnot.RData", sep=""))
-              if (!all(file.exists(snp.files))) stop("not all gds files have associated snp annotations.")
+              ## x <- getValidChromosomes(object)
+              ## snp.files <- file.path(object@directory, paste(object@base, object@chromSep, x, "_snpAnnot.RData", sep=""))
+              ## if (!all(file.exists(snp.files))) stop("not all gds files have associated snp annotations.")
               
               # check scan annotation
               #scan.file <- file.path(object@directory, paste(object@base, "_scanAnnot.Rdata", sep=""))
@@ -52,12 +59,13 @@ setValidity("GenotypeDataByChr",
             })
 
 
-setGeneric("getValidChromosomes", function(object, ...) standardGeneric("getValidChromosomes"))
 setMethod("getValidChromosomes",
           signature(object="GenotypeDataByChr"),
           function(object) {
-            files <- list.files(object@directory, pattern="*.gds")
-            chroms <- matrix(unlist(strsplit(sub("[.][^.]*$", "", files), object@chromSep)), ncol=2, byrow=TRUE)[,2]
+            file.pattern <- paste0("^", object@base, object@chromSep, ".+", object@suffix, "$")
+            files <- list.files(object@directory, pattern=file.pattern)
+            chroms <- matrix(unlist(strsplit(sub(paste0(object@suffix, "$"), "", files), object@chromSep)),
+                             ncol=2, byrow=TRUE)[,2]
             mixedsort(chroms)
           })
 
@@ -66,7 +74,7 @@ setGeneric("getGenotypeFileName", function(object, ...) standardGeneric("getGeno
 setMethod("getGenotypeFileName",
           signature(object="GenotypeDataByChr"),
           function(object, chromosome) {
-            tmp <- paste(object@base, object@chromSep, chromosome, ".gds", sep="")
+            tmp <- paste0(object@base, object@chromSep, chromosome, object@suffix)
             file.path(object@directory, tmp)
           })
 
@@ -101,8 +109,7 @@ setMethod("getGenoData",
 setMethod("getScanAnnotation",
           signature(object = "GenotypeDataByChr"),
           function(object) {
-              getobj(file.path(object@directory,
-                               paste(object@base, "_scanAnnot.RData", sep="")))  
+            getobj(file.path(object@directory, paste0(object@base, "_scanAnnot.RData")))  
           })
 
 
@@ -111,10 +118,7 @@ setMethod("getScanAnnotation",
 setMethod("getSnpAnnotation",
           signature(object = "GenotypeDataByChr"),
           function(object, chromosome) {
-            if (!(chromosome %in% getValidChromosomes(object))) stop (paste(chromosome, "is not a valid chromosome"))
-            
-            getobj(file.path(object@directory,
-                             paste(object@base, object@chromSep, chromosome, "_snpAnnot.RData", sep="")))
+            getSnpAnnotation(object@annotation, chromosome)
           })
 
 
@@ -122,7 +126,7 @@ setGeneric("getSnpSegmentMap", function(object, ...) standardGeneric("getSnpSegm
 setMethod("getSnpSegmentMap",
           signature(object="GenotypeDataByChr"),
           function(object) {
-            file.path(object@directory, paste(object@base, "_snp_segment_map.csv", sep=""))
+            file.path(object@directory, paste0(object@base, "_snp_segment_map.csv"))
           })
 
 # getScanID method, which uses the first gds file

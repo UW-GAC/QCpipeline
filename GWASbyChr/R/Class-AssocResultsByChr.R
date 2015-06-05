@@ -1,24 +1,27 @@
 setClass("AssocResultsByChr",
          representation(directory = "character",
                         base = "character",
-                        chromSep = "character"),
+                        chromSep = "character",
+                        suffix = "character"),
          prototype(directory = "",
                    base = "",
-                   chromSep="_chr"))
+                   chromSep="_chr",
+                   suffix = ".RData"))
 
 
-AssocResultsByChr <- function(directory, base, chromSep, ...) {
-  # autodetect base?
+AssocResultsByChr <- function(directory, base, chromSep, suffix, ...) {
   if (missing(chromSep)) chromSep <- "_chr"
+  if (missing(suffix)) suffix <- ".RData"
+  # autodetect base?
   if (missing(base)) {
-    files <- list.files(directory, pattern="assoc.+RData")
-    if (length(files) == 0) files <- list.files(directory, pattern="meta.+RData")
-    if (length(files) == 0) files <- list.files(directory, pattern="RData$")
+    files <- list.files(directory, pattern=paste0("assoc.+", suffix, "$"))
+    if (length(files) == 0) files <- list.files(directory, pattern=paste0("meta.+", suffix, "$"))
+    if (length(files) == 0) files <- list.files(directory, pattern=paste0(suffix, "$"))
     # probably not the best way to do this, but..
     base <- unique(matrix(unlist((strsplit(files, chromSep))), ncol=2, byrow=TRUE)[,1])
     if (length(base) > 1) stop("ambiguous base name in directory. provide base.") # maybe this belongs in validity method
   }
-  new("AssocResultsByChr", directory=directory, base=base, chromSep=chromSep, ...)
+  new("AssocResultsByChr", directory=directory, base=base, chromSep=chromSep, suffix=suffix, ...)
 }
 
 # to write -- what does it check?
@@ -34,7 +37,7 @@ setValidity("AssocResultsByChr",
               if (!file_test("-d", object@directory)) return(paste(object@directory, " does not exist"))
 
               # check that there is at least one RData file
-              file.pattern <- paste0("^", object@base, object@chromSep, ".+RData", sep="")
+              file.pattern <- paste0("^", object@base, object@chromSep, ".+", object@suffix, "$")
               if (length(list.files(object@directory, pattern=file.pattern)) == 0)
                   return(paste(object@directory, " has no .RData files"))
               TRUE
@@ -44,9 +47,10 @@ setValidity("AssocResultsByChr",
 setMethod("getValidChromosomes",
           signature(object="AssocResultsByChr"),
           function(object) {
-            file.pattern <- paste0(object@base, object@chromSep, ".+RData", sep="")
+            file.pattern <- paste0("^", object@base, object@chromSep, ".+", object@suffix, "$")
             files <- list.files(object@directory, pattern=file.pattern)
-            chroms <- matrix(unlist(strsplit(sub("[.][^.]*$", "", files), object@chromSep)), ncol=2, byrow=TRUE)[,2]
+            chroms <- matrix(unlist(strsplit(sub(paste0(object@suffix, "$"), "", files), object@chromSep)),
+                             ncol=2, byrow=TRUE)[,2]
             mixedsort(chroms)
           })
 
@@ -60,7 +64,7 @@ setMethod("getAssocResults",
               
               assoc.list <- lapply(unique(chromosome), function(c) {
                   getobj(file.path(object@directory,
-                                   paste(object@base, object@chromSep, c, ".RData", sep="")))
+                                   paste0(object@base, object@chromSep, c, object@suffix)))
               })
               x <- do.call(rbind, assoc.list)
               

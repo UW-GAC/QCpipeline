@@ -24,11 +24,12 @@
 \section{Constructor}{
   \describe{
     \item{}{
-      \code{AssocResultsByChr(directory, base=NULL)}:
+      \code{AssocResultsByChr(directory, base, chromSep, suffix)}:
       
       \code{directory} is the path to the directory.
       \code{base} is (optionally) the base name. The code will automatically attempt to detect base from the files, assuming the naming conventions are met.
-        
+      \code{chromSep} separates the base from the chromosome string. Default is "_chr".
+      \code{suffix} comes after the chromosome string. Default is ".RData".
 
       The \code{AssocResultsByChr} constructor creates and returns a
       AssocResultsByChr instance that works with the files contained in the directory.

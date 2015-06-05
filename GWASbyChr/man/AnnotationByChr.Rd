@@ -23,11 +23,12 @@
 \section{Constructor}{
   \describe{
     \item{}{
-      \code{AnnotationByChr(directory, base=NULL)}:
+      \code{AnnotationByChr(directory, base, chromSep, suffix)}:
       
       \code{directory} is the path to the directory.
       \code{base} is (optionally) the base name. The code will automatically attempt to detect base from the files, assuming the naming conventions are met.
-        
+      \code{chromSep} separates the base from the chromosome string. Default is "_chr-".
+      \code{suffix} comes after the chromosome string. Default is ".RData".
 
       The \code{AnnotationByChr} constructor creates and returns a
       AnnotationByChr instance that works with the annotation files contained in the directory.

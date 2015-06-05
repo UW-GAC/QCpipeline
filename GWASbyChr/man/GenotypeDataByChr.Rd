@@ -27,19 +27,21 @@
 \description{
   The GenotypeDataByChr class is a wrapper to work with imputed data gds files stored by chromosome.
   The class relies on the underlying directory structure to be set up in specific way.
-  All imputed data sets must have one GDS file per chromosome in one directory, with a naming convention BASE_chr1.gds, BASE_chr2.gds (where BASE can be specified for each directory).
-  If present, the SnpAnnotationDataFrame and ScanAnnotationDataFrame objects in the directory must be named as \code{BASE_chr1_snpAnnot.RData}, \code{BASE_chr2_scanAnnot.RData}, etc.
+  All imputed data sets must have one GDS file per chromosome in one directory, with a naming convention BASE_chr-1.gds, BASE_chr-2.gds (where BASE can be specified for each directory).
+  If present, the SnpAnnotationDataFrame and ScanAnnotationDataFrame objects in the directory must be named as \code{BASE_chr-1_snpAnnot.RData}, \code{BASE_chr-2_scanAnnot.RData}, etc.
 }
 
 
 \section{Constructor}{
   \describe{
     \item{}{
-      \code{GenotypeDataByChr(directory, base=NULL)}:
+      \code{GenotypeDataByChr(directory, base, annotation, chromSep, suffix)}:
       
       \code{directory} is the path to the directory.
       \code{base} is (optionally) the base name. The code will automatically attempt to detect base from the files, assuming the naming conventions are met.
-        
+      \code{annotation} is (optionally) a \code{\link{AnnotationByChr}} object. If it is missing, it will be created assuming "_snpAnnot.RData" files in \code{directory}.
+      \code{chromSep} separates the base from the chromosome string. Default is "_chr-".
+      \code{suffix} comes after the chromosome string. Default is ".gds".
 
       The \code{GenotypeDataByChr} constructor creates and returns a
       GenotypeDataByChr instance that works with the imputed dosage files contained in the directory.
