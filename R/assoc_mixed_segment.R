@@ -103,13 +103,12 @@ impute.geno <- as.logical(config["impute_geno"])
 
 # compute variance component estimates
 out <- assocTestMixedModel(genoData = genoData,
-                           snpStart = index[1],
-                           snpEnd = index[2],
+                           snp.include=ids,
                            cholSigmaInv = VC$cholSigmaInv,
                            outcome = "workingY",
                            covar.vec = covars,
                            test=test_type,
-                           scan.exclude = scan.exclude,
+                           scan.include = scan.include,
                            impute.geno = impute.geno,
                            block.size = block.size)
 
@@ -126,7 +125,8 @@ if (hasVariable(snpAnnot, "oevar") & hasVariable(snpAnnot, "type")){
 # if this is not an autosome, we need to recalculate allele frequencies
 Xchromosome <- chromosome %in% XchromCode(genoData)
 if (Xchromosome){
-  afreq <- getAlleleFrequency(genoData, snpStart=index[1], snpEnd=index[2], scan.exclude=scan.exclude, blockSize=block.size, verbose=TRUE)
+  afreq <- getAlleleFrequency(genoData, snp.include=ids, scan.exclude=scan.exclude, blockSize=block.size, verbose=TRUE)
+  stopifnot(allequal(rownames(afreq), out$snpID))
 } else {
   afreq <- out[, c("MAF", "n")]
 }
@@ -140,13 +140,15 @@ if (config["model_type"] == "logistic"){
   
   # cases
   case.exclude <- union(scan.exclude, scanAnnot$scanID[outcomeVal %in% 0])
-  afreq.case <- getAlleleFrequency(genoData, snpStart=index[1], snpEnd=index[2], scan.exclude=case.exclude, blockSize = block.size)
+  afreq.case <- getAlleleFrequency(genoData, snp.include=ids, scan.exclude=case.exclude, blockSize = block.size)
+  stopifnot(allequal(rownames(afreq.case), out$snpID))
   out$effN.case <- getEffectiveN(afreq.case, oevar=oevar, type=type, Xchromosome=Xchromosome)
   out$n1 <- afreq.case[, "n"]
   
   # controls
   ctrl.exclude <- union(scan.exclude, scanAnnot$scanID[outcomeVal %in% 1])
-  afreq.ctrl <- getAlleleFrequency(genoData, snpStart=index[1], snpEnd=index[2], scan.exclude=ctrl.exclude, blockSize = block.size)
+  afreq.ctrl <- getAlleleFrequency(genoData, snp.include=ids, scan.exclude=ctrl.exclude, blockSize = block.size)
+  stopifnot(allequal(rownames(afreq.ctrl), out$snpID))
   out$effN.ctrl <- getEffectiveN(afreq.ctrl, oevar=oevar, type=type, Xchromosome=Xchromosome)
   out$n0 <- afreq.ctrl[, "n"]
   

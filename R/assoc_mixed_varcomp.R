@@ -82,10 +82,10 @@ model
 # scan.include
 if (!is.na(config["scan_include_file"])) {
   scan.include <- getobj(config["scan_include_file"])
-  scan.exclude <- setdiff(scanAnnot$scanID, scan.include)
+#  scan.exclude <- setdiff(scanAnnot$scanID, scan.include)
 } else {
   scan.include <- NULL
-  scan.exclude <- NULL
+#  scan.exclude <- NULL
 }
 
 
@@ -97,7 +97,7 @@ res <- fitNullMixedModel(scanAnnot = scanAnnot,
                  covMatList = cov.mat,
                  outcome = outcome,
                  covar.vec = covars,
-                 scan.exclude = scan.exclude,
+                 scan.include = scan.include,
                  model=model)
 
 res$VC$converged
