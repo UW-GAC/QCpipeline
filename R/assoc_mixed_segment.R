@@ -31,7 +31,8 @@ required <- c("annot_scan_file", "covars", "covars_as_factor",
               "scan_include_file")
 opt <- c("out_assoc_prefix"="assoc_mixed/study",
          "out_plot_prefix"="assoc_mixed/study",
-         "block_size"=5000)
+         "block_size"=5000, 
+         "annot_snp_file"="illumina_snp_annot_v02.RData")
 optional <- names(opt)
 default <- unname(opt)
 config <- setConfigDefaults(config, required, optional, default)
@@ -39,18 +40,17 @@ print(config)
 
 ## scan annotation
 scanAnnot <- getobj(paste0(config["out_assoc_prefix"], "_scanAnnot.RData"))
-
-# set categorical variables in association models as factor
-if (!is.na(config["covars_as_factor"])) {
-  factors <- unlist(strsplit(config["covars_as_factor"], " ", fixed=TRUE))
-  for (i in factors) {
-    scanAnnot[[i]] <- as.factor(scanAnnot[[i]])
-  }
-}
+# factors are already set
 
 # make geno data
-genoByChr <- GenotypeDataByChr(config["geno_file"])
-genoData <- getGenoData(genoByChr, chromosome=chromosome, snpAnnot=TRUE, scanAnnot=scanAnnot)
+if (file_test("-d", config["geno_file"])){
+  genoByChr <- GenotypeDataByChr(config["geno_file"])
+  genoData <- getGenoData(genoByChr, chromosome=chromosome, snpAnnot=TRUE, scanAnnot=scanAnnot)
+} else {
+  gds <- GdsGenotypeReader(config["geno_file"])
+  snpAnnot <- getobj(config["annot_snp_file"])
+  genoData <- GenotypeData(gds, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
+}
 
 
 # variance components

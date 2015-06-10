@@ -27,15 +27,20 @@ opt <- c("snp_filter_column"=NA,
          "maf.filter.type"="snp.specific",
          "maf.absolute.threshold"=0.02,
          "maf.linear.threshold"=30,
-         "maf.logistic.threshold"=50)
+         "maf.logistic.threshold"=50,
+         "annot_snp_file"=NA)
 optional <- names(opt)
 default <- unname(opt)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 
-genoByChr <- GenotypeDataByChr(config["geno_file"])
-snpAnnot <- getSnpAnnotation(genoByChr, chromosome=chromosome)
+if (file_test("-d", config["geno_file"])){
+  genoByChr <- GenotypeDataByChr(config["geno_file"])
+  snpAnnot <- getSnpAnnotation(genoByChr, chromosome=chromosome)
+} else {
+  snpAnnot <- getobj(config["annot_snp_file"])
+}
 
 # required columns: rsID, alleleA, alleleB
 requiredColumns <- c("position", "alleleA", "alleleB")

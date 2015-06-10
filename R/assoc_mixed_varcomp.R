@@ -37,19 +37,41 @@ print(config)
 scanAnnot <- getobj(config["annot_scan_file"])
 
 # make geno data
-genoByChr <- GenotypeDataByChr(config["geno_file"])
-chr <- getValidChromosomes(genoByChr)[1]
-genoData <- getGenoData(genoByChr, chromosome=chr, snpAnnot=FALSE, scanAnnot=FALSE)
-scanAnnot <- scanAnnot[match(getScanID(genoData), scanAnnot$scanID)]
-close(genoData)
-# this is just for checking - will be needed later
-genoData <- getGenoData(genoByChr, chromosome=chr, snpAnnot=TRUE, scanAnnot=scanAnnot)
-close(genoData)
+if (file_test("-d", config["geno_file"])){
+  genoByChr <- GenotypeDataByChr(config["geno_file"])
+  chr <- getValidChromosomes(genoByChr)[1]
+  genoData <- getGenoData(genoByChr, chromosome=chr, snpAnnot=FALSE, scanAnnot=FALSE)
+  scanAnnot <- scanAnnot[match(getScanID(genoData), scanAnnot$scanID)]
+  close(genoData)
+  # this is just for checking - will be needed later
+  genoData <- getGenoData(genoByChr, chromosome=chr, snpAnnot=TRUE, scanAnnot=scanAnnot)
+  close(genoData)
+} else {
+  gds <- GdsGenotypeReader(config["geno_file"])
+  scanAnnot <- getobj(config["annot_scan_file"])
+  scanAnnot <- scanAnnot[match(getScanID(gds), scanAnnot$scanID),]
+  # just for checking
+  genoData <- GenotypeData(gds, scanAnnot=scanAnnot)
+  close(gds)
+}
+
+
+
+# scan.include
+if (!is.na(config["scan_include_file"])) {
+  scan.include <- getobj(config["scan_include_file"])
+  #  scan.exclude <- setdiff(scanAnnot$scanID, scan.include)
+} else {
+  scan.include <- scanAnnot$scanID
+  #  scan.exclude <- NULL
+}
+
 
 # set categorical variables in association models as factor
 if (!is.na(config["covars_as_factor"])) {
   factors <- unlist(strsplit(config["covars_as_factor"], " ", fixed=TRUE))
   for (i in factors) {
+    scanAnnot[[i]][!(scanAnnot$scanID %in% scan.include)] <- NA
     scanAnnot[[i]] <- as.factor(scanAnnot[[i]])
   }
 }
@@ -78,15 +100,6 @@ if (model.type == "logistic"){
 }
 model
 
-
-# scan.include
-if (!is.na(config["scan_include_file"])) {
-  scan.include <- getobj(config["scan_include_file"])
-#  scan.exclude <- setdiff(scanAnnot$scanID, scan.include)
-} else {
-  scan.include <- NULL
-#  scan.exclude <- NULL
-}
 
 
 # covariance matrices
