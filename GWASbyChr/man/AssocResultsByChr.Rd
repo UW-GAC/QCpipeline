@@ -44,7 +44,7 @@
 
   \describe{
     \item{}{
-      \code{getAssocResults(object, chromosome)}: Returns the data frame associated with \code{object} for a given chromosome.  If \code{chromosome=NULL} (default), returns all results in a single data frame.
+      \code{getAssocResults(object, chromosome, returnColumns=NULL)}: Returns the data frame associated with \code{object} for a given chromosome.  If \code{chromosome=NULL} (default), returns all results in a single data frame. The \code{returnColumns} argument can be used to select columns to return; any columns that appear in the association data frames that intersect with \code{returnColumns} are returned. If \code{returnColumns=NULL}, all columns are returned by default.
     }
 
     \item{}{
@@ -52,11 +52,11 @@
     }
 
     \item{}{
-      \code{lookUpSnps(object, snps=NULL, column="snpID", chromosome=getValidChromosomes(object1), ...)}: Returns a data frame of results associated with \code{object}. If \code{snps=NULL}, results are concatenated into a single data frame from all chromosomes specified by \code{chromosome}. If \code{snps} is not \code{NULL}, then only rows where the entries in \code{column} match \code{snps} are returned. \code{snps}, \code{column} and \code{chromosome} must be named arguments (a requirement of method dispatch).  \code{...} are passed to the \code{getSnpAnnotation} method for \code{AnnotationByChr}.
+      \code{lookUpSnps(object, snps=NULL, column="snpID", chromosome=getValidChromosomes(object1), returnColumns=NULL, ...)}: Returns a data frame of results associated with \code{object}. If \code{snps=NULL}, results are concatenated into a single data frame from all chromosomes specified by \code{chromosome}. If \code{snps} is not \code{NULL}, then only rows where the entries in \code{column} match \code{snps} are returned. \code{snps}, \code{column} and \code{chromosome} must be named arguments (a requirement of method dispatch).  \code{...} are passed to the \code{getSnpAnnotation} method for \code{AnnotationByChr}.
     }
 
     \item{}{
-      \code{lookUpSnps(object1, object2, snps, column="snpID", chromosome=getValidChromosomes(object2), ...)}: \code{object1} is a \code{\link{AnnotationByChr}} object, and \code{object2} is a \code{AssocResultsByChr} object.  
+      \code{lookUpSnps(object1, object2, snps, column="snpID", chromosome=getValidChromosomes(object2), returnColumns=NULL, ...)}: \code{object1} is a \code{\link{AnnotationByChr}} object, and \code{object2} is a \code{AssocResultsByChr} object.  
       Returns a single data frame with columns from both \code{lookUpSnps} for \code{AnnotationByChr} and \code{AssocResultsByChr}.  \code{...} are passed to the \code{getSnpAnnotation} method for \code{AnnotationByChr}.
     }
   }

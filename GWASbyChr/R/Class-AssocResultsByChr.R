@@ -58,15 +58,24 @@ setMethod("getValidChromosomes",
 setGeneric("getAssocResults", function(object, ...) standardGeneric("getAssocResults"))
 setMethod("getAssocResults",
           signature(object = "AssocResultsByChr"),
-          function(object, chromosome=getValidChromosomes(object)) {
+          function(object, chromosome=getValidChromosomes(object), returnColumns=NULL) {
               chk <- setdiff(chromosome, getValidChromosomes(object))
               if (length(chk) > 0) stop (paste(paste(chk, collapse=","), "is not a valid chromosome"))
               
-              assoc.list <- lapply(unique(chromosome), function(c) {
-                  getobj(file.path(object@directory,
-                                   paste0(object@base, object@chromSep, c, object@suffix)))
-              })
+              assoc.list <- list()
+              for (chr in unique(chromosome)){
+                assoc <- getobj(file.path(object@directory,
+                                          paste0(object@base, object@chromSep, chr, object@suffix)))
+                if (!is.null(returnColumns)){
+                  keep <- intersect(c("snpID", returnColumns), names(assoc))
+                  assoc <- assoc[, keep]
+                }
+                
+                assoc.list[[as.character(chr)]] <- assoc
+              }
+              
               x <- do.call(rbind, assoc.list)
+              rownames(x) <- NULL
               
               ## select non-duplicated snpIDs -- necessary for haplotype2 tests
               sel <- any(duplicated(x$snpID))

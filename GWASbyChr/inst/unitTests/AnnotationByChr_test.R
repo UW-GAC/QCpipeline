@@ -19,6 +19,14 @@ test_AnnotationByChr <- function(){
   snpAnnot.chk <- getobj(file.path(directory, paste(prefix, "_chr-", chromosome, ".RData", sep="")))
   checkEquals(snpAnnot, snpAnnot.chk)
 
+  snpAnnot <- getSnpAnnotation(bcAnnot, returnColumns=c("snpID", "snpName"))
+  snpAnnot.chk <- getSnpAnnotation(bcAnnot)
+  checkTrue(setequal(varLabels(snpAnnot), c("snpID", "position", "chromosome", "snpName")))
+  checkEquals(snpAnnot$snpID, snpAnnot.chk$snpID)
+  checkEquals(snpAnnot$position, snpAnnot.chk$position)
+  checkEquals(snpAnnot$chromosome, snpAnnot.chk$chromosome)
+  checkEquals(snpAnnot$snpName, snpAnnot.chk$snpName)
+  
   # read in multiple chromosomes
   chromosome <- sample(getValidChromosomes(bcAnnot), 3)
   chromosome <- as.numeric(chromosome)
@@ -48,8 +56,8 @@ test_AnnotationByChr <- function(){
   checkEquals(annot1$snpID, 1:5)
   
   snp.ids <- snpAnnot$snpID[1:5]
-  annot1 <- lookUpSnps(bcAnnot, snps=snp.ids, extraCols="extra")
-  head(pData(annot1))
+  annot1 <- lookUpSnps(bcAnnot, snps=snp.ids, returnColumns=c("position", "extra"))
+  checkTrue(setequal(varLabels(annot1), c("snpID", "position", "chromosome", "extra")))
   checkEquals(annot1$extra[annot1$snpID %in% snp.ids], snpAnnot$extra[snpAnnot$snpID %in% snp.ids])
 
   # wrong column

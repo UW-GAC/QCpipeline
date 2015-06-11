@@ -43,7 +43,7 @@
 
   \describe{
     \item{}{
-      \code{getSnpAnnotation(object, chromosome)}: Returns the SnpAnnotationDataFrame associated with \code{object} for a given chromosome(s).
+      \code{getSnpAnnotation(object, chromosome, returnColumns=NULL)}: Returns the SnpAnnotationDataFrame associated with \code{object} for a given chromosome(s). The \code{returnColumns} argument can be used to select columns to return; any columns that appear in the annotation that intersect with \code{returnC olumns} are returned.  If \code{returnColumns=NULL}, all columns are returned by default.
     }
 
     \item{}{
@@ -51,7 +51,7 @@
     }
 
     \item{}{
-      \code{lookUpSnps(object, snps=NULL, column="snpID", chromosome=getValidChromosomes(object), extraCols=NULL, ...)}: Returns a SnpAnnotationDataFrame associated with \code{object}. If \code{snps=NULL}, all rows are returned from the SNP annotations for chromosomes specified with \code{chromosome}. If \code{snps=NULL}, only rows where \code{snps} matches the entries in \code{column} are returned. Specify \code{chromosome} to restrict the search to a subset of chromosomes.  \code{snps}, \code{column} and \code{chromosome} must be named arguments (a requirement of method dispatch). \code{...} are passed to \code{\link{getSnpAnnotation}}.
+      \code{lookUpSnps(object, snps=NULL, column="snpID", chromosome=getValidChromosomes(object), returnColumns=NULL, ...)}: Returns a SnpAnnotationDataFrame associated with \code{object}. If \code{snps=NULL}, all rows are returned from the SNP annotations for chromosomes specified with \code{chromosome}. If \code{snps=NULL}, only rows where \code{snps} matches the entries in \code{column} are returned. Specify \code{chromosome} to restrict the search to a subset of chromosomes.  \code{snps}, \code{column} and \code{chromosome} must be named arguments (a requirement of method dispatch). \code{...} are passed to \code{\link{getSnpAnnotation}}.
     }
   }
 }

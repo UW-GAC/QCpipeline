@@ -2,25 +2,24 @@
 setGeneric("lookUpSnps", function(object1, object2, ...) standardGeneric("lookUpSnps"))
 setMethod("lookUpSnps",
           signature(object1 = "AnnotationByChr", object2="missing"),
-          function(object1, object2, snps=NULL, column="snpID", chromosome=getValidChromosomes(object1), extraCols=NULL, ...) {
+          function(object1, object2, snps=NULL, column="snpID", chromosome=getValidChromosomes(object1), returnColumns=NULL, ...) {
             
             ## add option to look up by multiple columns?  (chromosome, position)
-            
-            # for memory considerations, loop over chromosomes here even though getSnpAnnotation can do it
+            # for memory considerations, loop over chromosomes even though getSnpAnnotation can do it
             annot.list <- list()
             for (c in unique(chromosome)){
-              annot <- getSnpAnnotation(object1, c, ...)
-              cols <- intersect(c("snpID", "snpName", "chromosome", "position", "alleleA", "alleleB", "type", "rsID", "dataset", "composite.filter", "oevar", extraCols), varLabels(annot))
+              if (!is.null(returnColumns)) returnColumns <- union(column, returnColumns)
+              annot <- getSnpAnnotation(object1, c, returnColumns=returnColumns, ...)
               
               if (!is.null(snps)){
                 index <- annot[[column]] %in% snps
               } else {
                 index <- 1:nrow(annot)
               }
-              annot.list[[c]] <- pData(annot)[index, cols]
+              annot.list[[c]] <- pData(annot)[index, ]
             }
             
-            meta <- varMetadata(annot)[cols, , drop=FALSE]
+            meta <- varMetadata(annot)[varLabels(annot), , drop=FALSE]
             
             annot <- do.call(rbind, annot.list)
             
@@ -36,11 +35,12 @@ setMethod("lookUpSnps",
 
 setMethod("lookUpSnps",
           signature(object1 = "AssocResultsByChr", object2 = "missing"),
-          function(object1, snps=NULL, column="snpID", chromosome=getValidChromosomes(object1)) {
+          function(object1, snps=NULL, column="snpID", chromosome=getValidChromosomes(object1), returnColumns=NULL) {
             
             assoc.list <- list()
             for (c in unique(chromosome)){
-              assoc <- getAssocResults(object1, c)
+              if (!is.null(returnColumns)) returnColumns <- union(column, returnColumns)
+              assoc <- getAssocResults(object1, c, returnColumns=returnColumns)
               if (!is.null(snps)) {
                 index <- assoc[[column]] %in% snps
               } else {
@@ -55,12 +55,12 @@ setMethod("lookUpSnps",
 
 setMethod("lookUpSnps",
           signature(object = "AnnotationByChr", object2 = "AssocResultsByChr"),
-          function(object1, object2, snps=NULL, column="snpID", chromosome=getValidChromosomes(object2), ...) {
-            
-            annot <- lookUpSnps(object1, snps=snps, column=column, chromosome=chromosome, ...)
+          function(object1, object2, snps=NULL, column="snpID", chromosome=getValidChromosomes(object2), returnColumns=NULL, ...) {
+              
+            annot <- lookUpSnps(object1, snps=snps, column=column, chromosome=chromosome, returnColumns=returnColumns, ...)
             annot <- pData(annot)
             
-            assoc <- lookUpSnps(object2, snps=annot$snpID, column="snpID", chromosome=unique(annot$chromosome))
+            assoc <- lookUpSnps(object2, snps=annot$snpID, column="snpID", chromosome=unique(annot$chromosome), returnColumns=returnColumns)
             
             annot$chromosome <- chromToChar(annot$chromosome)
             

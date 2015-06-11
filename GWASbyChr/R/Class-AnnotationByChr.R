@@ -58,13 +58,20 @@ setMethod("getValidChromosomes",
 # returns the snp annotation for the specified chromosome
 setMethod("getSnpAnnotation",
           signature(object = "AnnotationByChr"),
-          function(object, chromosome=getValidChromosomes(object)) {
+          function(object, chromosome=getValidChromosomes(object), returnColumns=NULL) {
             if (!all(chromosome %in% getValidChromosomes(object))) stop (paste(chromosome, "is not a valid chromosome"))
             
-            snpAnnot.list <- lapply(unique(chromosome), function(c) {
-                getobj(file.path(object@directory,
-                                 paste0(object@base, object@chromSep, c, object@suffix)))
-            })
+            snpAnnot.list <- list()
+            for (chr in unique(chromosome)){
+              snpAnnot <- getobj(file.path(object@directory,
+                                           paste0(object@base, object@chromSep, chr, object@suffix)))
+              if (!is.null(returnColumns)) {
+                keep <- intersect(c("snpID", "chromosome", "position", returnColumns), varLabels(snpAnnot))
+                snpAnnot <- snpAnnot[, keep]
+              }
+              snpAnnot.list[[as.character(chr)]] <- snpAnnot
+            }
+
             snp.list <- lapply(snpAnnot.list, pData)
             meta.list <- lapply(snpAnnot.list, varMetadata)
             

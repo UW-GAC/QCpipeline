@@ -23,12 +23,20 @@ test_AssocResultsByChr <- function(){
   chromosome <- sample(getValidChromosomes(bcAssoc), 2)
   assoc <- getAssocResults(bcAssoc, chromosome)
   assoc.chk <- lapply(chromosome, function(x) getobj(file.path(directory, paste(prefix, "_chr", x, ".RData", sep=""))))
-  checkEquals(assoc, do.call(rbind, assoc.chk))
+  assoc.chk <- do.call(rbind, assoc.chk)
+  rownames(assoc.chk) <- NULL
+  checkEquals(assoc, assoc.chk)
 
+  assoc <- getAssocResults(bcAssoc, chromosome, returnColumns=c("effN"))
+  checkTrue(setequal(names(assoc), c("snpID", "effN")))
+  checkEquals(assoc$snpID, assoc.chk$snpID)
+  checkEquals(assoc$effN, assoc.chk$effN)
+  
   # check all chromosomes
   assoc <- getAssocResults(bcAssoc)
   checkEquals(length(unique(assoc$chromosome)), length(getValidChromosomes(bcAssoc)))
 
+  
   # check X
   chromosome <- 23
   assoc <- getAssocResults(bcAssoc, chromosome)
@@ -57,8 +65,8 @@ test_AssocResultsByChr <- function(){
   assoc <- lookUpSnps(bcAnnot, bcAssoc, snps=paste0("rs", snp.ids), column="rsID")
   checkEquals(assoc$snpID, snp.ids)
   # add an extra column
-  assoc <- lookUpSnps(bcAnnot, bcAssoc, snps=paste0("rs", snp.ids), column="rsID", extraCols="extra")
-  checkTrue("extra" %in% names(assoc))
+  assoc <- lookUpSnps(bcAnnot, bcAssoc, snps=paste0("rs", snp.ids), column="rsID", returnColumns=c("snpID", "pval", "extra"))
+  checkTrue(setequal(names(assoc), c("snpID", "chromosome", "position", "extra", "pval", "rsID")))
   assoc <- lookUpSnps(bcAnnot, bcAssoc, snps=paste0("rs", snp.ids), column="rsID", chromosome=1)
   checkEquals(assoc$snpID, 1:5)
   
