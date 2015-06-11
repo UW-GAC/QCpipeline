@@ -53,7 +53,7 @@ win <- as.numeric(config["ld_win_size"]) * 1e6
 
 gdsobj <- snpgdsOpen(config["gds_geno_file"])
 snpset <- snpgdsLDpruning(gdsobj, sample.id=scan.ids, snp.id=snp.ids,
-                          autosome.only=TRUE, maf=maf, missing.rate=0.05,
+                          autosome.only=TRUE, maf=maf, missing.rate=0.02,
                           method="corr", slide.max.bp=win, ld.threshold=r, 
                           num.thread=nThreads)
 snpgdsClose(gdsobj)
