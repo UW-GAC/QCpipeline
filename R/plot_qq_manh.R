@@ -36,9 +36,9 @@ config <- readConfig(args[1])
 required <- c("model_type", "annot_scan_file", "geno_file", "covars_as_factor")
 optional <- c("ivar", "plot_chroms", "out_plot_prefix", "signif_line", "maf.filter.type",
               "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold",
-              "out_assoc_prefix", "scan_exclude",
+              "maf.survival.threshold", "out_assoc_prefix", "scan_exclude",
               "assoc_type")
-default <- c(NA, NA, "assoc", 5e-8, "snp.specific", 0.02, 30, 50, "assoc", NA, "glm")
+default <- c(NA, NA, "assoc", 5e-8, "snp.specific", 0.02, 30, 50, 75, "assoc", NA, "glm")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -46,7 +46,7 @@ print(config)
 (pathprefix <- config["out_assoc_prefix"])
 (qqfname <- config["out_plot_prefix"])
 (model.type <- config["model_type"])
-stopifnot(all(model.type %in% c("logistic", "linear")))
+stopifnot(all(model.type %in% c("logistic", "linear", "survival")))
 if (!is.na(config["plot_chroms"])) {
     ## process plot_chroms - works with e.g., "1 2 3 5:10"
     plotchroms <- sort(unique(unlist(lapply(unlist(strsplit(config["plot_chroms"], " ")),
@@ -70,7 +70,8 @@ if (!is.na(config["plot_chroms"])) {
 
 maf.thresh <- switch(model.type,
                      linear=config["maf.linear.threshold"],
-                     logistic=config["maf.logistic.threshold"])
+                     logistic=config["maf.logistic.threshold"],
+                     survival=as.numeric(config["maf.survival.threshold"]))
 ##maf.text <- switch(config["maf.filter.type"],
 ##                   absolute=paste("MAF >", config["maf.absolute.threshold"]),
 ##                   snp.specific=paste("2*MAF*(1-MAF)*N >", maf.thresh))
@@ -84,7 +85,8 @@ if (config["maf.filter.type"] == "absolute") {
 } else if (config["maf.filter.type"] == "snp.specific") {
     N <- switch(model.type,
                 linear=max(combined$n, na.rm=TRUE),
-                logistic=max( pmin(combined$n0, combined$n1), na.rm=TRUE))
+                logistic=max( pmin(combined$n0, combined$n1), na.rm=TRUE),
+                survival=combined$n.events)
     
     maf <- quadSolveMAF(as.numeric(maf.thresh), N)
     mafhi.text <- paste("2*MAF*(1-MAF)*N >", maf.thresh)
@@ -112,7 +114,7 @@ if (!is.na(config["ivar"])) {
     ge.df <- ifelse(ivar %in% factors, nlevels(as.factor(scanAnnot[[ivar]])) - 1, 1)
 }
 
-for (type in c("LR", "Wald", "GxE", "Joint", "Score")) { 
+for (type in c("LR", "Wald", "GxE", "Joint", "Score", "z")) { 
     varp <- paste(type, "pval", sep=".")    
     varstat <- paste(type, "Stat", sep=".")
     
@@ -135,11 +137,12 @@ for (type in c("LR", "Wald", "GxE", "Joint", "Score")) {
     
     ## The wald.stat and lr.stat have 1 degree of freeom
     ## if we were plotting joint p-values from a model with interactions, it would be higher (2 or more)
-    df <- switch(type, Wald=1, LR=1, GxE=ge.df, Joint=ge.df+1, Score=1)
+    df <- switch(type, Wald=1, LR=1, GxE=ge.df, Joint=ge.df+1, Score=1, z=1)
     
     ## QQ plots
     outfile <- paste0(qqfname, "_qq_", type, ".png")
-    qqPlotPng(assoc$pval, stat=assoc[[varstat]], df=df, filters, outfile)
+    if (type == "z") stat <- (assoc[[varstat]])^2 else stat <- assoc[[varstat]]
+    qqPlotPng(assoc$pval, stat=stat, df=df, filters, outfile)
     
     ## Manhattan plots
     outfile <- paste0(qqfname, "_manh_", type, ".png")

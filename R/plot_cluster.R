@@ -39,9 +39,8 @@ fname <- paste0(pathprefix, "_combined_qual_filt.RData")
 combined <- getobj(fname)
 combined <- combined[combined$composite.filter,]
 
-varp <- "LR.pval"
-## no LR test for models with interactions
-if (!(varp %in% names(combined))) varp <- "Wald.pval"
+# select pvalue to use for plots
+varp <- intersect(names(combined), paste0(c("LR", "Wald", "z"), ".pval"))[1]
 
 combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
 snp.intid <- combined.intid[1:27,]

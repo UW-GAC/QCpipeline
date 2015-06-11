@@ -21,8 +21,8 @@ end <- as.integer(args[3])
 required <- c("annot_snp_file", "model_type")
 optional <- c("annot_snp_filtCol", "annot_snp_rsIDCol", "maf.filter.type",
               "maf.absolute.threshold", "maf.linear.threshold", "maf.logistic.threshold",
-              "out_assoc_prefix")
-default <- c("quality.filter", "rsID", "snp.specific", 0.02, 30, 50, "assoc")
+              "maf.survival.threshold", "out_assoc_prefix")
+default <- c("quality.filter", "rsID", "snp.specific", 0.02, 30, 50, 75, "assoc")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -57,13 +57,15 @@ combined$composite.filter <- getVariable(snpAnnot, config["annot_snp_filtCol"], 
 ## MAF filter
 maf.thresh <- switch(config["model_type"],
                      linear=as.numeric(config["maf.linear.threshold"]),
-                     logistic=as.numeric(config["maf.logistic.threshold"]))
+                     logistic=as.numeric(config["maf.logistic.threshold"]),
+                     survival=as.numeric(config["maf.survival.threshold"]))
 
 ## snp-specific filtering for logistic is calculated the number of cases or controls, whichever is smaller
 ## for linear it is all samples
 N <- switch(config["model_type"],
             linear=combined$n,
-            logistic=pmin(combined$n0, combined$n1))
+            logistic=pmin(combined$n0, combined$n1),
+            survival=combined$n.events)
 
 maf.filt <- switch(config["maf.filter.type"],
                    absolute=(!is.na(combined$MAF) &
