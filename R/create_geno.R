@@ -1,6 +1,6 @@
 ##########
 # Genotype netCDF file
-# Usage: R --args config.file <test> < create_geno.R
+# Usage: R --args config.file <test> <nbatches> <batch> < create_geno.R
 ##########
 
 library(GWASTools)
@@ -28,12 +28,27 @@ config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 scanAnnot <- getobj(config["annot_scan_file"])
+ncfile <- config["geno_file"]
+diagfile <- config["geno_diagFile"]
+checkfile <- config["geno_checkFile"]
 
-# check for test
+# check for test or batches
 if (length(args) > 1) {
   if ((args[2]) == "test") {
     message("testing first 5 scans")
     scanAnnot <- scanAnnot[1:5,] # testing
+  } else {
+    nbatches <- as.integer(args[2])
+    batch <- as.integer(args[3])
+    stopifnot(batch <= nbatches)
+    nsamp <- nrow(scanAnnot)
+    n.per.batch <- ceiling(nsamp/nbatches)
+    start <- n.per.batch*(batch-1) + 1
+    end <- min(n.per.batch*batch, nsamp)
+    scanAnnot <- scanAnnot[start:end,]
+    ncfile <- paste0("batch", batch, ".", ncfile)
+    diagfile <- paste0("batch", batch, ".", diagfile)
+    checkfile <- paste0("batch", batch, ".", checkfile)
   }
 }
 nsamp <- nrow(scanAnnot)
@@ -42,8 +57,6 @@ nsamp <- nrow(scanAnnot)
 ##########
 # Add data to ncdf
 ##########
-ncfile <- config["geno_file"]
-
 (snpAnnot <- getobj(config["annot_snp_file"]))
 snp.cols <- intersect(c("snpID", config["annot_snp_nameCol"], "chromosome", "position", 
                         "alleleA", "alleleB"),
@@ -84,7 +97,7 @@ res <- createDataFile(path = config["raw_path"], filename = ncfile,
                       allele.coding=config["raw_alleleCoding"],
                       array.name = config["array_name"],
                       genome.build = config["array_build"],
-                      diagnostics.filename=config["geno_diagFile"])
+                      diagnostics.filename=diagfile)
 
 ########################################
 # MANUAL REVIEW - DIAGNOSTICS
@@ -113,11 +126,11 @@ data <- GenotypeData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
 scanID <- getScanID(data)
 range(scanID)
 
-n <- nsamp-4   # number of samples minus 4 to get last 5 samples
-geno <- getGenotype(data, snp=c(1,-1), scan=c(n,5))
+n <- nsamp-1   # number of samples minus 1 to get last 2 samples
+geno <- getGenotype(data, snp=c(1,-1), scan=c(n,2))
 dim(geno) #snp by sample
 nsnp <- nrow(snpAnnot)
-stopifnot(dim(geno) == c(nsnp, 5))
+stopifnot(dim(geno) == c(nsnp, 2))
 table(geno[,1], useNA="ifany")
 geno[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
 geno[(nsnp-4):nsnp,] # last 5 snps
@@ -135,7 +148,7 @@ res <- checkGenotypeFile(path = config["raw_path"], filename = ncfile,
                          col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                          check.scan.index=1:nsamp, n.scans.loaded=nsamp,
                          allele.coding=config["raw_alleleCoding"],
-                         diagnostics.filename=config["geno_checkFile"])
+                         diagnostics.filename=checkfile)
 
 ########################################
 # MANUAL REVIEW - DIAGNOSTICS

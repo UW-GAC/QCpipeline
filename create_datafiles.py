@@ -67,6 +67,8 @@ parser.add_option("-t", "--test", dest="test",
 parser.add_option("-o", "--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
+parser.add_option("-b", "--batches", dest="batches", default=None, 
+                  help="create GDS in this many batches and then combine")
 parser.add_option("--checkPlink", dest="plink",
                   action="store_true", default=False,
                   help="check PLINK file")
@@ -81,6 +83,7 @@ email = options.email
 test = options.test
 overwrite = options.overwrite
 qname = options.qname
+nbatch = options.batches
 plink = options.plink
 
 sys.path.append(pipeline)
@@ -99,14 +102,27 @@ if not overwrite:
             sys.exit(file + " already exists; use -o flag to overwrite")
 
 driver = os.path.join(pipeline, "runRscript.sh")
+driver_array = os.path.join(pipeline, "runRscript_array.sh")
 
 jobid = dict()
-for job in ["create_geno", "create_xy", "create_bl"]:
+for type in ["geno", "xy", "bl"]:
+    job = "create_" + type
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
-    
+
+    if nbatch is None:
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
+    else:
+        arrayRange = "1:" + nbatch
+        jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config, nbatch], queue=qname, email=email, arrayRange=arrayRange)
+        holdid = [jobid[job].split(".")[0]]      
+        rscript = os.path.join(pipeline, "R", "create_from_batches.R")
+        jobid[job + "_combine"] = QCpipeline.submitJob(job + "_combine", driver, [rscript, config, nbatch, type], holdid=holdid, queue=qname, email=email)
+        
 if plink:
-    holdid = [jobid['create_geno']]
+    if nbatch is None:
+        holdid = [jobid['create_geno']]
+    else:
+        holdid = [jobid['create_geno_combine']]
 
     # convert bed to ped
     prefix = configdict['plink_prefix']

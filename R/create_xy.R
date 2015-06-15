@@ -1,6 +1,6 @@
 ##########
 # XY netCDF file
-# Usage: R --args config.file <test> < create_xy.R
+# Usage: R --args config.file <test> <nbatches> <batch> < create_xy.R
 ##########
 
 library(GWASTools)
@@ -28,12 +28,27 @@ print(config)
 getqual <- !is.na(config["raw_qCol"])
 
 scanAnnot <- getobj(config["annot_scan_file"])
+ncfile <- config["xy_file"]
+diagfile <- config["xy_diagFile"]
+checkfile <- config["xy_checkFile"]
 
 # check for test
 if (length(args) > 1) {
   if ((args[2]) == "test") {
     message("testing first 5 scans")
     scanAnnot <- scanAnnot[1:5,] # testing
+  } else {
+    nbatches <- as.integer(args[2])
+    batch <- as.integer(args[3])
+    stopifnot(batch <= nbatches)
+    nsamp <- nrow(scanAnnot)
+    n.per.batch <- ceiling(nsamp/nbatches)
+    start <- n.per.batch*(batch-1) + 1
+    end <- min(n.per.batch*batch, nsamp)
+    scanAnnot <- scanAnnot[start:end,]
+    ncfile <- paste0("batch", batch, ".", ncfile)
+    diagfile <- paste0("batch", batch, ".", diagfile)
+    checkfile <- paste0("batch", batch, ".", checkfile)
   }
 }
 nsamp <- nrow(scanAnnot)
@@ -42,7 +57,6 @@ nsamp <- nrow(scanAnnot)
 ##########
 # Add data to ncdf
 ##########
-ncfile <- config["xy_file"]
 vars <- c("X","Y")
 if (getqual) vars <- c("quality", vars)
 
@@ -77,7 +91,7 @@ res <- createDataFile(path = config["raw_path"], filename = ncfile,
                       col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                       array.name = config["array_name"],
                       genome.build = config["array_build"],
-                      diagnostics.filename=config["xy_diagFile"])
+                      diagnostics.filename=diagfile)
 
 ########################################
 # MANUAL REVIEW - DIAGNOSTICS
@@ -109,28 +123,28 @@ data <- IntensityData(nc, snpAnnot=snpAnnot, scanAnnot=scanAnnot)
 scanID <- getScanID(data)
 range(scanID)
 
-n <- nsamp-4   # number of samples minus 4 to get last 5 samples
+n <- nsamp-1   # number of samples minus 1 to get last 2 samples
 
 if (getqual) {
-  q <- getQuality(data, snp=c(1,-1), scan=c(n,5))
+  q <- getQuality(data, snp=c(1,-1), scan=c(n,2))
   dim(q)
   nsnp <- nrow(snpAnnot)
-  stopifnot(dim(q) == c(nsnp, 5))
+  stopifnot(dim(q) == c(nsnp, 2))
   q[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
   q[(nsnp-4):nsnp,] # last 5 snps
 }
 
-x <- getX(data, snp=c(1,-1), scan=c(n,5))
+x <- getX(data, snp=c(1,-1), scan=c(n,2))
 dim(x)
 nsnp <- nrow(snpAnnot)
-stopifnot(dim(x) == c(nsnp, 5))
+stopifnot(dim(x) == c(nsnp, 2))
 x[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
 x[(nsnp-4):nsnp,] # last 5 snps
 
-y <- getY(data, snp=c(1,-1), scan=c(n,5))
+y <- getY(data, snp=c(1,-1), scan=c(n,2))
 dim(y)
 nsnp <- nrow(snpAnnot)
-stopifnot(dim(y) == c(nsnp, 5))
+stopifnot(dim(y) == c(nsnp, 2))
 y[round(nsnp/2):(round(nsnp/2)+10),] # middle 10 snps
 y[(nsnp-4):nsnp,] # last 5 snps
 close(data)
@@ -146,7 +160,7 @@ res <- checkIntensityFile(path = config["raw_path"], filename = ncfile,
                           col.total=col.total,
                           col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                           check.scan.index=1:nsamp, n.scans.loaded=nsamp,
-                          diagnostics.filename=config["xy_checkFile"])
+                          diagnostics.filename=checkfile)
 
 ########################################
 # MANUAL REVIEW - DIAGNOSTICS
