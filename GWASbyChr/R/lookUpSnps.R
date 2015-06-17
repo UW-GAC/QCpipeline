@@ -21,8 +21,10 @@ setMethod("lookUpSnps",
             
             meta <- varMetadata(annot)[varLabels(annot), , drop=FALSE]
             
-            annot <- do.call(rbind, annot.list)
+            annot <- do.call(rbind.fill, annot.list)
             
+            meta <- meta[match(names(annot), rownames(meta)), , drop=FALSE]
+
             if (nrow(annot) > 0) {
                 row.names(annot) <- 1:nrow(annot)
             } else {
