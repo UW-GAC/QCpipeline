@@ -11,6 +11,7 @@
 ## Updated Sep 7, 2014 to fix bugs/enhance indels.vcfout feature
 ## Updated Oct 14, 2014 to report missing columns early on in script (S Nelson)
 ## Updated Oct 24, 2014 better message about the number of indels with chr0 chrMT pos0
+## Updated Jun 18, 2015 handle NA in Refstrand column of input, enhance indels.vcfout feature 
 ##
 ################################# CONTENT
 ## Example allele mappings table:
@@ -476,6 +477,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 				
 			### make vcf file ###
 			if (indels.vcfout) {
+				a$var.original    = a$var
 				a$sourceseq.start = sourceseq.start
 				a$sourceseq.end   = sourceseq.end
 				
@@ -483,6 +485,11 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 				# (run code twice using for loop (below), unless break at bottom of loop)
 				if (print.plus) { # is there a RefStrand column ? 
 					a$shouldflip = xor(a$strand.diff, indels.dat$RefStrand == "-")
+
+					# ensure shouldflip is not NA
+					# (strand.diff could be NA, RefStrand could be NA)
+					a$shouldflip = ifelse(is.na(a$shouldflip), FALSE, a$shouldflip)
+
 				} else {
 					a$shouldflip = FALSE
 				}
@@ -510,7 +517,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 					# gather more info per indel
 					# seq1      var   seq2
 					# A.....A   TT    G.....G
-					a$var  = ifelse(a$shouldflip, a$var.revcomp, a$var)
+					a$var  = ifelse(a$shouldflip, a$var.revcomp, a$var.original)
 					a$seq1 = ifelse(a$shouldflip, as.character(reverseComplement(DNAStringSet(a$sourceseq.end))),   a$sourceseq.start)
 					a$seq2 = ifelse(a$shouldflip, as.character(reverseComplement(DNAStringSet(a$sourceseq.start))), a$sourceseq.end)
 					
@@ -801,6 +808,8 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
       ## where RefStrand="+", same as DESIGN alleles
       ## where RefStrand="-", reverse complement of DESIGN alleles
 
+	## if RefStrand is NA, plus alleles will be NA
+	
       snp.dat$plus.A[is.element(snp.dat$RefStrand,"+")] <- snp.dat$design.A[is.element(snp.dat$RefStrand,"+")]
       snp.dat$plus.B[is.element(snp.dat$RefStrand,"+")] <- snp.dat$design.B[is.element(snp.dat$RefStrand,"+")]
 
