@@ -34,7 +34,7 @@ def readConfig(file):
     return config
 
 
-def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, qsubOptions="",
+def submitJob(job, cmd, args, queue="gcc.q", holdid=None, holdid_array=None, email=None, qsubOptions="",
               arrayRange=None, verbose=True):
     """Sumbit a pipeline job.
 
@@ -47,6 +47,7 @@ def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, qsubOption
     args - list of arguments to cmd
     queue - compute cluster queue to submit job into
     holdid - list of job ids that must be complete before this job is run
+    holdid_array - list of job ids whose sub array jobs must be complete before this job is run
     email - email address to notify when job is complete
     qsubOptions - additional options to pass to qsub
     arrayRange - specified, range of array jobs to pass to qsub (ie 1-23)
@@ -67,6 +68,16 @@ def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, qsubOption
         holdStr = "-hold_jid " + ",".join(holdid)
     else:
         holdStr = ""
+    
+    
+    # hold on array jobs (by submitted segment)
+    if holdid_array is not None and holdid_array != []:
+        if isinstance(holdid_array, str):
+            holdid_array = [holdid_array]
+        holdStr_array = "-hold_jid_ad " + ",".join(holdid_array)
+    else:
+        holdStr_array = ""
+
 
     if email is not None:
         emailStr = "-m e -M " + email
@@ -80,7 +91,7 @@ def submitJob(job, cmd, args, queue="gcc.q", holdid=None, email=None, qsubOption
         
     argStr = " ".join(args)
 
-    qsub = "qsub -S /bin/bash %s %s %s %s %s %s %s %s" % (qsubOptions, nameStr, arrayStr, holdStr, queueStr, emailStr, cmd, argStr)
+    qsub = "qsub -S /bin/bash %s %s %s %s %s %s %s %s %s" % (qsubOptions, nameStr, arrayStr, holdStr, holdStr_array, queueStr, emailStr, cmd, argStr)
     
     #print qsub # this is helpful to uncomment for occasional debugging
     
