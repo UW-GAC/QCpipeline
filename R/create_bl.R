@@ -164,8 +164,8 @@ table(res$chk, useNA="ifany")
 stopifnot(all(res$chk == 1))
 
 table(res$inten.chk$BAlleleFreq, useNA="ifany")
-stopifnot(all(res$inten.chk$ballelefreq == 1))
+stopifnot(all(res$inten.chk$BAlleleFreq == 1))
 
 table(res$inten.chk$LogRRatio, useNA="ifany")
-stopifnot(all(res$inten.chk$logrratio == 1))
+stopifnot(all(res$inten.chk$LogRRatio == 1))
 

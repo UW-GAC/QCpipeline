@@ -186,8 +186,8 @@ if (getqual) {
 }
 
 table(res$inten.chk$X, useNA="ifany")
-stopifnot(all(res$inten.chk$x == 1))
+stopifnot(all(res$inten.chk$X == 1))
 
 table(res$inten.chk$Y, useNA="ifany")
-stopifnot(all(res$inten.chk$y == 1))
+stopifnot(all(res$inten.chk$Y == 1))
 

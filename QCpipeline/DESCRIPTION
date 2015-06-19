@@ -1,5 +1,5 @@
 Package: QCpipeline
-Version: 0.9.8
+Version: 0.9.9
 Type: Package
 Title: Utilities for the QC pipeline
 Description: Configuration and plotting code
@@ -7,7 +7,8 @@ Author: Stephanie Gogarten, Cathy Laurie, Sarah Nelson, Jess Shen, Adrienne Stil
 Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
 Depends: GWASTools
 Imports: gplots, BiocGenerics, Biobase, Biostrings, tools, GWASExactHW,
-        rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt, S4Vectors, reshape2 
+        rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt, S4Vectors, reshape2,
+	grid 
 Suggests: RUnit, SRAdb, MSBVAR, GWASdata, BSgenome.Hsapiens.UCSC.hg19,
         VariantAnnotation, GenomicFeatures, AnnotationDbi,
         TxDb.Hsapiens.UCSC.hg19.knownGene,
