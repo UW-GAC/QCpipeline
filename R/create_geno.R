@@ -32,6 +32,10 @@ ncfile <- config["geno_file"]
 diagfile <- config["geno_diagFile"]
 checkfile <- config["geno_checkFile"]
 
+batchfile <- function(x, batch) {
+    file.path(dirname(x), paste0("batch", batch, ".", basename(x)))
+}
+
 # check for test or batches
 if (length(args) > 1) {
   if ((args[2]) == "test") {
@@ -46,9 +50,9 @@ if (length(args) > 1) {
     start <- n.per.batch*(batch-1) + 1
     end <- min(n.per.batch*batch, nsamp)
     scanAnnot <- scanAnnot[start:end,]
-    ncfile <- paste0("batch", batch, ".", ncfile)
-    diagfile <- paste0("batch", batch, ".", diagfile)
-    checkfile <- paste0("batch", batch, ".", checkfile)
+    ncfile <- batchfile(ncfile, batch)
+    diagfile <- batchfile(diagfile, batch)
+    checkfile <- batchfile(checkfile, batch)
   }
 }
 nsamp <- nrow(scanAnnot)

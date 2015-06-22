@@ -25,9 +25,13 @@ nbatches <- as.integer(args[2])
 type <- args[3]
 stopifnot(type %in% c("geno", "xy", "bl"))
 
+batchfile <- function(x, batch) {
+    file.path(dirname(x), paste0("batch", batch, ".", basename(x)))
+}
+
 ## select files based on type
 filename <- function(type, batch) {
-    paste0("batch", batch, ".", config[paste0(type, "_file")])
+    batchfile(config[paste0(type, "_file")], batch)
 }
 
 ## open first file
