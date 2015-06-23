@@ -353,12 +353,12 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
   scoreD = scoreI = scoreD.old = scoreI.old = hg19D.old = hg19I.old = posD.old = posI.old = NULL
   
   ## Biostrings is imported in NAMESPACE  
-  ## if (indels.verbose && !require(Biostrings)) {
+  ## if (indels.verbose && !requireNamespace("Biostrings")) {
   ##	indels.verbose <- FALSE
   ##	warning("\tverbose indels NOT written to output")
   ## }
 
-  if (indels.vcfout && !require(BSgenome.Hsapiens.UCSC.hg19)) {
+  if (indels.vcfout && !requireNamespace("BSgenome.Hsapiens.UCSC.hg19")) {
 	indels.vcfout <- FALSE
 	warning("\tno vcf file will be created")
   }

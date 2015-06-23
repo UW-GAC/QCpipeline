@@ -19,22 +19,22 @@ genome build, e.g 'hg18' (build 36) or 'hg19' (build 37)
 \item{database_table}{
   name of database table to get: e.g.,  'refGene' for  RefSeq refGene
   table, under track Ref Seq Genes; 'knownGene' for knownGene table,
-  under track UCSC genes...or other tables listed by \code{\link{supportedUCSCtables}}
+  under track UCSC genes...or other tables listed by \code{\link[GenomicFeatures]{supportedUCSCtables}}
 }
 }
 \details{
  Specifying \code{database_table='knownGene'} will make use of the
  pre-existing annotation packages
- \code{\link{TxDb.Hsapiens.UCSC.hg19.knownGene}} (for build hg19) and
- \code{\link{TxDb.Hsapiens.UCSC.hg18.knownGene}} (for build hg18). 
+ \pkg{\link[TxDb.Hsapiens.UCSC.hg19.knownGene]{TxDb.Hsapiens.UCSC.hg19.knownGene}} (for build hg19) and
+ \pkg{\link[TxDb.Hsapiens.UCSC.hg18.knownGene]{TxDb.Hsapiens.UCSC.hg18.knownGene}} (for build hg18). 
  Other \code{database_table} arguments will use the
- \code{\link{makeTranscriptDbFromUCSC}} function to create a TxDb
+ \code{\link[GenomicFeatures]{makeTranscriptDbFromUCSC}} function to create a TxDb
  object, pulling the annotation from UCSC Genome Browser.
 }
 \value{
-Returns a \code{\link{TxDb}} object, which can either be (1) saved as an
+Returns a \code{\link[GenomicFeatures]{TxDb}} object, which can either be (1) saved as an
 SQLite file for later use, with
-\code{\link{saveDb}} and/or (2) passed as an argument to the companion \code{\link{defineExomeVars}} function
+\code{\link[AnnotationDbi]{saveDb}} and/or (2) passed as an argument to the companion \code{\link{defineExomeVars}} function
 }
 \references{
   \url{http://www.bioconductor.org/packages/release/bioc/vignettes/GenomicFeatures/inst/doc/GenomicFeatures.pdf}
@@ -48,9 +48,9 @@ Sarah Nelson
 % }
 
 \seealso{
-  \code{\link{TxDb}}, \code{\link{saveDb}}, \code{\link{loadDb}},
-  \code{\link{TxDb.Hsapiens.UCSC.hg19.knownGene}},
-  \code{\link{TxDb.Hsapiens.UCSC.hg18.knownGene}}, \code{\link{makeTranscriptDbFromUCSC}}
+  \code{\link[GenomicFeatures]{TxDb}}, \code{\link[AnnotationDbi]{saveDb}}, \code{\link[AnnotationDbi]{loadDb}},
+  \pkg{\link[TxDb.Hsapiens.UCSC.hg19.knownGene]{TxDb.Hsapiens.UCSC.hg19.knownGene}},
+  \pkg{\link[TxDb.Hsapiens.UCSC.hg18.knownGene]{TxDb.Hsapiens.UCSC.hg18.knownGene}}, \code{\link[GenomicFeatures]{makeTranscriptDbFromUCSC}}
 
 }
 \examples{

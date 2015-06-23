@@ -165,7 +165,7 @@ test_gdsMerge_dosage <- function() {
 
     new <- GdsGenotypeReader(paste0(newfile, ".gds"))
     checkEquals(1:20, getSnpID(new))
-    checkEquals("Float32", getNodeDescription(new, "genotype")$storage)
+    checkEquals("dFloat32", getNodeDescription(new, "genotype")$storage)
     close(new)
 
     lapply(genoDataList, close)

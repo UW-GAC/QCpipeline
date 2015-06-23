@@ -15,22 +15,22 @@ defineExomeVars(snpAnnot, txdb, collapsed = TRUE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{snpAnnot}{\code{\link{SnpAnnotationDataFrame}} object to annotate}
-  \item{txdb}{A \code{\link{TxDb}} object to use for the annotation}
+  \item{txdb}{A \code{\link[GenomicFeatures]{TxDb}} object to use for the annotation}
   \item{collapsed}{logical, whether to return one row per input variant versus one
     row for each location type}
 }
 \details{
-  This function uses the \code{\link{locateVariants}} function to
+  This function uses the \code{\link[VariantAnnotation]{locateVariants}} function to
   annotate variants. The \code{txdb} argument refers to a
-  \code{\link{TxDb}} object, which the user can either:
+  \code{\link[GenomicFeatures]{TxDb}} object, which the user can either:
 
       - create with the function\code{\link{getTxDb}}, a companion
       function to \code{defineExomeVars}.
 
   or
   
-      - load from a previously created and saved \code{\link{TxDb}}
-      object, using the \code{\link{saveDb}} and \code{\link{loadDb}}
+      - load from a previously created and saved \code{\link[GenomicFeatures]{TxDb}}
+      object, using the \code{\link[AnnotationDbi]{saveDb}} and \code{\link[AnnotationDbi]{loadDb}}
       functions.
   
   Users should check that (1) variants in the \code{snpAnnot} are in a
@@ -45,7 +45,7 @@ defineExomeVars(snpAnnot, txdb, collapsed = TRUE)
 
   All the variants included in the \code{snpAnnot} input will be
   returned in the output. The returned values from the
-  \code{\link{locateVariants}} function will be \code{NA} where
+  \code{\link[VariantAnnotation]{locateVariants}} function will be \code{NA} where
   the variant was either was not included in the query or when no
   information was found for that variant. Reasons for not including a
   variant in the query are (1) unmapped position or (2) chromosome value other
@@ -60,15 +60,15 @@ defineExomeVars(snpAnnot, txdb, collapsed = TRUE)
     to chromosome value other than an autosome, X, Y, or mitochondrial}
   \item{excl.pos}{logical inciator for whether variant was excluded from query due
    to position=0 (unmapped)}
-  \item{loctype}{Values returned from \code{\link{locateVariants}}. Possible values
+  \item{loctype}{Values returned from \code{\link[VariantAnnotation]{locateVariants}}. Possible values
   are 'coding', 'intron', 'threeUTR', 'fiveUTR', 'intergenic',
   'spliceSite', or 'promoter'. If \code{collapsed=TRUE}, multiple
   records are concatenated by ';', with \code{NA} values removed.} 
-  \item{geneID}{Values returned from \code{\link{locateVariants}}. For
+  \item{geneID}{Values returned from \code{\link[VariantAnnotation]{locateVariants}}. For
   genic SNPs, one or more Entrez GeneIDs; \code{NA} otherwise. If
   \code{collapsed=TRUE}, multiple records are concatenated by ';', with
   \code{NAs} removed.} 
-  \item{exomic}{logical, \code{TRUE} where variant is located in exomic region (at least one \code{loctype} value of 'coding'); \code{FALSE} if not located in exomic region; \code{NA} if not included in query (because \code{excl.chr=TRUE}, \code{excl.pos=TRUE}, or no match found by \code{\link{locateVariants}} query).} 
+  \item{exomic}{logical, \code{TRUE} where variant is located in exomic region (at least one \code{loctype} value of 'coding'); \code{FALSE} if not located in exomic region; \code{NA} if not included in query (because \code{excl.chr=TRUE}, \code{excl.pos=TRUE}, or no match found by \code{\link[VariantAnnotation]{locateVariants}} query).} 
 }
 \references{
   \url{http://www.bioconductor.org/help/workflows/annotation/AnnotatingRanges/}
@@ -86,8 +86,8 @@ Sarah Nelson
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-  \code{\link{locateVariants}}, \code{\link{TxDb}}, \code{\link{saveDb}},
-      \code{\link{loadDb}}
+  \code{\link[VariantAnnotation]{locateVariants}}, \code{\link[GenomicFeatures]{TxDb}}, \code{\link[AnnotationDbi]{saveDb}},
+      \code{\link[AnnotationDbi]{loadDb}}
 }
 \examples{
 \dontrun{
