@@ -1,0 +1,16 @@
+Package: QCannot
+Version: 0.1.0
+Type: Package
+Title: Utilities for QC annotation
+Description: Code for annotating variants: alleles, genome build, etc.
+Author: Stephanie Gogarten, Sarah Nelson, Adrienne Stilp, Tin Louie
+Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
+Depends: GWASTools
+Imports: BiocGenerics, Biobase, Biostrings, 
+        rtracklayer, IRanges, GenomicRanges, stringr, gdsfmt, S4Vectors, reshape2,
+	VariantAnnotation, GenomicFeatures, AnnotationDbi
+Suggests: GWASdata, BSgenome.Hsapiens.UCSC.hg19,
+        TxDb.Hsapiens.UCSC.hg19.knownGene,
+        TxDb.Hsapiens.UCSC.hg18.knownGene
+License: Artistic-2.0
+LazyLoad: yes

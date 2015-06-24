@@ -23,7 +23,7 @@ Takes a GenotypeData object and converts from one build to another based on a us
 If \code{remove.unmapped=FALSE}, all SNPs in \code{genoData} must have entries in \code{map}.
 }
 \author{Stephanie Gogarten}
-\seealso{\code{\link{convertBuild}}, \code{\link{gdsMerge}}}
+\seealso{\code{\link{convertBuild}}, \code{\link[QCpipeline]{gdsMerge}}}
 \examples{
 \dontrun{
 See /projects/geneva/geneva_sata/QC_reports/SOPs/datasetMerging/exampleDatasets/dataMerging_example.pdf

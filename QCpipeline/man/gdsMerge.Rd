@@ -42,7 +42,7 @@ One can provide a list of scanIDs (\code{sampleList}) and snpIDs
 is to include all of them.
 }
 \author{Stephanie Gogarten}
-\seealso{\code{\link{gdsCombine}}, \code{\link{gdsUpdateBuild}}}
+\seealso{\code{\link{gdsCombine}}, \code{\link[QCannot]{gdsUpdateBuild}}}
 \examples{
 \dontrun{
 See /projects/geneva/geneva_sata/QC_reports/SOPs/datasetMerging/exampleDatasets/dataMerging_example.pdf

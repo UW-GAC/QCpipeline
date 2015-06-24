@@ -5,20 +5,18 @@ import(GenomicRanges)
 importFrom(gplots, plotCI) # used in boxplotMeanSD
 import(BiocGenerics)
 import(Biobase)
-import(Biostrings)
+#import(Biostrings)
 import(tools)
 import(GWASExactHW)
 import(gdsfmt)
-import(reshape2) # used in defineExomeVars, possibly other future functions
-importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
-importFrom(stringr, str_sub, str_locate_all, str_replace_all, "str_sub<-") # used in checkABalleles, laiDosageFile
+#import(reshape2) # used in defineExomeVars, possibly other future functions
+importFrom(stringr, str_sub, str_locate_all, str_replace_all, "str_sub<-") # used in laiDosageFile
 import(grid) # used in multiplot
 
 
 export(readConfig, writeConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,
        dbgapScanAnnotation, dbgapSnpAnnotation,
-       make.allele.mappings, make.allele.annotation,
        defineFamilies,
        GenotypeReader, IntensityReader,
        plateLayoutPlot,
@@ -29,15 +27,10 @@ export(readConfig, writeConfig, setConfigDefaults,
        qqPlotPng, manhattanPlotPng,
        gdsCombine, checkGdsCombine,
        gdsMerge, gdsMergeCheck,
-       getSnpNames, readSnpTable,
-       convertBuild, checkABalleles,
        chromToChar, chromToInt,
-       gdsUpdateBuild,
        filterImputationSegments,
        getAnomSegOverlap,
        calculateLambda,
-       defineDupVars,
-       defineExomeVars, getTxDb,
        laiDosageFile, checkLaiDosageFile,
        multiplot
        )

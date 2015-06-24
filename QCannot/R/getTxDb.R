@@ -20,9 +20,6 @@
 
 getTxDb <- function(build, database_table) {
 
-  # check required packages
-  requireNamespace("GenomicFeatures")
-
   # check packages that may be required based on "database_table" argument
   if(database_table=="knownGene") {
       if(build=="hg19") {requireNamespace("TxDb.Hsapiens.UCSC.hg19.knownGene")}
@@ -41,8 +38,8 @@ getTxDb <- function(build, database_table) {
 
   if(database_table=="knownGene") {
       message("Getting UCSC database table 'knownGene'")
-      if(build=="hg19") {txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene}
-      if(build=="hg18") {txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene}    
+      if(build=="hg19") {txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene::TxDb.Hsapiens.UCSC.hg19.knownGene}
+      if(build=="hg18") {txdb <- TxDb.Hsapiens.UCSC.hg18.knownGene::TxDb.Hsapiens.UCSC.hg18.knownGene}    
   }
 
   else {

@@ -1,0 +1,22 @@
+import(GWASTools)
+import(IRanges)
+import(S4Vectors)
+import(GenomicRanges)
+import(BiocGenerics)
+import(Biobase)
+import(Biostrings)
+import(gdsfmt)
+import(reshape2) # used in defineExomeVars, possibly other future functions
+importFrom(rtracklayer, liftOver, import.chain) # used in convertBuild
+importFrom(stringr, str_sub) # used in checkABalleles
+importFrom(VariantAnnotation, locateVariants, AllVariants) # used in defineExomeVars
+import(GenomicFeatures) # used in defineExomeVars
+importFrom(AnnotationDbi, saveDb, loadDb) # used in defineExomeVars
+
+export(make.allele.mappings, make.allele.annotation,
+       getSnpNames, readSnpTable,
+       convertBuild, checkABalleles,
+       gdsUpdateBuild,
+       defineDupVars,
+       defineExomeVars, getTxDb
+       )

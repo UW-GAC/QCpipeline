@@ -33,8 +33,8 @@ multiplot <- function(..., plotlist=NULL, cols=1, layout=NULL, letters=FALSE) {
     if (letters) {
         requireNamespace("ggplot2")
         for (i in 1:numPlots) {
-            plots[[i]] <- plots[[i]] + ggtitle(LETTERS[i]) +
-                theme(plot.title=element_text(size=16, hjust=0))
+            plots[[i]] <- plots[[i]] + ggplot2::ggtitle(LETTERS[i]) +
+                ggplot2::theme(plot.title=ggplot2::element_text(size=16, hjust=0))
         }
     }
       
