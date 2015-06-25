@@ -5,6 +5,7 @@
 
 library(GWASTools)
 library(QCpipeline)
+library(ggplot2)
 sessionInfo()
 
 # read configuration
@@ -27,23 +28,28 @@ print(config)
 mninten <- getobj(config["out_inten_file"])
 mninten <- mninten[[1]] # only want sum of X and Y intensities
 stopifnot(allequal(getScanID(scanAnnot), rownames(mninten)))
+colnames(mninten) <- paste0("mninten.", colnames(mninten))
 
 # heterozygosity
 het <- getobj(config["out_het_file"])
 stopifnot(allequal(getScanID(scanAnnot), rownames(het)))
+colnames(het) <- paste0("het.", colnames(het))
 
-# plot colors
-sex <- getVariable(scanAnnot, config["annot_scan_sexCol"])
-if (is.null(sex)) {
-  stop(paste("sex variable", config["annot_scan_sexCol"], "not found in annotation"))
-}
-if (!all(sex %in% c("M", "F", NA))) {
-  stop("sex must be coded as M/F or NA")
-}
-plotcol <- rep(NA, nrow(scanAnnot))
-plotcol[sex == "F"] <- "red"
-plotcol[sex == "M"] <- "blue"
-plotcol[is.na(sex)] <- "black"
+dat <- getVariable(scanAnnot, c("scanID", config["annot_scan_sexCol"]))
+names(dat)[2] <- "sex.annot"
+
+dat <- cbind(dat, mninten)
+dat <- cbind(dat, het)
+
+# best guess at real sex
+dat$sex.genotype <- ifelse(dat$mninten.Y > 0.5 & dat$mninten.X < 1.0, "M", "F")
+
+# order so that mismatches are on top
+dat$mismatch <- ifelse(dat$sex.genotype == dat$sex.annot, 0, 1)
+dat$mismatch[is.na(dat$mismatch)] <- 1
+
+# replace so it shows up on the axis label
+dat$sex.annot[is.na(dat$sex.annot)] <- "NA"
 
 # plot labels - X and Y probes
 (snpAnnot <- getobj(config["annot_snp_file"]))
@@ -53,43 +59,48 @@ ny <- sum(chr == "Y")
 xlab <- paste("X intensity (",nx," probes)", sep="")
 ylab <- paste("Y intensity (",ny," probes)", sep="")
 
-# best guess at real sex
-# only used for plotting anomalous points on top
-male <- mninten[,"Y"] > 0.5 & mninten[,"X"] < 1.0
-anom <- (male & sex == "F") | (!male & sex == "M") | is.na(sex)
 
-# plot
+plots <- list()
+theme_set(theme_bw())
+
+ggcol <- scale_color_manual(breaks=c("F", "M", "NA"), values=c("#FF4D4D", "#0099FF", "black"))
+
+plots[[1]] <- ggplot(dat, aes(x=mninten.X, y=mninten.Y, color=sex.annot)) +
+  geom_point(aes(order=mismatch)) +
+  xlab(xlab) +
+  ylab(ylab) +
+  ggcol + 
+  guides(alpha=FALSE) +
+  theme(legend.position=c(1,1), legend.justification=c(1,1))
+
+plots[[2]] <- ggplot(dat, aes(x=mninten.X, y=het.X, color=sex.annot)) +
+  geom_point(aes(order=mismatch)) +
+  xlab(xlab) +
+  ylab("X heterozygosity") +
+  ggcol + 
+  guides(color=FALSE, alpha=FALSE)
+
+plots[[3]] <- ggplot(dat, aes(x=mninten.Y, y=het.X, color=sex.annot)) +
+  geom_point(aes(order=mismatch)) +
+  xlab(ylab) +
+  ylab("X heterozygosity") +
+  ggcol +
+  guides(color=FALSE, alpha=FALSE)
+
+plots[[4]] <- ggplot(dat[dat$sex.annot %in% "F", ], aes(x=het.A, y=het.X, color=sex.annot)) +
+  geom_point(aes(order=mismatch)) +
+  xlab("Autosomal heterozygosity") +
+  ylab("X heterozygosity") +
+  ggcol +
+  guides(color=FALSE, alpha=FALSE)
+
 pdf(file=config["out_pdf"], width=8, height=8)
-par(mfrow=c(2,2))
-
-# X vs Y intensity
-plot(mninten[,"X"], mninten[,"Y"], col=plotcol, xlab=xlab, ylab=ylab)
-points(mninten[anom,"X"], mninten[anom,"Y"], col=plotcol[anom])
-if (any(is.na(sex))) {
-  legend(bestLegendPos(mninten[,"X"], mninten[,"Y"]), c("M","F","NA"), col=c("blue","red","black"), pch=c(1,1,1))
-} else {
-  legend(bestLegendPos(mninten[,"X"], mninten[,"Y"]), c("M","F"), col=c("blue","red"), pch=c(1,1))
-}
-
-# Het on X vs X intensity
-plot(mninten[,"X"], het[,"X"], col=plotcol, xlab=xlab, ylab="X heterozygosity")
-points(mninten[anom,"X"], het[anom,"X"], col=plotcol[anom])
-
-# Het on X vs Y intensity
-plot(mninten[,"Y"], het[,"X"], col=plotcol, xlab=ylab, ylab="X heterozygosity")
-points(mninten[anom,"Y"], het[anom,"X"], col=plotcol[anom])
-
-# X vs A het (females only)
-sel <- sex == "F"
-plot(het[sel,"A"], het[sel,"X"], col="red", xlab="Autosomal heterozygosity", ylab="X heterozygosity")
-points(het[(sel & anom),"A"], het[(sel & anom),"X"], col=plotcol[sel & anom])
+multiplot(plotlist=plots, cols=2, byrow=TRUE)
 dev.off()
 
 
 # plot autosome intensities
 autoPrefix <- config["out_autosome_prefix"]
-# just plot one for now
-i <- 1
 
 autosomes <- intersect(unique(chr), as.character(1:22))
 for (autosome in autosomes){
@@ -98,14 +109,11 @@ for (autosome in autosomes){
   
   png(paste(autoPrefix, "_", autosome, ".png", sep=""), width=600, height=600)
   
-  plot(mninten[, "X"], mninten[, autosome], col=plotcol, xlab=xlab, ylab=ylab, cex.lab=1.5)
-  points(mninten[anom, "X"], mninten[anom, autosome], col=plotcol[anom])
-  
-  if (any(is.na(sex))) {
-    legend("top", c("M","F","NA"), col=c("blue","red","black"), pch=c(1,1,1))
-  } else {
-    legend("top", c("M","F"), col=c("blue","red"), pch=c(1,1))
-  }
-  
-  dev.off()
+  p <- ggplot(dat, aes_string(x="mninten.X", y=paste0("mninten.", autosome), color="sex.annot")) +
+    geom_point(aes(order=mismatch)) +
+    xlab(xlab) + ylab(ylab) +
+    ggcol +
+    theme(legend.position=c(1,1), legend.justification=c(1,1))
+  print(p)
+  ggsave(paste(autoPrefix, "_", autosome, ".png", sep=""), width=8, height=8)
 }
