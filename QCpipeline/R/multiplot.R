@@ -10,7 +10,7 @@
 # then plot 1 will go in the upper left, 2 will go in the upper right, and
 # 3 will go all the way across the bottom.
 #
-multiplot <- function(..., plotlist=NULL, cols=1, layout=NULL, letters=FALSE) {
+multiplot <- function(..., plotlist=NULL, cols=1, layout=NULL, letters=FALSE, byrow=FALSE) {
   # Make a list from the ... arguments and plotlist
   plots <- c(list(...), plotlist)
 
@@ -22,7 +22,7 @@ multiplot <- function(..., plotlist=NULL, cols=1, layout=NULL, letters=FALSE) {
     # ncol: Number of columns of plots
     # nrow: Number of rows needed, calculated from # of cols
     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-                    ncol = cols, nrow = ceiling(numPlots/cols))
+                    ncol = cols, nrow = ceiling(numPlots/cols), byrow=byrow)
   }
 
  if (numPlots==1) {

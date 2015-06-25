@@ -3,7 +3,7 @@
 \title{Multiple plot function}
 \description{Combine multiple ggplot objects into one plot}
 \usage{
-multiplot(..., plotlist=NULL, cols=1, layout=NULL, letters=FALSE)
+multiplot(..., plotlist=NULL, cols=1, layout=NULL, letters=FALSE, byrow=FALSE)
 }
 \arguments{
   \item{...}{ggplot objects}
@@ -11,6 +11,7 @@ multiplot(..., plotlist=NULL, cols=1, layout=NULL, letters=FALSE)
   \item{cols}{Number of columns in layout}
   \item{layout}{A matrix specifying the layout. If present, 'cols' is ignored.}
   \item{letters}{logical for whether to add letters A, B, etc. to the top left of each plot (for multi-panel figures in publications)}
+  \item{byrow}{logical for whether the plots should be printed by row or by column}
 }
 \details{
 Taken from 
