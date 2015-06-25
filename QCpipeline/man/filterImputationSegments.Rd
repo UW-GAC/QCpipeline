@@ -9,7 +9,7 @@ Filter genotype probabilities in imputation segments
 }
 
 \usage{
-filterImputationSegments(infile, outfile, anomalies, sample.annot, segments, chromosome, filteredValue = -1, block.size = 5000, overwrite = FALSE, verbose = TRUE)
+filterImputationSegments(infile, outfile, anomalies, sample.annot, segments, chromosome, filteredValue = -1, block.size = 5000, overwrite = FALSE, verbose = TRUE, checkLineCount=FALSE)
 getAnomSegOverlap(anomalies, segments)
 }
 
@@ -24,6 +24,7 @@ getAnomSegOverlap(anomalies, segments)
   \item{block.size}{number of SNPs to read in per block}
   \item{overwrite}{overwrite existing outfile?}
   \item{verbose}{report progress info?}
+  \item{checkLineCount}{logical indicator for whether to check that number of input lines match number of output lines}
 }
 
 \value{

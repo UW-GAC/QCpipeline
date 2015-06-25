@@ -12,7 +12,7 @@ import(gdsfmt)
 #import(reshape2) # used in defineExomeVars, possibly other future functions
 importFrom(stringr, str_sub, str_locate_all, str_replace_all, "str_sub<-") # used in laiDosageFile
 import(grid) # used in multiplot
-
+importFrom(R.utils, countLines) # used in filterImputationSegments
 
 export(readConfig, writeConfig, setConfigDefaults,
        boxplotMeanSD, plot2DwithHist, bestLegendPos,

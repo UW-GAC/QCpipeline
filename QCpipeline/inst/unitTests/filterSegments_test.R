@@ -131,7 +131,8 @@ test_filterImputationSegments <- function(){
                                     filteredValue=filtVal,
                                     block.size=b,
                                     overwrite=TRUE,
-                                    verbose=TRUE)
+                                    verbose=TRUE,
+                                    checkLineCount=TRUE)
     
     # check them - we already have gprobs
     gprobs.filt <- read.table(outfile, as.is=T)
@@ -227,7 +228,8 @@ test_filterImputationSegments_snpBoundary <- function(){
                                     filteredValue=filtVal,
                                     block.size=b,
                                     overwrite=TRUE,
-                                    verbose=TRUE)
+                                    verbose=TRUE,
+                                    checkLineCount=TRUE)
     
     # check them - we already have gprobs
     gprobs.filt <- read.table(outfile, as.is=T)
@@ -257,7 +259,8 @@ test_filterImputationSegments_snpBoundary <- function(){
                                     filteredValue=filtVal,
                                     block.size=b,
                                     overwrite=TRUE,
-                                    verbose=TRUE)
+                                    verbose=TRUE,
+                                    checkLineCount=TRUE)
     
     # check them - we already have gprobs
     gprobs.filt <- read.table(outfile, as.is=T)

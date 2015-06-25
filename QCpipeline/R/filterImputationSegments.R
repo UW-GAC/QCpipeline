@@ -50,7 +50,8 @@ filterImputationSegments <- function(infile,
                            filteredValue=-1,
                            block.size=5000,
                            overwrite=FALSE,
-                           verbose=TRUE
+                           verbose=TRUE,
+                           checkLineCount=FALSE
                            ){
   
   # write to a tempfile then copy.
@@ -154,21 +155,14 @@ filterImputationSegments <- function(infile,
   
   close(opfile)
   
+  if (checkLineCount){
+    in.lines <- countLines(infile)
+    out.lines <- countLines(outfile)
+    if (in.lines != out.lines) stop("line mismatch!")
+  }
   
   log <- unique(do.call(rbind, log.list)) # unique to get rid of duplicated rows if looping in blocks
   log
   
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
