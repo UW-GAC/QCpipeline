@@ -28,7 +28,7 @@ Optional config parameters [default]:
 annot_scan_fileCol    [file]                 column of raw data file in scan annotation
 annot_scan_nameCol    [Sample.Name]          column of raw data sample name in scan annotation
 annot_snp_nameCol     [rsID]                 column of raw data snp name in snp annotation
-raw_scanNameInFile    [1]                    1=repeated in column, -1=embedded in column heading, 0=none
+raw_scanNameInFile    [0]                    1=repeated in column, -1=embedded in column heading, 0=none
 raw_sepType           [,]                    column separator in raw data (e.g. ",", "\t")
 raw_skipNum           [12]                   number of rows to skip (including header)
 raw_colTotal          [14]                   total number of columns in raw data files
