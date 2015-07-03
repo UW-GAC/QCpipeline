@@ -91,7 +91,7 @@ for (b in 2:nbatches) {
             stopifnot(allequal(d1, db))
         }
     }
-    i <- n1 + nsamp
+    i <- i + nsamp
     close(bgds)
 }
 
