@@ -5,7 +5,11 @@
 
 library(GWASTools)
 library(QCpipeline)
+library(plyr)
+library(ggplot2)
 sessionInfo()
+
+theme_set(theme_bw() + theme(legend.position="top"))
 
 # read configuration
 args <- commandArgs(trailingOnly=TRUE)
@@ -54,139 +58,135 @@ if (!is.na(config["annot_scan_hapmapCol"])) {
 }
 length(scan.exclude)
 
+batch.res <- getobj(paste(config["out_batch_prefix"], "RData", sep="."))
+
 scan.index <- !(scanAnnot$scanID %in% scan.exclude)
 stopifnot(all(!(getScanID(scanAnnot, index=scan.index) %in% scan.exclude)))
 sum(scan.index)
 
-batch.res <- getobj(paste(config["out_batch_prefix"], "RData", sep="."))
-batches <- names(batch.res$lambda)
-n <- length(batches)
-batch <- getVariable(scanAnnot, config["annot_scan_batchCol"], index=scan.index)
-race <- getVariable(scanAnnot, config["annot_scan_raceCol"], index=scan.index)
-racetbl <- table(race)
+scan <- getVariable(scanAnnot, c("scanID",
+                                 config["annot_scan_batchCol"],
+                                 config["annot_scan_raceCol"],
+                                 config["annot_scan_redoCol"],
+                                 config["annot_scan_missAutoCol"]), index=scan.index)
+names(scan) <- c("scanID", "plate", "race", "redo", "missing")
+racetbl <- table(scan$race)
 majority <- names(racetbl)[racetbl == max(racetbl)]
-racefrac <- rep(NA, n); names(racefrac) <- batches
-for (i in 1:n) {
-  nsamp <- sum(batch %in% batches[i] & !is.na(race))
-  nmaj <- sum(batch %in% batches[i] & race %in% majority)
-  racefrac[i] <- nmaj / nsamp
-}
+batches <- ddply(scan, .(plate), summarise, nsamp=sum(!is.na(race)), nmaj=sum(race %in% majority), racefrac=nmaj/nsamp, meanmiss=mean(missing))
+redoPlates <- unique(scan$plate[scan$redo %in% c("Y", "Yes", "yes", "YES", TRUE)])
+batches$redo <- batches$plate %in% redoPlates
 
-pcol <- rep("black", length(batches))
-bpcol <- rep("black", length(batches))
-redo <- getVariable(scanAnnot, config["annot_scan_redoCol"], index=scan.index)
-if (!is.null(redo)) {
-  redobatches <- unique(batch[redo %in% c("Y", "Yes", "yes", "YES", TRUE)])
-  pcol[batches %in% redobatches] <- "red"
-  # boxplot labels will always be sorted
-  bpcol[sort(batches) %in% redobatches] <- "red"
-}
+color_redo <- scale_color_manual(values=c("black", "red"), breaks=c("FALSE", "TRUE"))
 
-
-if (type == "chisq") {
-  pdf(config["out_meanchisq_race_plot"], width=6, height=6)
-  plot(racefrac, batch.res$mean.chisq, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab=paste("fraction of", majority, "samples per batch"), col=pcol)
-  abline(v=mean(racefrac), lty=2) # mean over all plates
-  if (!is.null(redo)) {
-    legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("redo","mean"), col=c("red","black"), pch=c(1,-1), lty=c(0,2))
-  } else {
-    legend(bestLegendPos(racefrac, batch.res$mean.chisq), c("mean"), pch=c(-1), lty=c(2))
-  }
-  dev.off()
+if (type == "chisq"){
+  batches$stat <- batch.res$mean.chisq[match(batches$plate, names(batch.res$mean.chisq))]
+  ylab <- expression(paste("mean ", chi^2, " test statistic"))
+  outfile <- config["out_meanchisq_race_plot"]
 } else if (type == "fisher") {
-  pdf(config["out_meanor_race_plot"], width=6, height=6)
-  plot(racefrac, batch.res$mean.or, ylab="mean Fisher's OR", xlab=paste("fraction of", majority, "samples per batch"), col=pcol)
-  abline(v=mean(racefrac), lty=2) # mean over all plates
-  if (!is.null(redo)) {
-    legend(bestLegendPos(racefrac, batch.res$mean.or), c("redo","mean"),  col=c("red","black"), pch=c(1,-1), lty=c(0,2))
-  } else {
-    legend(bestLegendPos(racefrac, batch.res$mean.or), c("mean"), pch=c(-1), lty=c(2))
-  }
-  dev.off()
+  batches$stat <- batch.res$mean.or[match(batches$plate, names(batch.res$mean.or))]
+  ylab <- "mean Fisher's OR"
+  outfile <- config["out_meanor_race_plot"]
 }
+p <- ggplot(batches, aes(x=racefrac, y=stat, color=redo)) +
+  geom_vline(x=mean(batches$racefrac), linetype='dashed') +  # mean over all plates
+  geom_point() +
+  color_redo +
+  ylab(ylab) +
+  xlab(paste("fraction of", majority, "samples per batch"))
+ggsave(outfile, plot=p, width=6, height=6)
 
-pdf(config["out_lambda_race_plot"], width=6, height=6)
-plot(racefrac, batch.res$lambda, ylab=expression(paste("genomic inflation factor ", lambda)), xlab=paste("fraction of", majority, "samples per batch"), col=pcol)
-abline(v=mean(racefrac), lty=2) # mean over all plates
-if (!is.null(redo)) {
-  legend(bestLegendPos(racefrac, batch.res$lambda), c("redo","mean"),  col=c("red","black"), pch=c(1,-1), lty=c(0,2))
-} else {
-  legend(bestLegendPos(racefrac, batch.res$lambda), c("mean"), pch=c(-1), lty=c(2))
-}
-dev.off()
+
+
+
+
+batches$lambda <- batch.res$lambda[match(batches$plate, names(batch.res$lambda))]
+p <- ggplot(batches, aes(x=racefrac, y=lambda, color=redo)) +
+  geom_vline(x=mean(batches$racefrac), linetype='dashed') + # mean over all plates
+  geom_point() +
+  color_redo +
+  ylab(expression(paste("genomic inflation factor ", lambda))) +
+  xlab(paste("fraction of", majority, "samples per batch"))
+ggsave(config["out_lambda_race_plot"], plot=p, width=6, height=6)
 
 
 # distribution of number of samples per batch
-pdf(config["out_hist_plot"], width=6, height=6)
-hist(table(batch), xlab="number of samples per batch", ylab="number of batches", main="")
-dev.off()
+p <- ggplot(batches, aes(x=nsamp)) + geom_histogram(binwidth=1)
+ggsave(config["out_hist_plot"], plot=p, width=6, height=6)
 
 
 # mean autosomal missing call rate per batch
-missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"], index=scan.index)
-bmiss <- rep(NA,n); names(bmiss) <- batches
-bn <- rep(NA,n); names(bn) <- batches
-for(i in 1:n) {
-  x <- missing[is.element(batch, batches[i])]
-  bmiss[i] <- mean(x)
-  bn[i] <- length(x)
-}
-pdf(config["out_meanmcr_nscan_plot"], width=6, height=6)
-plot(bn, bmiss, xlab="number of samples per batch", ylab="mean autosomal missing call rate", col=pcol)
-y <- lm(bmiss ~ bn)
-#abline(y$coefficients)
-anova(y)
-if (!is.null(redo)) legend(bestLegendPos(bn, bmiss), "redo", col="red", pch=1)
-dev.off()
+p <- ggplot(batches, aes(x=nsamp, y=meanmiss, color=redo)) +
+  geom_point() +
+  color_redo +
+  ylab("mean autosomal missing call rate") +
+  xlab("number of samples per batch")
+ggsave(config["out_meanmcr_nscan_plot"], plot=p, width=6, height=6)
 
-if (type == "chisq") {
-  pdf(config["out_meanmcr_meanchisq_plot"], width=6, height=6)
-  tmp <- batch.res$mean.chisq[match(names(bmiss), names(batch.res$mean.chisq))]
-  plot(tmp, bmiss, xlab=expression(paste("mean ", chi^2, " test statistic")), ylab="mean autosomal missing call rate", col=pcol)
-  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", col="red", pch=1)
-  dev.off()
-} else if (type == "fisher") {
-  pdf(config["out_meanmcr_meanor_plot"], width=6, height=6)
-  tmp <- batch.res$mean.or[match(names(bmiss), names(batch.res$mean.or))]
-  plot(tmp, bmiss, xlab="mean Fisher's OR", ylab="mean autosomal missing call rate", col=pcol)
-  if (!is.null(redo)) legend(bestLegendPos(tmp, bmiss), "redo", col="red", pch=1)
-  dev.off()
-}
+lmr <- lm(meanmiss ~ nsamp, data=batches)
+anova(lmr)
 
+
+# missing call rate vs test stat
 if (type == "chisq") {
-  pdf(config["out_meanchisq_nscan_plot"], width=6, height=6)
-  tmp <- batch.res$mean.chisq[match(names(bn), names(batch.res$mean.chisq))]
-  plot(bn, tmp, ylab=expression(paste("mean ", chi^2, " test statistic")), xlab="number of samples per batch", col=pcol)
-  if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", col="red", pch=1)
-  dev.off()
+  xlab <- expression(paste("mean ", chi^2, " test statistic"))
+  outfile <- config["out_meanmcr_meanchisq_plot"]
 } else if (type == "fisher") {
-  pdf(config["out_meanor_nscan_plot"], width=6, height=6)
-  tmp <- batch.res$mean.or[match(names(bn), names(batch.res$mean.or))]
-  plot(bn, tmp, ylab="mean Fisher's OR", xlab="number of samples per batch", col=pcol)
-  if (!is.null(redo)) legend(bestLegendPos(bn, tmp), "redo", col="red", pch=1)
-  dev.off()
+  xlab <- "mean Fisher's OR"
+  outfile <- config["out_meanmcr_meanor_plot"]
 }
+p <- ggplot(batches, aes(x=stat, y=meanmiss, color=redo)) +
+  geom_point() +
+  xlab(xlab) +
+  ylab("mean autosomal missing call rate") +
+  color_redo
+ggsave(file=outfile, plot=p, widt=6, height=6)
+
+
+# test stat vs number of scans
+if (type == "chisq") {
+  ylab <- expression(paste("mean ", chi^2, " test statistic"))
+  outfile <- config["out_meanchisq_nscan_plot"]
+} else if (type == "fisher") {
+  ylab <- "mean Fisher's OR"
+  outfile <- config["out_meanor_nscan_plot"]
+}
+p <- ggplot(batches, aes(x=nsamp, y=stat, color=redo)) +
+  geom_point() +
+  xlab("number of samples per batch") +
+  ylab(ylab) +
+  color_redo
+ggsave(file=outfile, plot=p, widt=6, height=6)
+
 
 
 # batch effect on missing call rate
 # make plate names shorter for plotting
-batch <- getVariable(scanAnnot, config["annot_scan_batchCol"], index=scan.index)
-batchLabel <- vapply(strsplit(as.character(batch), "-"), function(x) x[[1]][1], "a")
-missing <- getVariable(scanAnnot, config["annot_scan_missAutoCol"], index=scan.index)
+scan$redo <- scan$plate %in% batches$plate[batches$redo]
+scan$batchLabel <- vapply(strsplit(as.character(scan$plate), "-"), function(x) x[[1]][1], "a")
 model <- log10(missing) ~ as.factor(batchLabel)
-lm.result <- lm(model)
+lm.result <- lm(model, data=scan)
 anova(lm.result)
-pdf(config["out_mcr_plot"], width=6, height=6)
-par(mar=c(6, 4, 4, 2) + 0.1)
-boxplot(model, varwidth=TRUE, las=2, ylab="log10(autosomal missing call rate)", main=config["annot_scan_batchCol"], border=bpcol)
-dev.off()
+
+p <- ggplot(scan, aes(x=batchLabel, y=missing, color=redo)) +
+  geom_boxplot(varwidth=TRUE) +
+  ylab("log10(autosomal missing call rate)") +
+  xlab("") +
+  scale_y_log10() +
+  theme(axis.text.x=element_text(angle = 90, hjust = 0)) +
+  color_redo
+ggsave(file=config["out_mcr_plot"], plot=p, width=6, height=6)
 
 
 # chromosome 1 intensity by batch
 mninten <- getobj(config["inten_file"])
 mninten <- mninten[[1]]
 stopifnot(all(!(names(mninten[scan.index, "1"]) %in% scan.exclude)))
-pdf(config["out_inten_plot"], width=6, height=6)
-par(mar=c(6, 4, 4, 2) + 0.1)
-boxplot(mninten[scan.index,"1"] ~ as.factor(batchLabel), varwidth=TRUE, las=2, ylab="mean chromosome 1 intensity", main=config["annot_scan_batchCol"], border=bpcol)
-dev.off()
+scan$mninten <- mninten[(match(scan$scanID, rownames(mninten))), "1"]
+
+p <- ggplot(scan, aes(x=batchLabel, y=mninten, color=redo)) +
+  geom_boxplot(varwidth=TRUE) +
+  ylab("mean chromosome 1 intensity") +
+  xlab("") +
+  theme(axis.text.x=element_text(angle = 90, hjust = 0)) +
+  color_redo
+ggsave(file=config["out_inten_plot"], plot=p, width=6, height=6)
