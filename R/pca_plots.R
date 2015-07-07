@@ -136,7 +136,9 @@ if (length(ethn) > 0) {
 table(samp$plotsym, useNA="ifany")
 
 # labels
-(x <- pca$eigenval[1:4]/sum(pca$eigenval))
+## recent change in SNPRelate - pca$eigenval only returns first 32 values
+#(x <- pca$eigenval[1:4]/sum(pca$eigenval))
+x <- pca$varprop[1:4]
 lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 
 samp$nrace <- table(samp$race, useNA="ifany")[samp$race]
