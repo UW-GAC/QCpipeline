@@ -294,7 +294,7 @@ if (!is.na(config["out_corr_pruned_plot_prefix"])) {
 }
   
 # scree plot
-x <- pca$eigenval/sum(pca$eigenval)
+x <- pca$varprop
 pdf(config["out_scree_plot"], width=6, height=6)
 plot(1:nev,100*x[1:nev], xlab="Eigenvector", ylab="Percent of variance accounted for")
 dev.off()
