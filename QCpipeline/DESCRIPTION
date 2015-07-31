@@ -1,9 +1,9 @@
 Package: QCpipeline
-Version: 0.10.2
+Version: 0.10.3
 Type: Package
 Title: Utilities for the QC pipeline
 Description: Everything but the kitchen sink.
-Author: Stephanie Gogarten, Cathy Laurie, Sarah Nelson, Jess Shen, Adrienne Stilp, Leila Zelnick
+Author: Stephanie Gogarten, Adrienne Stilp, Cathy Laurie, Cecelia Laurie, Sarah Nelson, Jess Shen, Leila Zelnick
 Maintainer: Stephanie Gogarten <sdmorris@u.washington.edu>
 Depends: GWASTools
 Imports: gplots, BiocGenerics, Biobase, tools, GWASExactHW,
