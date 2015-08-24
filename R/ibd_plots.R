@@ -70,10 +70,11 @@ if (!is.na(config["exp_rel_file"])) {
   relprs <- getobj(config["exp_rel_file"])
   message("expected relative pairs (subjects)")
   print(table(relprs$relation))
+  print(table(relprs$exp.rel))
   relprs$ii <- pasteSorted(relprs$Individ1, relprs$Individ2)
 
-  ibd <- merge(ibd, relprs[,c("ii","relation")], all.x=TRUE)
-  names(ibd)[names(ibd) == "relation"] <- "exp.rel"
+  ibd <- merge(ibd, relprs[,c("ii", "relation", "exp.rel")], all.x=TRUE)
+  ## names(ibd)[names(ibd) == "relation"] <- "exp.rel"
   message("expected relative pairs (samples)")
   print(table(ibd$exp.rel, useNA="ifany"))
 } else {
@@ -87,10 +88,10 @@ table(ibd$exp.rel)
 
 
 ## make our own color code so we can modify the plot legend
-deg2.rel <-  c("HS", "HSr", "HSFC", "Av", "GpGc", "DFC")
-deg3.rel <- c("FC", "HAv", "OAv", "OC")
+## deg2.rel <-  c("HS", "HSr", "HSFC", "Av", "GpGc", "DFC")
+## deg3.rel <- c("FC", "HAv", "OAv", "OC")
 prel <- ibd$exp.rel
-prel[prel %in% deg2.rel] <- "Deg2"
+## prel[prel %in% deg2.rel] <- "Deg2"
 rels <- c("Dup", "PO", "FS", "Deg2", "Deg3", "Q", "U")
 cols <- c("magenta", "cyan", "red", "blue", "lightgreen", "darkgreen", "black")
 names(cols) <- rels
@@ -133,10 +134,10 @@ if (config["ibd_method"] == "KING") {
   dev.off()
   
   unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.deg2 # use degree 2 cutoff in KING paper - ~0.088
-  ## check for Deg2 and Deg3
-  deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
-  deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
-  unexp <- unexp & !deg2 & !deg3
+  ## ## check for Deg2 and Deg3
+  ## deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
+  ## deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
+  ## unexp <- unexp & !deg2 & !deg3
   message("unexpected relative pairs")
   print(table(ibd$obs.rel[unexp]))
   
@@ -176,10 +177,10 @@ if (config["ibd_method"] == "KING") {
 
   ## plot of unexpected relationships (kinship > 0.1)
   unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > 0.09833927
-  ## check for Deg2 and Deg3
-  deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
-  deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
-  unexp <- unexp & !deg2 & !deg3
+  ## ## check for Deg2 and Deg3
+  ## deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
+  ## deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
+  ## unexp <- unexp & !deg2 & !deg3
   message("unexpected relative pairs")
   print(table(ibd$obs.rel[unexp]))
 
@@ -204,7 +205,7 @@ if (config["ibd_method"] == "KING") {
 
 ## check for expected relationships not observed
 if (!is.na(config["exp_rel_file"])) {
-  relprs <- relprs[relprs$relation != "U",]
+  relprs <- relprs[relprs$exp.rel != "U",]
   unobs.sel <- !(relprs$ii %in% ibd$ii)
   if (sum(unobs.sel) > 0) {
     message(paste(sum(unobs.sel), "relative pairs not observed"))
