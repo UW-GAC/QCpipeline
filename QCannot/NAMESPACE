@@ -12,11 +12,13 @@ importFrom(stringr, str_sub) # used in checkABalleles
 importFrom(VariantAnnotation, locateVariants, AllVariants) # used in defineExomeVars
 import(GenomicFeatures) # used in defineExomeVars
 importFrom(AnnotationDbi, saveDb, loadDb) # used in defineExomeVars
+import(bitops) # used in run.blat
 
 export(make.allele.mappings, make.allele.annotation,
        getSnpNames, readSnpTable,
        convertBuild, checkABalleles,
        gdsUpdateBuild,
        defineDupVars,
-       defineExomeVars, getTxDb
+       defineExomeVars, getTxDb,
+       runBlat, getRefStrand
        )
