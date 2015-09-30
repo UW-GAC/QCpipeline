@@ -142,7 +142,7 @@ if (sum(any.chk) > 0) {
   png(png.file, width=720, height=720)
   anomStatsPlot(blData, genoData, anom.stats=long.chk, snp.ineligible=snp.ineligible,
                 win=as.integer(config["plot.win"]), centromere=centromeres, cex=0.25,
-                cex.axis=1.7, cex.main=1.7, cex.lab=1.7)
+                cex.axis=1.7, cex.main=1.7, cex.lab=1.7, colors="neon")
   dev.off()
 } else {
   message("no long anomalies found")

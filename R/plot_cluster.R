@@ -40,7 +40,7 @@ combined <- getobj(fname)
 combined <- combined[combined$composite.filter,]
 
 # select pvalue to use for plots
-varp <- intersect(names(combined), paste0(c("LR", "Wald", "z"), ".pval"))[1]
+(varp <- intersect(paste0(c("LR", "Wald", "z"), ".pval"), names(combined))[1])
 
 combined.intid <- combined[order(combined[,varp]),c("snpID",varp)]
 snp.intid <- combined.intid[1:27,]
