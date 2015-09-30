@@ -12,6 +12,7 @@
 ## Updated Oct 14, 2014 to report missing columns early on in script (S Nelson)
 ## Updated Oct 24, 2014 better message about the number of indels with chr0 chrMT pos0
 ## Updated Jun 18, 2015 handle NA in Refstrand column of input, enhance indels.vcfout feature 
+## Updated Sep 29, 2015 preface Hsapiens with BSgenome.Hsapiens.UCSC.hg19:: and preface getSeq, DNAStringSet, reverseComplement with Biostrings::
 ##
 ################################# CONTENT
 ## Example allele mappings table:
@@ -99,9 +100,9 @@
 #
 getSequence <- function(a, insertion=FALSE) {
 	if (insertion) {
-		toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posI - a$seq1.n +1, a$posI + a$seq2.n)))
+		toupper(as.character(Biostrings::getSeq(BSgenome.Hsapiens.UCSC.hg19::Hsapiens, a$chr.name, a$posI - a$seq1.n +1, a$posI + a$seq2.n)))
 	} else {
-		toupper(as.character(getSeq(Hsapiens, a$chr.name, a$posD - a$seq1.n,    a$posD + a$var.n + a$seq2.n - 1)))
+		toupper(as.character(Biostrings::getSeq(BSgenome.Hsapiens.UCSC.hg19::Hsapiens, a$chr.name, a$posD - a$seq1.n,    a$posD + a$var.n + a$seq2.n - 1)))
 	}
 }
 
@@ -299,7 +300,7 @@ pseudoBLAT <- function(b) {
 	if (nrow(downstream) > 0) {
 		# grab a long hg19 sequence (LEN bases) upstream or downstream of deletion
 		# (deletion begins at posD according to best deletion scenario so far) 
-		downstream$hg19L = with(downstream, toupper(as.character(getSeq(Hsapiens, chr.name, posD + var.n, posD + var.n + LEN -1))))
+		downstream$hg19L = with(downstream, toupper(as.character(Biostrings::getSeq(BSgenome.Hsapiens.UCSC.hg19::Hsapiens, chr.name, posD + var.n, posD + var.n + LEN -1))))
 
 		# look for exact match of seq1 or seq2 in long hg19 sequence
 		# (if there're multiple matches, get the closest one to the deletion)
@@ -319,7 +320,7 @@ pseudoBLAT <- function(b) {
 	}
 	
 	if (nrow(upstream) > 0) {
-		upstream$hg19L = with(upstream, toupper(as.character(getSeq(Hsapiens, chr.name, posD - LEN,   posD -1))))
+		upstream$hg19L = with(upstream, toupper(as.character(Biostrings::getSeq(BSgenome.Hsapiens.UCSC.hg19::Hsapiens, chr.name, posD - LEN,   posD -1))))
 		upstream$hit   = with(upstream, mapply(function(x, y) rev(gregexpr(x, y, fixed=T)[[1]])[1], seq1, hg19L))
 		upstream$hg19D = with(upstream, ifelse(hit == -1, hg19D, paste0(substr(hg19L, hit, LEN), 
 	                                                                    substr(hg19D, seq1.n +1, seq1.n + var.n + seq2.n)) ))
@@ -352,13 +353,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
   # avoid R CMD check notes
   scoreD = scoreI = scoreD.old = scoreI.old = hg19D.old = hg19I.old = posD.old = posI.old = NULL
   
-  ## Biostrings is imported in NAMESPACE  
-  ## if (indels.verbose && !requireNamespace("Biostrings")) {
-  ##	indels.verbose <- FALSE
-  ##	warning("\tverbose indels NOT written to output")
-  ## }
-
-  if (indels.vcfout && !requireNamespace("BSgenome.Hsapiens.UCSC.hg19")) {
+  if (indels.vcfout && (!requireNamespace("Biostrings", quietly=T) || !requireNamespace("BSgenome.Hsapiens.UCSC.hg19", quietly=T)) ) {
 	indels.vcfout <- FALSE
 	warning("\tno vcf file will be created")
   }
@@ -443,8 +438,8 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 			# strand.diff = TRUE if IlmnStrand is different from SourceStrand
             a <- as.data.frame(cbind(left, right))
             a$var <- ifelse(a$left == "-", a$right, a$left)
-            tmp <- DNAStringSet(a$var)
-            a$var.revcomp <- as.character(reverseComplement(tmp))
+            tmp <- Biostrings::DNAStringSet(a$var)
+            a$var.revcomp <- as.character(Biostrings::reverseComplement(tmp))
             a$Name <- indels
             a$DI <- indels.dat$SNP == "[D/I]"
             a$strand.diff <- indels.dat$IlmnStrand != indels.dat$SourceStrand
@@ -460,10 +455,10 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 
 			# top.A and .B depend on IlmnStrand and design.A and .B (or revcomp)
 			# PLUS is equivalent to TOP, MINUS is equivalent to BOT
-            tmp <- DNAStringSet(indels.dat$design.A)
-            indels.dat$alle1.revcomp <- as.character(reverseComplement(tmp))
-            tmp <- DNAStringSet(indels.dat$design.B)
-            indels.dat$alle2.revcomp <- as.character(reverseComplement(tmp))
+            tmp <- Biostrings::DNAStringSet(indels.dat$design.A)
+            indels.dat$alle1.revcomp <- as.character(Biostrings::reverseComplement(tmp))
+            tmp <- Biostrings::DNAStringSet(indels.dat$design.B)
+            indels.dat$alle2.revcomp <- as.character(Biostrings::reverseComplement(tmp))
 
             indels.dat$top.A[is.element(indels.dat$IlmnStrand,
                 c("P", "PLUS"))] <- indels.dat$design.A[is.element(indels.dat$IlmnStrand, c("P", "PLUS"))]
@@ -518,8 +513,8 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 					# seq1      var   seq2
 					# A.....A   TT    G.....G
 					a$var  = ifelse(a$shouldflip, a$var.revcomp, a$var.original)
-					a$seq1 = ifelse(a$shouldflip, as.character(reverseComplement(DNAStringSet(a$sourceseq.end))),   a$sourceseq.start)
-					a$seq2 = ifelse(a$shouldflip, as.character(reverseComplement(DNAStringSet(a$sourceseq.start))), a$sourceseq.end)
+					a$seq1 = ifelse(a$shouldflip, as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(a$sourceseq.end))),   a$sourceseq.start)
+					a$seq2 = ifelse(a$shouldflip, as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(a$sourceseq.start))), a$sourceseq.end)
 					
 					a$var.n  = nchar(a$var)
 					a$seq1.n = nchar(a$seq1)
