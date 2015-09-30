@@ -9,7 +9,9 @@ This function runs the command line BLAT tool to find region(s) of the
 genome with high similarity to the user's input sequence(s).
 }
 \usage{
-runBlat(seq.input, make.fasta=TRUE, output.fn="blat_query", ooc=TRUE,
+runBlat(seq.input, make.fasta=TRUE,
+resource.path="/projects/geneva/gcc-fs2/SNP_annotation/UCSC_downloads/blat_resources/",
+output.fn="blat_query", ooc=TRUE,
 tileSize=11, stepSize=tileSize, repMatch=1024, minScore=30, minIdentity=90,
 find.best=TRUE, out.type="psl", return.result=FALSE)
 }
@@ -22,10 +24,14 @@ find.best=TRUE, out.type="psl", return.result=FALSE)
   \item{make.fasta}{Logical flag on whether the \code{seq.input} object needs
     to be converted into FASTA format. Default=TRUE
  }
+  \item{resource.path}{File path to resource files \dQuote{hg19.2bit}
+    and, if \code{ooc=TRUE}, also \dQuote{11.ooc}. Defaults to location
+    of these files on the GCC server.
+ }
  \item{output.fn}{Base name for all output files. Defaults to \dQuote{blat_query.}
  }
  \item{ooc}{Logical flag for whether to speed up the BLAT search by providing a file of commonly repeated sequences. Default=TRUE
-}
+ }
  \item{tileSize}{Defaults to 11.
  }
  \item{stepSize}{Defaults to tileSize. To match web BLAT query, set to 5.

@@ -3,8 +3,9 @@
 # migrated to QCannot package 9/21/2015
 
 runBlat <- function(seq.input, make.fasta=TRUE,
-                     output.fn="blat_query",
-                     ooc=TRUE, tileSize=11, stepSize=tileSize,
+                    resource.path="/projects/geneva/gcc-fs2/SNP_annotation/UCSC_downloads/blat_resources/",
+                     output.fn="blat_query",  ooc=TRUE,
+                     tileSize=11, stepSize=tileSize,
                      repMatch=1024, minScore=30, minIdentity=90,
                      find.best=TRUE, out.type="psl", return.result=FALSE)
 {
@@ -39,13 +40,17 @@ runBlat <- function(seq.input, make.fasta=TRUE,
 
   # if pointing to pre-exisiting FASTA file, check that file exists
   if(!make.fasta){
-    fa.exists <- file.exists(seq.input)
-    if(!fa.exists) stop(paste("Specified input FASTA file does not exist:", seq.input))
-  }
+    if(file.exists(seq.input)) stop("Specified input FASTA file does not exist: ", seq.input)  }
   
-   # if asking for to find best, check that output type is psl
+   # if asking to find best hit(s), check that output type is psl
   if (find.best & out.type!="psl")
    {warning("Cannot apply 'near best in genome filter' (find.best=TRUE) unless BLAT output type is psl (out.type='psl')")}
+
+   # construct file paths to BLAT resource files and check they exist
+  db.path <- file.path(resource.path, "hg19.2bit")
+  if(!file.exists(db.path)) stop("resource file ", db.path," cannot be found")
+  ooc.path <- file.path(resource.path, "11.ooc")
+  if(ooc & !file.exists(ooc.path)) stop("resource file ", ooc.path," cannot be found")
   
   ### end checks
 
@@ -66,30 +71,19 @@ runBlat <- function(seq.input, make.fasta=TRUE,
 
   # if "seq.input" input is already a FASTA file saved on the filesystem
   if (!make.fasta){
-    message("User input being interpreted as file path to pre-existing FASTA file\n")
+    message("User input bexing interpreted as file path to pre-existing FASTA file\n")
     fasta.fn <- seq.input
   }
 
   ### run BLAT query tool
-  # build BLAT arguments
-
-  # point to OOC file
-  if (!ooc) {ooc.path=""}
-  if (ooc) {
-    ooc.path <- system.file("extdata", "11.ooc", package="QCannot")
-    ## for testing
-    # ext <- "/projects/geneva/gcc-fs2/sarahcn/GCC_Code/QCPipeline/trunk/QCannot/inst/extdata"
-    # ooc.path <- file.path(ext, "11.ooc")
-  }
-
-  # point to 2bit file
-  db.path <- system.file("extdata", "hg19.2bit", package="QCannot")
-  ## for testing
-  # db.path <- file.path(ext, "hg19.2bit")
-
+  
   # create system command to submit the BLAT job
+  ooc.arg <- ""
+  if(ooc) ooc.arg <- paste0(" -ooc=", ooc.path)
+  
   filo <- paste(output.fn, out.type, sep=".")
-  cmnd <- paste0("blat -ooc=", ooc.path, " -minScore=", minScore, " -minIdentity=", minIdentity, " -tileSize=", tileSize, " -stepSize=", stepSize, " -repMatch=", repMatch, " -out=", out.type, " ", db.path, " ", fasta.fn, " ", filo)
+  
+  cmnd <- paste0("blat ", ooc.arg, " -minScore=", minScore, " -minIdentity=", minIdentity, " -tileSize=", tileSize, " -stepSize=", stepSize, " -repMatch=", repMatch, " -out=", out.type, " ", db.path, " ", fasta.fn, " ", filo)
   
   message(paste("Submitting following command line BLAT query:\n", cmnd, "\n"))
   system(cmnd)
