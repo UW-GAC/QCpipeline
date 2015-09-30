@@ -22,8 +22,8 @@ getTxDb <- function(build, database_table) {
 
   # check packages that may be required based on "database_table" argument
   if(database_table=="knownGene") {
-      if(build=="hg19") {requireNamespace("TxDb.Hsapiens.UCSC.hg19.knownGene")}
-      if(build=="hg18") {requireNamespace("TxDb.Hsapiens.UCSC.hg18.knownGene")}    
+      if(build=="hg19") {requireNamespace("TxDb.Hsapiens.UCSC.hg19.knownGene", quietly=TRUE)}
+      if(build=="hg18") {requireNamespace("TxDb.Hsapiens.UCSC.hg18.knownGene", quietly=TRUE)}    
   }
 
   # check specified build
