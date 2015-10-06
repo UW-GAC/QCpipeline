@@ -13,6 +13,7 @@
 ## Updated Oct 24, 2014 better message about the number of indels with chr0 chrMT pos0
 ## Updated Jun 18, 2015 handle NA in Refstrand column of input, enhance indels.vcfout feature 
 ## Updated Sep 29, 2015 preface Hsapiens with BSgenome.Hsapiens.UCSC.hg19:: and preface getSeq, DNAStringSet, reverseComplement with Biostrings::
+## Updated Oct 5, 2015 enhance indels.vcfout
 ##
 ################################# CONTENT
 ## Example allele mappings table:
@@ -124,10 +125,12 @@ nchar.suffix <- function(a) {
 # equalACTGN() is invoked by equal.hg19()
 # to test for string equality, 
 # skipping over any non-ACGT characters (e.g. N, which is IUPAC wildcard) appearing in arg1
+# 
+# return FALSE if unequal string lengths
 #
 equalACGTN <- function(flank, hg19) {
 	ACGT = c("A", "C", "G", "T")
-	return(0 == mapply(function(c1, c2) sum(c1 != c2 & c1 %in% ACGT), strsplit(flank, ''), strsplit(hg19, '')))
+	return ((nchar(flank) == nchar(hg19)) & (0 == mapply(function(c1, c2) sum(c1 != c2 & c1 %in% ACGT), strsplit(flank, ''), strsplit(hg19, ''))))
 	
 	# if side (arg3) == 1, flank is to the "left" (upstream) of the indel,
 	# otherwise flank is to the "right" (downstream);
@@ -152,7 +155,7 @@ equalACGTN <- function(flank, hg19) {
 # nchar(a$var)  == a$var.n
 # nchar(a$seq1) == a$seq1.n
 # nchar(a$seq2) == a$seq2.n
-# a$seq1.n >= LEN (a constant defined below; it's smaller than the Illumina 50-mer probe)
+# a$seq1.n >= LEN 
 # a$seq2.n >= LEN
 #
 # if insertion is TRUE:
@@ -164,12 +167,14 @@ equalACGTN <- function(flank, hg19) {
 # return TRUE if the same conditions above are met, 
 #                and a$var matches a$hg19D exactly
 #
-equal.hg19 <- function(a, insertion=FALSE) {
-	LEN = 30
-	probeLEN = 50
-	stopifnot(all(a$seq1.n >= LEN))
-	stopifnot(all(a$seq2.n >= LEN))
-	
+# n.b. 
+# this function depends on substr() returning empty string if start/stop parameters are invalid
+#
+equal.hg19 <- function(a, LEN, probeLEN, insertion=FALSE) {
+	stopifnot(LEN <= probeLEN)
+	# stopifnot(all(a$seq1.n >= LEN))
+	# stopifnot(all(a$seq2.n >= LEN))
+		
 	if (insertion) {
 		seq2.near = equalACGTN(substr(a$seq2, 1, LEN), substr(a$hg19I, a$seq1.n +1, a$seq1.n + LEN))
 		seq2.far  = equalACGTN(substr(a$seq2, LEN +1, probeLEN), substr(a$hg19I, a$seq1.n + LEN +1, a$seq1.n + probeLEN))
@@ -346,8 +351,15 @@ pseudoBLAT <- function(b) {
 
 
 
+# probeLEN can be 50 or 60 depending on the array
+make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout = FALSE, indels.vcfout.filename = "indels.needLeftAlign.vcf", probeLEN = 50) {
+  stopifnot(probeLEN >= 20) # some probes may be as short as 32
 
-make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout = FALSE, indels.vcfout.filename = "indels.needLeftAlign.vcf") {
+  LEN = 30 # parameter for equal.hg19(); should be shorter than probeLEN
+  if (LEN >= probeLEN) {
+	LEN = probeLEN - 1
+  }
+  
   options(stringsAsFactors = FALSE)
 
   # avoid R CMD check notes
@@ -503,6 +515,8 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 				a$chr      = ifelse(a$chr == "XY", "X", a$chr)
 				a$chr.name = paste0("chr", a$chr)
 
+				a$INFO = "." # to be put into INFO column of vcf  
+				
 				iteration1.results = NULL
 				for (iteration in 1:2) {
 					if (iteration == 2) {
@@ -547,43 +561,64 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 					
 					# initialize
 					a$posD  = 0
+					a$posI  = 0
 					a$hg19D = "ACGT"
+					a$hg19I = "ACGT"
 					a$del   = FALSE # mark variants as possible deletions using a$del = TRUE
-									
-					# loop through scenarios
-					# skip variants already determined as possible deletions 
-					scenarios = cbind(a$MapInfo,  a$MapInfo +1,  a$MapInfo - a$var.n +1,  a$MapInfo - a$var.n +2,  
+					a$ins   = FALSE
+					
+					# go through deletion scenarios, followed by insertion scenarios
+					# when a scenario fits, mark the indel & skip testing it
+					scenariosD = cbind(a$MapInfo,  a$MapInfo +1,  a$MapInfo - a$var.n +1,  a$MapInfo - a$var.n +2,  
 									  a$MapInfo +nchar.suffix(a), 
 									  a$MapInfo +nchar.suffix(a) +1, 
 									  a$MapInfo +nchar.suffix(a) -a$var.n +1, 
 									  a$MapInfo +nchar.suffix(a) -a$var.n +2)
-					for (i in 1:ncol(scenarios)) {
-						a$posD  = ifelse(a$del, a$posD,  scenarios[,i])
+					scenariosI = cbind(a$MapInfo, a$MapInfo -1, a$MapInfo +nchar.suffix(a),  a$MapInfo -1 +nchar.suffix(a))
+					
+					for (s in 1:ncol(scenariosD)) {
+						a$posD  = ifelse(a$del, a$posD,  scenariosD[,s])
 						a$hg19D = ifelse(a$del, a$hg19D, getSequence(a))
-						a$del   = ifelse(a$del, TRUE,    equal.hg19(a))
+						a$del   = ifelse(a$del, TRUE,    equal.hg19(a, probeLEN, probeLEN))
+					}
+					for (s in 1:ncol(scenariosI)) {
+						a$posI  = ifelse(a$ins, a$posI,  scenariosI[,s])
+						a$hg19I = ifelse(a$ins, a$hg19I, getSequence(a, insertion=TRUE))
+						a$ins   = ifelse(a$ins, TRUE,    equal.hg19(a, probeLEN, probeLEN, insertion=TRUE))
 					}
 
-					# initialize for insertion scenarios:
-					a$posI  = 0
-					a$hg19I = "ACGT"
-					a$ins   = FALSE
-					scenarios = cbind(a$MapInfo, a$MapInfo -1, a$MapInfo +nchar.suffix(a),  a$MapInfo -1 +nchar.suffix(a))
-					for (i in 1:ncol(scenarios)) {
-						a$posI  = ifelse(a$ins, a$posI,  scenarios[,i])
-						a$hg19I = ifelse(a$ins, a$hg19I, getSequence(a, insertion=TRUE))
-						a$ins   = ifelse(a$ins, TRUE,    equal.hg19(a, insertion=TRUE))
+					# for variants not yet tagged as insertion or deletion, re-run the scenarios 
+					# with a shorter LEN so that equal.hg19() will compare fewer ACGTs
+					# and therefore more likely to return TRUE (although a longer LEN is preferable
+					# for confidence)
+					a$del2 = FALSE
+					a$ins2 = FALSE
+					for (s in 1:ncol(scenariosD)) {
+						a$posD  = ifelse(a$del | a$ins | a$del2, a$posD,  scenariosD[,s])
+						a$hg19D = ifelse(a$del | a$ins | a$del2, a$hg19D, getSequence(a))
+						a$del2  = ifelse(a$del | a$ins | a$del2, a$del2,  equal.hg19(a, LEN, probeLEN))
 					}
+					for (s in 1:ncol(scenariosI)) {
+						a$posI  = ifelse(a$del | a$ins | a$ins2, a$posI,  scenariosI[,s])
+						a$hg19I = ifelse(a$del | a$ins | a$ins2, a$hg19I, getSequence(a, insertion=TRUE))
+						a$ins2  = ifelse(a$del | a$ins | a$ins2, a$ins2,  equal.hg19(a, LEN, probeLEN, insertion=TRUE))
+					}
+					
+					# consolidate
+					a$del = a$del | a$del2
+					a$ins = a$ins | a$ins2
+					a$del2 <- NULL
+					a$ins2 <- NULL
+					
 					
 					# if any variant has not yet been tagged as insertion or deletion
 					# (because of equal.hg19() test results)
 					# then go through the above scenarios again (plus one new scenario), 
 					# but instead of equal.hg19(), use approx.hg19() which returns 
 					# a numeric score per scenario, then pick scenario with highest score
-					a$approx.hg = "." # to be put into INFO column of vcf  
 					b = a[!a$ins & !a$del,]
 					if (nrow(b) > 0) {
 						message("\tnumber of indels that will undergo approximate matching is ", nrow(b))
-						b$approx.hg = "APPROX"
 						
 						b$scoreD     = 0
 						b$scoreD.old = -10 # dummy value (best score so far)
@@ -646,16 +681,19 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 						b$ins = (b$scoreI > b$scoreD) & (b$scoreI >  (pmin(b$seq1.n, b$seq2.n) + 10))
 						# b$del  = ((b$scoreD > (b$scoreI + 0.02)) & (b$scoreD > 0.6)) | ((b$scoreD > b$scoreI) & (b$scoreD > 0.8))
 						# b$ins  = ((b$scoreI > (b$scoreD + 0.02)) & (b$scoreI > 0.6)) | ((b$scoreI > b$scoreD) & (b$scoreI > 0.8))
+
+						if (nrow(b[b$ins | b$del,]) > 0) b[b$ins | b$del,]$INFO = "APPROX"
 						
 						# remove extraneous columns
 						# merge b into a
 						b = subset(b, select = -c(scoreD, scoreI, scoreD.old, scoreI.old, hg19D.old, hg19I.old, posD.old, posI.old))
 						a = a[a$ins | a$del,]
 						a = rbind(a, b)
-					}
-				
-					# is iteration 2 warranted?
-					# not if all variants have been tagged as insertion, deletion, or both
+					} # end of approx. matching
+
+
+					# if all variants have been tagged as insertion, deletion, or both,
+					# then skip iteration #2
 					if (iteration == 1) {
 						b = a[!a$ins & !a$del,]
 						if (nrow(b) > 0) { 
@@ -665,7 +703,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 						} else {
 							break 
 						}
-					} else { # else this is iteration 2
+					} else { # else this is already iteration 2
 						a = rbind(a, iteration1.results)
 					}
 					
@@ -674,15 +712,17 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 				# keep only indels that are unambiguously an insertion or deletion 
 				# i.e. toss indels that could be either, and toss indels that appear to be neither
 				num.attempted = nrow(a)
-				a = a[xor(a$ins, a$del),]
-				num.unambiguous = nrow(a)
+				num.unambiguous = sum(xor(a$ins, a$del))
 				if (num.unambiguous > 0) {
 					if (num.attempted != num.unambiguous) {
 						warning("\tunable to classify ", num.attempted - num.unambiguous, " indels (will not appear in vcf)")
+						write.table(a[a$ins == a$del,]$Name, "indels.unprocessed", col.names=F, row.names=F, quote=F)
 					}
+					
+					a = a[xor(a$ins, a$del),]
 					# define pos, ref, alt columns of vcf output
 					a$pos = ifelse(a$ins, a$posI, a$posD -1) # reconcile vcf requirements & posI or posD (see * @ above)
-					
+			
 					# n.b. pseudoBLAT results, if any were kept, invalidate var.n, so don't use it
 					# a$ref = ifelse(a$ins, substr(a$hg19I, a$seq1.n, a$seq1.n), substr(a$hg19D, a$seq1.n, a$seq1.n +a$var.n))
 					a$ref = ifelse(a$ins, substr(a$hg19I, a$seq1.n, a$seq1.n), substr(a$hg19D, a$seq1.n, nchar(a$hg19D) - a$seq2.n))
@@ -690,7 +730,7 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 					a$alt = ifelse(a$ins, paste0(a$ref, a$var), substr(a$ref, 1, 1))
 					
 					# sort by chr, pos 
-					vcf = a[,c("chr", "pos", "Name", "ref", "alt", "approx.hg")]
+					vcf = a[,c("chr", "pos", "Name", "ref", "alt", "INFO")]
 					vcf$chr = ifelse(vcf$chr == "X", "23", vcf$chr)
 					vcf$chr = ifelse(vcf$chr == "Y", "24", vcf$chr)
 					vcf$chr = as.integer(vcf$chr)
@@ -702,8 +742,8 @@ make.allele.mappings <- function(snp.dat, indels.verbose = TRUE, indels.vcfout =
 					# create dummy values to comply with vcf format
 					vcf$column6 = 100
 					vcf$column7 = "PASS"
-					vcf$column8 = vcf$approx.hg
-					vcf$approx.hg <- NULL
+					vcf$column8 = vcf$INFO
+					vcf$INFO <- NULL
 					vcf$column9 = "GT"
 					vcf$column10 = "0/1"
 					
