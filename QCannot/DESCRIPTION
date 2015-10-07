@@ -1,5 +1,5 @@
 Package: QCannot
-Version: 0.1.1
+Version: 0.1.2
 Type: Package
 Title: Utilities for QC annotation
 Description: Code for annotating variants: alleles, genome build, etc.
