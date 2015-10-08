@@ -7,6 +7,9 @@ library(GWASTools)
 library(QCpipeline)
 library(RColorBrewer)
 library(MASS)
+library(ggplot2)
+library(GGally)
+library(ggExtra)
 sessionInfo()
 
 # read configuration
@@ -17,6 +20,9 @@ config <- readConfig(args[1])
 # check for type
 if (length(args) < 2) stop("missing pca type (study or combined)")
 type <- args[2]
+
+theme_set(theme_bw())
+
 
 # check config and set defaults
 if (type == "study") {
@@ -83,8 +89,8 @@ if (type == "study") {
   } else samp$ethnicity <- NA
 } else if (type == "combined") {
   scanAnnot <- getobj(config["annot_scan_file"])
-  scan1 <- getVariable(scanAnnot, c("scanID", config["annot_scan_raceCol"]))
-  names(scan1) <- c("scanID", "race")
+  scan1 <- getVariable(scanAnnot, c("scanID", config["annot_scan_raceCol"], config["annot_scan_hapmapCol"]))
+  names(scan1) <- c("scanID", "race", "geno.cntl")
   if (!is.na(config["annot_scan_ethnCol"])) {
     scan1$ethnicity <- getVariable(scanAnnot, config["annot_scan_ethnCol"])
   } else scan1$ethnicity <- NA
@@ -96,6 +102,7 @@ if (type == "study") {
   ext.scanAnnot <- getobj(config["ext_annot_scan_file"])
   scan2 <- getVariable(ext.scanAnnot, c("scanID", config["ext_annot_scan_raceCol"]))
   names(scan2) <- c("scanID", "race")
+  scan2$geno.cntl <- 1
   scan2$ethnicity <- NA
   samp <- rbind(scan1, scan2)
 } else {
@@ -108,32 +115,32 @@ samp <- samp[match(pca$sample.id, samp$scanID),]
 stopifnot(allequal(pca$sample.id, samp$scanID))
 table(samp$race, samp$ethnicity, useNA="ifany")
 
-# color by race
-table(samp$race, useNA="ifany")
+# why are we doing this? (sort capital letters before lower case)
 Sys.setlocale("LC_COLLATE", "C")
-samp$plotcol <- "gray50"
+
+# color by race
 race <- as.character(sort(unique(samp$race)))
 if (length(race) > 0) {
   stopifnot(all(race %in% names(config)))
-  for (r in race) {
-    sel <- samp$race %in% r
-    samp$plotcol[sel] <- config[r]
-  }
+  cmapRace <- config[race]
+  colorScale <- scale_color_manual("race", values=cmapRace, breaks=names(cmapRace), na.value="grey")
+} else {
+  colorScale <- scale_color_manual("race", values="black", breaks="hack", na.value="black")
 }
-table(samp$plotcol, useNA="ifany")
+rm(race)
 
 # plot symbol by ethnicity
-table(samp$ethnicity, useNA="ifany")
-samp$plotsym <- 1
 ethn <- as.character(sort(unique(samp$ethnicity)))
-if (length(ethn) > 0) {
+if (length(ethn) > 0){
   stopifnot(all(ethn %in% names(config)))
-  for (e in ethn) {
-    sel <- samp$ethnicity %in% e
-    samp$plotsym[sel] <- as.integer(config[e])
-  }
+  symbolMap <- config[ethn]
+  mode(symbolMap) <- "integer"
+  symbolScale <- scale_shape_manual("ethnicity", values=symbolMap, breaks=names(symbolMap), na.value=16)
+} else {
+  symbolScale <- scale_shape_manual("ethnicity", values=1, breaks="hack", na.value=16)
 }
-table(samp$plotsym, useNA="ifany")
+rm(ethn)
+
 
 # labels
 ## recent change in SNPRelate - pca$eigenval only returns first 32 values
@@ -141,128 +148,122 @@ table(samp$plotsym, useNA="ifany")
 x <- pca$varprop[1:4]
 lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 
-samp$nrace <- table(samp$race, useNA="ifany")[samp$race]
-samp$nrace[is.na(samp$nrace)] <- sum(is.na(samp$nrace))
-zorder <- order(-samp$nrace)
-# plot the first four PCs
+#samp$nrace <- table(samp$race, useNA="ifany")[samp$race]
+#samp$nrace[is.na(samp$nrace)] <- sum(is.na(samp$nrace))
+#zorder <- order(-samp$nrace)
+
+pcs <- pca$eigenvect
+colnames(pcs) <- paste0("EV", 1:ncol(pcs))
+pcs <- as.data.frame(pcs)
+pcs$scanID <- pca$sample.id
+
+dat <- merge(pcs, samp)
+
+# plot the first four pcs
+nev <- 4
+pairs <- ggpairs(dat,
+                 columns=which(names(dat) %in% sprintf("EV%s", 1:nev)),
+                 upper=list(continuous="points"),
+                 color="race",
+                 pch="ethnicity",
+                 columnLabels=lbls[1:nev],
+                 axisLabels="internal",
+                 params=c(alpha=0))
+for (i in 1:length(pairs$columns)){
+  for (j in 1:length(pairs$columns)){
+    subplot <- getPlot(pairs, i, j)
+    if (i != j){
+      subplot <- subplot + geom_point(alpha=0.7, size=2, aes(pch=ethnicity))
+    } else {
+    }
+    subplot <- subplot + colorScale + symbolScale
+    #subplot <- subplot + theme()
+    #subplot <- subplot + guides(colour = guide_legend(override.aes = list(size=3)))
+    #if (i == 2 & j == 1) leg <- g_legend(subplot)
+    pairs <- putPlot(pairs, subplot, i, j)
+  }
+}
 png(config["out_pairs_plot"], width=720, height=720)
-par(lwd=1.5, cex.axis=1.5)
-pairs(pca$eigenvect[zorder,1:4], labels=lbls, col=samp$plotcol[zorder], pch=samp$plotsym[zorder])
+print(pairs)
 dev.off()
+
+
+# plot EV1 vs EV2 with density plots
+p <- ggplot(dat, aes(x=EV1, y=EV2, color=race, pch=ethnicity)) +
+  geom_point(alpha=0.7) +
+  colorScale +
+  symbolScale +
+  theme(legend.position="none") +
+  xlab(lbls[1]) + ylab(lbls[2])
+pdf(config["out_dens_plot"], width=6, height=6)
+ggMarginal(p, type="density")
+dev.off()
+
 
 # plot EV1 vs EV2
-# one group at a time so we don't cover up smaller sample sets
-pdf(config["out_ev12_plot"], width=6, height=6)
-plot(pca$eigenvect[zorder,1], pca$eigenvect[zorder,2], xlab=lbls[1], ylab=lbls[2], col=samp$plotcol[zorder], pch=samp$plotsym[zorder])
-#plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
-#tbl <- table(samp$plotcol)
-#colOrd <- names(tbl)[order(tbl, decreasing=TRUE)]
-#for (r in colOrd) {
-#  sel <- samp$plotcol == r
-#  points(pca$eigenvect[sel,1], pca$eigenvect[sel,2], col=samp$plotcol[sel], pch=samp$plotsym[se#l])
-#}
-legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(race, ethn),
-       col=c(config[race], rep("black", length(ethn))),
-       pch=c(rep(1, length(race)), as.integer(config[ethn])),
-       ncol=ifelse(length(race) + length(ethn) > 8, 2, 1))
-dev.off()
+p <- p + theme(legend.position="right")
+ggsave(config["out_ev12_plot"], plot=p, width=6, height=6)
+
+
+ggParcoordTheme <- theme(axis.title.x=element_blank(),
+                         axis.ticks.y=element_blank(),
+                         axis.text.y=element_blank(),
+                         axis.title.y=element_blank(),
+                         axis.text.x=element_text(colour="black"),
+                         panel.grid.major.y=element_blank(),
+                         panel.grid.minor.y=element_blank(),
+                         legend.position="top")
+
 
 # parallel coordinates plot
-png(config["out_parcoord_plot"], width=1200, height=600)
-samp$alpha <- .getParcoordAlpha(samp, "race")
-par(mar = c(5, 2, 7, 2), xpd=TRUE)
-# legend in subplot above parcoord.
-#layout(matrix(c(2,1), nrow=2), heights=c(1,3))
-parcoord(pca$eigenvect[zorder, 1:12], col=rgb(t(col2rgb(samp$plotcol)), alpha=samp$alpha, maxColorValue=255)[zorder])
-title(xlab="Eigenvector")
-# legend
-legendNames <- race
-legendCols <- config[race]
-if (any(is.na(samp$race))){
-  legendNames <- c(legendNames, "Unknown")
-  legendCols <- c(legendCols, "gray50")
-}
-legend("topleft", legendNames, col=legendCols, lty=1, ncol=5, box.col="white", lwd=3, inset=c(0, -0.2))
-dev.off()
-
+ev.ind <- which(names(dat) %in% sprintf("EV%s", 1:12))
+p <- ggparcoord(dat, columns=ev.ind, groupColumn="race", scale="uniminmax", alphaLines=0.5) +
+  colorScale + ggParcoordTheme
+ggsave(config["out_parcoord_plot"], plot=p, width=10, height=5)
 
 
 ## other variables for parallel coordinate, specified by user
-if (type == "study"){
+if (type == "study" & length(vars) > 0){
   for (var in vars){
     stopifnot(var %in% names(samp))
     
     # auto filename
     fname <- paste(config["out_parcoord_var_prefix"], "_", var, ".png", sep="")
+    dat[["fvar"]] <- as.factor(dat[[var]])
     
-    x <- table(samp[[var]])
-    x <- x[order(names(x))]
-    # palette and colors
-    if (length(x) > 9) stop("only 9 levels allowed")
-    if (length(x) < 3) pal <- c("black", "red") else  pal <- brewer.pal(length(x), "Set1")
-    names(pal) <- names(x)
-    samp$varcol <- pal[as.character(samp[[var]])]
-    samp$varcol[is.na(samp$varcol)] <- "gray"
-    # ordering and transparency
-    varorder <- order(-.getN(samp, var))
-    samp$alpha <- .getParcoordAlpha(samp, var)
-    # plot
-    png(fname, width=1200, height=600)
-    samp$alpha <- .getParcoordAlpha(samp, "race")
-    par(mar = c(5, 2, 7, 2), xpd=TRUE)
-    parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], cex.axis=3, cex.lab=3)
-    title(xlab="Eigenvector")
-    # legend
-    if (any(is.na(samp[[var]])))  pal["Unknown"] <- "gray"
-    legend("topleft", names(pal), col=pal, lty=1, ncol=5, box.col="white", lwd=3, inset=c(0, -0.2))
-    dev.off()
-    
-    
-#     pdf(fname, width=12, height=6)
-#     par(mar = c(4, 2, 7, 2), xpd=TRUE)
-#     parcoord(pca$eigenvect[varorder, 1:12], col=rgb(t(col2rgb(samp$varcol)), alpha=samp$alpha, maxColorValue=255)[varorder], main=var)
-#     title(xlab="Eigenvector")
-#     # legend
-#     if (any(is.na(samp[[var]])))  pal["Unknown"] <- "gray"
-#     legend("topleft", names(pal), col=pal, lty=1, ncol=4, box.col="white", lwd=3, inset=c(0, -0.3))
-#     dev.off()
+    p <- ggparcoord(dat, columns=ev.ind, groupColumn="fvar", scale="uniminmax", alphaLines=0.5) +
+      scale_color_brewer(var, palette="Set1", na.value="grey") + ggParcoordTheme
+    ggsave(fname, plot=p, width=10, height=5)
     
   }
 }
 
 if (type == "combined"){
   
-	# plot hapmaps separately from study subjects - study in gray, hm in color
-	pdf(config["out_ev12_plot_hapmap"], width=6, height=6)
-	plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], col="gray", pch=samp$plotsym)# type="n")
-	# this is an ugly selection command - we want to keep the previous ordering but only have hapmap subjects
-	ext.sel <- zorder[(samp$scanID[zorder] %in% ext.scanAnnot$scanID) | (scanAnnot$geno.cntl[match(samp$scanID[zorder], scanAnnot$scanID)] %in% 1)] # get external or study hapmaps
-	ext.race <- as.character(sort(unique(samp$race[ext.sel])))
-	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
-        points(pca$eigenvect[ext.sel,1], pca$eigenvect[ext.sel,2], col=samp$plotcol[ext.sel], pch=samp$plotsym[ext.sel])
-	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c("Study", ext.race, ext.ethn),
-               col=c("gray", config[ext.race], rep("black", length(ext.ethn))),
-               pch=c(rep(1, length(ext.race)+1), as.integer(config[ext.ethn])),
-               ncol=ifelse(length(ext.race) + length(ext.ethn) > 8, 2, 1))
-	dev.off()
+  xlim <- range(dat$EV1)
+  ylim <- range(dat$EV2)
+  
+  # hapmap plot
+  dat$plotcol <- dat$race
+	dat$plotcol[dat$geno.cntl %in% 0] <- NA
+  p <- ggplot(dat, aes(x=EV1, y=EV2, color=plotcol, pch=ethnicity)) +
+    geom_point() +
+    colorScale +
+    symbolScale +
+    xlab(lbls[1]) + ylab(lbls[2]) +
+    xlim(xlim)
+  ggsave(config["out_ev12_plot_hapmap"], plot=p, width=6, height=6)
+  	
+  p <- ggplot(dat[dat$geno.cntl %in% 0, ], aes(x=EV1, y=EV2, color=race, pch=ethnicity)) +
+    geom_point() +
+    colorScale +
+    symbolScale +
+    xlab(lbls[1]) + ylab(lbls[2]) +
+    xlim(xlim)
+  ggsave(config["out_ev12_plot_study"], plot=p, width=6, height=6)
 
-	pdf(config["out_ev12_plot_study"], width=6, height=6)
-	plot(pca$eigenvect[,1], pca$eigenvect[,2], xlab=lbls[1], ylab=lbls[2], type="n")
-	ext.sel <- zorder[(samp$scanID[zorder] %in% scanAnnot$scanID) & (scanAnnot$geno.cntl[match(samp$scanID[zorder], scanAnnot$scanID)] %in% 0)] # get only study subjects (not study hapmaps)
-	ext.race <- as.character(sort(unique(samp$race[ext.sel])))
-	ext.ethn <- as.character(sort(unique(samp$ethn[ext.sel])))
-	points(pca$eigenvect[ext.sel,1], pca$eigenvect[ext.sel,2], col=samp$plotcol[ext.sel], pch=samp$plotsym[ext.sel])
-	legend(bestLegendPos(pca$eigenvect[,1], pca$eigenvect[,2]), legend=c(ext.race, ext.ethn),
-               col=c(config[ext.race], rep("black", length(ext.ethn))),
-               pch=c(rep(1, length(ext.race)), as.integer(config[ext.ethn])),
-               ncol=ifelse(length(ext.race) + length(ext.ethn) > 8, 2, 1))
-	dev.off()
 }
 
-# plot density on sides
-pdf(config["out_dens_plot"], width=7, height=7)
-plot2DwithHist(pca$eigenvect[zorder,1], pca$eigenvect[zorder,2], xlab=lbls[1], ylab=lbls[2], col=samp$plotcol[zorder], pch=samp$plotsym[zorder])
-dev.off()
 
 #plot SNP-PC correlation
 snpAnnot <- getobj(snpfile)
@@ -294,7 +295,10 @@ if (!is.na(config["out_corr_pruned_plot_prefix"])) {
 }
   
 # scree plot
-x <- pca$varprop
-pdf(config["out_scree_plot"], width=6, height=6)
-plot(1:nev,100*x[1:nev], xlab="Eigenvector", ylab="Percent of variance accounted for")
-dev.off()
+dat <- data.frame(ev=1:nev, varprop=pca$varprop[1:nev])
+
+p <- ggplot(dat, aes(x=factor(ev), y=100*varprop)) +
+  geom_point() +
+  xlab("Eigenvector") + ylab("Percent of variance accounted for")
+ggsave(config["out_scree_plot"], plot=p, width=6, height=6)
+
