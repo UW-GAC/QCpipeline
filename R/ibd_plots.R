@@ -5,7 +5,10 @@
 
 library(GWASTools)
 library(QCpipeline)
+library(RColorBrewer)
+library(ggplot2)
 sessionInfo()
+
 
 ## read configuration
 args <- commandArgs(trailingOnly=TRUE)
@@ -28,21 +31,30 @@ default <- c("subjectID", NA, "KING", "ibd_kc32.RData",
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
+theme_set(theme_bw() + theme(legend.position=c(1, 1), legend.justification=c(1,1), legend.background = element_rect(colour = "black")))
+
 ibd <- getobj(config["out_ibd_kc32_file"])
 dim(ibd)
 
 ## if ibd has > 5000 rows, make png instead of pdf
 if (nrow(ibd) > 5000) {
   plotfile <- function(filename, ...) {
-    file <- sub("pdf$", "png", filename)
-    png(file, width=650, height=650, ...)
+    png(plotname(filename), width=650, height=650, ...)
     par(cex=1.5)
   }
+  plotname <- function(filename){
+    sub("pdf$", "png", filename)
+  }
+  
 } else {
   plotfile <- function(filename, ...) {
-    pdf(filename, width=6, height=6)
+    pdf(plotname(filename), width=6, height=6)
+  }
+  plotname <- function(filename) {
+    filename
   }
 }
+
 
 (scanAnnot <- getobj(config["annot_scan_file"]))
 scanID <- getScanID(scanAnnot)
@@ -88,14 +100,10 @@ table(ibd$exp.rel)
 
 
 ## make our own color code so we can modify the plot legend
-## deg2.rel <-  c("HS", "HSr", "HSFC", "Av", "GpGc", "DFC")
-## deg3.rel <- c("FC", "HAv", "OAv", "OC")
-prel <- ibd$exp.rel
-## prel[prel %in% deg2.rel] <- "Deg2"
 rels <- c("Dup", "PO", "FS", "Deg2", "Deg3", "Q", "U")
-cols <- c("magenta", "cyan", "red", "blue", "lightgreen", "darkgreen", "black")
-names(cols) <- rels
-pcol <- cols[prel]
+cols <- c(brewer.pal(length(rels)-1, "Dark2")[c(1, 2, 3, 5, 4, 6)], "black")
+cmap <- setNames(cols, rels)
+
 
 if (config["ibd_method"] == "KING") {
 
@@ -106,60 +114,50 @@ if (config["ibd_method"] == "KING") {
   cut.deg3 <- 1/(2^(9/2))
   cut.ibs <- 0.003 # should be 0 for PO, but sometimes is greater due to genotyping error. 0.003 works for OLGA, Kittner, and HRS2
   
-  plotfile(config["out_ibd_exp_plot"])
-  plot(ibd$IBS0, ibd$kinship, col=pcol, main="IBD - expected",
-       xlab="Fraction of IBS=0", ylab="Kinship coefficient")
-  #abline(h=c(0.5,0.25,0.125), col="gray")
-  abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
-  rel <- rels[rels %in% unique(prel)]
-  col <- cols[rel]
-  legend("topright", legend=rel, col=col, pch=1)
-  dev.off()
-
+  alpha <- 0.7
+  
+  p <- ggplot(ibd, aes(x=IBS0, y=kinship, color=exp.rel)) +
+    geom_hline(y=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
+    geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
+    geom_point(alpha=alpha) +
+    scale_color_manual(values=cmap, breaks=names(cmap)) +
+    xlab("Fraction of IBS=0") + ylab("Kinship coefficient") +
+    theme(legend.position=c(1, 1), legend.justification=c(1,1)) +
+    ggtitle("IBD - expected")
+  ggsave(plotname(config["out_ibd_exp_plot"]), plot=p, width=6, height=6)
+  
   ## assign observed relationships (duplicates)
   ibd$obs.rel <- ibdAssignRelatednessKing(ibd$IBS0, ibd$kinship)
   message("observed relative pairs")
   print(table(ibd$obs.rel, useNA="ifany"))
   
-  plotfile(config["out_ibd_obs_plot"])
-  obscols <- cols[ibd$obs.rel]
-  # unique relatives
-  urel <- unique(ibd$obs.rel)
-  # ordered colors for legend
-  ucols <- cols[names(cols) %in% urel]
-  plot(ibd$IBS0, ibd$kinship, col=obscols, main="IBD - observed",
-       xlab="Fraction of IBS=0", ylab="Kinship coefficient")
-  abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
-  legend("topright", legend=names(ucols), col=ucols, pch=1)
-  dev.off()
+  p <- ggplot(ibd, aes(x=IBS0, y=kinship, color=obs.rel)) +
+    geom_hline(y=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
+    geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
+    geom_point(alpha=alpha) +
+    scale_color_manual(values=cmap, breaks=names(cmap)) +
+    xlab("Fraction of IBS=0") + ylab("Kinship coefficient") +
+    ggtitle("IBD - observed")
+  ggsave(plotname(config["out_ibd_obs_plot"]), plot=p, width=6, height=6)
   
-  unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.deg2 # use degree 2 cutoff in KING paper - ~0.088
+  
+  ibd$unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.deg2 # use degree 2 cutoff in KING paper - ~0.088
   ## ## check for Deg2 and Deg3
   ## deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
   ## deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
   ## unexp <- unexp & !deg2 & !deg3
   message("unexpected relative pairs")
-  print(table(ibd$obs.rel[unexp]))
+  print(table(ibd$obs.rel[ibd$unexp]))
   
   
-  plotfile(config["out_ibd_unexp_plot"])
-  psym <- rep(1, nrow(ibd))
-  psym[unexp] <- 2
-  cols[c("Deg3", "Q", "U")] <- "black"
-  pcol <- cols[prel]
-  plot(ibd$IBS0, ibd$kinship, col=pcol, pch=psym, xlab="Fraction of IBS=0",
-       ylab="Kinship coefficient")
-  points(ibd$IBS0[unexp], ibd$kinship[unexp], col=pcol[unexp], pch=psym[unexp])
-  abline(h=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), v=cut.ibs, lty=2, col="gray")
-  rels <- rels[rels %in% unique(prel)]
-  col <- cols[rel]
-  sym <- c(rep(1, length(col)), 2)
-  rel[rel == "U"] <- "Unrel"
-  rel <- paste("Exp", rel)
-  rel <- c(rel, "Unexp")
-  col <- c(col, "black")
-  legend("topright", legend=rel, col=col, pch=sym)
-  dev.off()
+  p <- ggplot(ibd, aes(x=IBS0, y=kinship, color=exp.rel, pch=unexp)) +
+    geom_hline(y=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
+    geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
+    geom_point(alpha=alpha) +
+    scale_color_manual(values=cmap, breaks=names(cmap)) +
+    xlab("Fraction of IBS=0") + ylab("Kinship coefficient") +
+    ggtitle("IBD - unexpected")
+  ggsave(plotname(config["out_ibd_unexp_plot"]), plot=p, width=6, height=6)
   
 } else {
   plotfile(config["out_ibd_exp_plot"])
@@ -184,15 +182,16 @@ if (config["ibd_method"] == "KING") {
   message("unexpected relative pairs")
   print(table(ibd$obs.rel[unexp]))
 
+  
   plotfile(config["out_ibd_unexp_plot"])
   psym <- rep(1, nrow(ibd))
   psym[unexp] <- 2
-  cols[c("Deg3", "Q", "U")] <- "black"
-  pcol <- cols[prel]
+  cmap[c("Deg3", "Q", "U")] <- "black"
+  pcol <- cmap[ibd$exp.rel]
   ibdPlot(ibd$k0, ibd$k1, color=pcol, pch=psym)
-  points(ibd$k0[unexp], ibd$k1[unexp], color=pcol[unexp], pch=psym[unexp])
-  rel <- rels[rels %in% unique(prel)]
-  col <- cols[rel]
+  points(ibd$k0[unexp], ibd$k1[unexp], col=pcol[unexp], pch=psym[unexp])
+  rel <- rels[rels %in% unique(ibd$exp.rel)]
+  col <- cmap[rel]
   sym <- c(rep(1, length(col)), 2)
   rel[rel == "U"] <- "Unrel"
   rel <- paste("Exp", rel)
@@ -252,9 +251,13 @@ uniqsamp <- unique(allsamp)
 con <- rep(NA, n)
 for(i in 1:n) con[i] <- sum(allsamp %in% uniqsamp[i])
 
-plotfile(config["out_ibd_con_plot"])
-plot(sort(con), xlab="rank", ylab="sample connectivity", main=paste(npr, "pairs with KC > 1/32"))
-dev.off()
+dat <- data.frame(con=sort(con), rank=1:length(con))
+p <- ggplot(dat, aes(x=rank, y=con)) +
+  geom_point() +
+  ylab("sample connectivity") +
+  ggtitle(paste(npr, "pairs with KC > 1/32"))
+ggsave(plotname(config["out_ibd_con_plot"]), plot=p, width=6, height=6)
+
 
 con.df <- data.frame("scanID"=uniqsamp, "connectivity"=con)
 save(con.df, file=config["out_ibd_con_file"])
