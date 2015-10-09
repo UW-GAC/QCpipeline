@@ -194,7 +194,9 @@ names(tmp) <- c("scanID", "tag")
 tags <- ddply(tmp, .(scanID), summarise, tags=paste(tag, collapse="; "))
 table(tags$tags)
 
-png(paste(config["out_plot_prefix"], "_%03d.png", sep=""), width=720, height=720)
+ndigits <- floor(log10(nrow(tags)) + 1)
+
+png(paste(config["out_plot_prefix"], "_%0", ndigits, "d.png", sep=""), width=720, height=720)
 chromIntensityPlot(blData, scan.ids=tags$scanID, chrom.ids=rep(chr.sel, nrow(tags)),
                    info=tags$tags, snp.exclude=snp.exclude, cex=0.25, ideogram=FALSE)
 dev.off()
@@ -211,8 +213,8 @@ snp.start <- snp.idx[1]
 snp.count <- snp.idx[2] - snp.idx[1] + 1
 
 
-fname <- paste0(config["out_baf_density_prefix"], "_%03d.png")
-adj <- 1/30 # bandwidth esque
+fname <- paste0(config["out_baf_density_prefix"], "_%0", ndigits, "d.png")
+adj <- 1/20 # bandwidth esque
 for (i in seq_along(tags$scanID)){
   
   if (i %% 10 == 0) message(sprintf("%s of %s flagged samples", i, nrow(tags)))
@@ -224,6 +226,7 @@ for (i in seq_along(tags$scanID)){
   p <- ggplot(dat, aes(x=baf)) +
     geom_line(aes(group=chromosome), alpha=0.3, stat="density", color="black", adjust=adj, na.rm=TRUE, size=0.2) +
     #geom_line(stat="density", color="red", adjust=adj, na.rm=TRUE) +
+    theme(axis.text.y=element_blank()) +
     ggtitle(sprintf("%s - %s", scan.id, tags$tags[i]))
   ggsave(sprintf(fname, i), plot=p, width=6, height=6)
 }
