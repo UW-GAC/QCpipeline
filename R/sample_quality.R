@@ -5,7 +5,12 @@
 
 library(GWASTools)
 library(QCpipeline)
+library(ggplot2)
+library(reshape2)
+library(plyr)
 sessionInfo()
+
+theme_set(theme_bw())
 
 # read configuration
 args <- commandArgs(trailingOnly=TRUE)
@@ -17,10 +22,12 @@ required <- c("annot_scan_file", "annot_scan_raceCol", "annot_snp_file",
               "baf_mean_file", "baf_sd_file", "bl_file")
 optional <- c("annot_scan_hetACol", "annot_snp_missingCol", "ibd_con_file",
               "out_baf_sd_boxplot", "out_het_boxplot", "out_flagged_file", "out_plot_prefix",
-              "plot_all_unknown", "race_unknown", "range_het", "range_sd")
+              "plot_all_unknown", "race_unknown", "range_het", "range_sd",
+              "out_baf_density_prefix")
 default <- c("het.A", "missing.n1", NA,
              "baf_sd.pdf", "het_outl.pdf", "qual_check.RData", "qual_check",
-             TRUE, NA, 1.5, 1.5)
+             TRUE, NA, 1.5, 1.5,
+             "baf_density")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -104,6 +111,9 @@ pdf(config["out_het_boxplot"], width=6, height=6)
 bp <- boxplot(samp$het.A ~ as.factor(samp$race), range=range.het, varwidth=TRUE, las=2,
               main=config["annot_scan_raceCol"], ylab="Autosomal heterozygosity")
 dev.off()
+## ggplot cannot use range unless you precompute stats yourself.
+#p <- ggplot(samp, aes(x=race, y=het.A)) + geom_boxplot() + ggtitle(config["annot_scan_raceCol"]) + ylab("Autosomal heterozygosity")
+#ggsave(config["out_het_boxplot"], plot=p, width=6, height=6)
 
 outliers <- samp[samp$het.A %in% bp$out,]
 (nhet <- nrow(outliers))
@@ -135,11 +145,10 @@ baf.sd <- getobj(config["baf_sd_file"])
 range.sd <- as.numeric(config["range_sd"])
 
 # create a matrix
-bsd <- matrix(nrow=nrow(baf.sd[[1]]), ncol=length(baf.sd),
-              dimnames=list(rownames(baf.sd[[1]]), names(baf.sd)))
-for (i in 1:ncol(bsd)) {
-  bsd[,i] <- baf.sd[[i]][,1]
-}
+bsd <- do.call(cbind, baf.sd)
+colnames(bsd) <- names(baf.sd)
+
+# can't use range in ggplot without computing stats yourself, so keep this as base R
 pdf(config["out_baf_sd_boxplot"], width=6, height=6)
 bp <- boxplot(bsd[,colnames(bsd) %in% 1:22], xlab="chromosome", ylab="SD of BAF",
               las=2, range=range.sd)
@@ -180,16 +189,43 @@ if ("1" %in% names(baf.sd)) {
 }
 
 # scans to plot
-scan.ids <- unlist(flagged, use.names=FALSE)
-tags <- vector()
-for (n in names(flagged)) tags <- c(tags, rep(n, length(flagged[[n]])))
-tags <- tags[!duplicated(scan.ids)]
-scan.ids <- unique(scan.ids)
-stopifnot(length(scan.ids) == length(tags))
+tmp <- melt(flagged)
+names(tmp) <- c("scanID", "tag")
+tags <- ddply(tmp, .(scanID), summarise, tags=paste(tag, collapse="; "))
+table(tags$tags)
 
 png(paste(config["out_plot_prefix"], "_%03d.png", sep=""), width=720, height=720)
-chromIntensityPlot(blData, scan.ids=scan.ids, chrom.ids=rep(chr.sel, length(scan.ids)),
-                   info=tags, snp.exclude=snp.exclude, cex=0.25, ideogram=FALSE)
+chromIntensityPlot(blData, scan.ids=tags$scanID, chrom.ids=rep(chr.sel, nrow(tags)),
+                   info=tags$tags, snp.exclude=snp.exclude, cex=0.25, ideogram=FALSE)
 dev.off()
+
+# review density plot of BAF for all samples for which >1 chromosome is an outlier
+# one line plotted per chromosome
+# contamination will appear as intermediate bumps between 0 and 0.5 and between 0.5 and 1 in most chromsomes
+# plot density of BAF by chromosome to look for contamination
+dat <- getVariable(snpAnnot, c("snpID", "chromosome"))
+sel <- dat$chromosome %in% 1:22
+dat <- dat[sel, ]
+snp.idx <- range(which(sel))
+snp.start <- snp.idx[1]
+snp.count <- snp.idx[2] - snp.idx[1] + 1
+
+
+fname <- paste0(config["out_baf_density_prefix"], "_%03d.png")
+adj <- 1/30 # bandwidth esque
+for (i in seq_along(tags$scanID)){
+  
+  if (i %% 10 == 0) message(sprintf("%s of %s flagged samples", i, nrow(tags)))
+  scan.id <- tags$scanID[i]
+  scan.idx <- which(scanID %in% scan.id)
+  
+  # read in BAF for this scan
+  dat$baf <- getBAlleleFreq(blData, scan=c(scan.idx, 1), snp=c(snp.start, snp.count))  
+  p <- ggplot(dat, aes(x=baf)) +
+    geom_line(aes(group=chromosome), alpha=0.3, stat="density", color="black", adjust=adj, na.rm=TRUE, size=0.2) +
+    #geom_line(stat="density", color="red", adjust=adj, na.rm=TRUE) +
+    ggtitle(sprintf("%s - %s", scan.id, tags$tags[i]))
+  ggsave(sprintf(fname, i), plot=p, width=6, height=6)
+}
 
 close(blData)
