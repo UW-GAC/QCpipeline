@@ -121,8 +121,16 @@ Sys.setlocale("LC_COLLATE", "C")
 # color by race
 race <- as.character(sort(unique(samp$race)))
 if (length(race) > 0) {
-  stopifnot(all(race %in% names(config)))
-  cmapRace <- config[race]
+  #stopifnot(all(race %in% names(config)))
+  
+  cmapRace <- setNames(config[race], race)
+  chk <- which(is.na(cmapRace))
+  if (length(chk) > 0) {
+    message(sprintf("Using default colors for %s races: %s", length(chk), paste(names(cmapRace[chk]), collapse=", ")))
+    defaultColors <- c(brewer.pal(8, "Dark2"), brewer.pal(8, "Set2"))
+    cmapRace[chk] <- defaultColors[1:length(chk)]
+  }
+  
   colorScale <- scale_color_manual("race", values=cmapRace, breaks=names(cmapRace), na.value="grey")
 } else {
   colorScale <- scale_color_manual("race", values="black", breaks="hack", na.value="black")
