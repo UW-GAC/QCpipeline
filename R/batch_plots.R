@@ -19,25 +19,31 @@ config <- readConfig(args[1])
 # check config and set defaults
 required <- c("annot_scan_file", "annot_scan_raceCol", "inten_file")
 optional <- c("annot_scan_batchCol", "annot_scan_missAutoCol", "annot_scan_redoCol",
-              "out_batch_prefix", "out_hist_plot", "out_inten_plot",
-              "out_lambda_race_plot", "out_mcr_plot", "out_meanchisq_nscan_plot",
-              "out_meanchisq_race_plot", "out_meanmcr_meanchisq_plot",
-              "out_meanmcr_meanor_plot", "out_meanmcr_nscan_plot",
-              "out_meanor_nscan_plot", "out_meanor_race_plot",
+              "out_hist_plot", "out_inten_plot",
+              "out_meanmcr_nscan_plot", "out_mcr_plot",
               "scan_exclude_file")
+              #"out_batch_prefix",
+              #"out_lambda_race_plot",
+              #"out_meanchisq_nscan_plot",
+              #"out_meanchisq_race_plot", "out_meanmcr_meanchisq_plot",
+              #"out_meanmcr_meanor_plot",
+              #"out_meanor_nscan_plot", "out_meanor_race_plot"
 default <- c("Sample.Plate", "miss.e1.auto", "Redo.Processing.Plate",
-             "batch_test", "batch_nscan_hist.pdf", "batch_chr1inten.pdf",
-             "batch_lambda_race.pdf", "batch_mcr.pdf", "batch_meanchisq_nscan.pdf",
-             "batch_meanchisq_race.pdf", "batch_meanmcr_meanchisq.pdf",
-             "batch_meanmcr_meanor.pdf", "batch_meanmcr_nscan.pdf",
-             "batch_meanor_nscan.pdf", "batch_meanor_race.pdf",
+             "batch_nscan_hist.pdf", "batch_chr1inten.pdf",
+             "batch_mcr.pdf", "batch_meanmcr_nscan.pdf",
              NA)
+             #"batch_test",
+             #"batch_lambda_race.pdf",
+             #"batch_meanchisq_nscan.pdf",
+             #"batch_meanchisq_race.pdf", "batch_meanmcr_meanchisq.pdf",
+             #"batch_meanmcr_meanor.pdf",
+             #"batch_meanor_nscan.pdf", "batch_meanor_race.pdf"
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
-# check for test
-if (length(args) < 2) stop("missing test type (chisq or fisher)")
-type <- args[2]
+## # check for test
+## if (length(args) < 2) stop("missing test type (chisq or fisher)")
+## type <- args[2]
   
 (scanAnnot <- getobj(config["annot_scan_file"]))
 
@@ -58,7 +64,7 @@ if (!is.na(config["annot_scan_hapmapCol"])) {
 }
 length(scan.exclude)
 
-batch.res <- getobj(paste(config["out_batch_prefix"], "RData", sep="."))
+#batch.res <- getobj(paste(config["out_batch_prefix"], "RData", sep="."))
 
 scan.index <- !(scanAnnot$scanID %in% scan.exclude)
 stopifnot(all(!(getScanID(scanAnnot, index=scan.index) %in% scan.exclude)))
@@ -78,39 +84,40 @@ batches$redo <- batches$plate %in% redoPlates
 
 color_redo <- scale_color_manual(values=c("black", "red"), breaks=c("FALSE", "TRUE"))
 
-if (type == "chisq"){
-  batches$stat <- batch.res$mean.chisq[match(batches$plate, names(batch.res$mean.chisq))]
-  ylab <- expression(paste("mean ", chi^2, " test statistic"))
-  outfile <- config["out_meanchisq_race_plot"]
-} else if (type == "fisher") {
-  batches$stat <- batch.res$mean.or[match(batches$plate, names(batch.res$mean.or))]
-  ylab <- "mean Fisher's OR"
-  outfile <- config["out_meanor_race_plot"]
-}
-p <- ggplot(batches, aes(x=racefrac, y=stat, color=redo)) +
-  geom_vline(x=mean(batches$racefrac), linetype='dashed') +  # mean over all plates
-  geom_point() +
-  color_redo +
-  ylab(ylab) +
-  xlab(paste("fraction of", majority, "samples per batch"))
-ggsave(outfile, plot=p, width=6, height=6)
+## if (type == "chisq"){
+##   batches$stat <- batch.res$mean.chisq[match(batches$plate, names(batch.res$mean.chisq))]
+##   ylab <- expression(paste("mean ", chi^2, " test statistic"))
+##   outfile <- config["out_meanchisq_race_plot"]
+## } else if (type == "fisher") {
+##   batches$stat <- batch.res$mean.or[match(batches$plate, names(batch.res$mean.or))]
+##   ylab <- "mean Fisher's OR"
+##   outfile <- config["out_meanor_race_plot"]
+## }
+## p <- ggplot(batches, aes(x=racefrac, y=stat, color=redo)) +
+##   geom_vline(x=mean(batches$racefrac), linetype='dashed') +  # mean over all plates
+##   geom_point() +
+##   color_redo +
+##   ylab(ylab) +
+##   xlab(paste("fraction of", majority, "samples per batch"))
+## ggsave(outfile, plot=p, width=6, height=6)
 
 
 
 
 
-batches$lambda <- batch.res$lambda[match(batches$plate, names(batch.res$lambda))]
-p <- ggplot(batches, aes(x=racefrac, y=lambda, color=redo)) +
-  geom_vline(x=mean(batches$racefrac), linetype='dashed') + # mean over all plates
-  geom_point() +
-  color_redo +
-  ylab(expression(paste("genomic inflation factor ", lambda))) +
-  xlab(paste("fraction of", majority, "samples per batch"))
-ggsave(config["out_lambda_race_plot"], plot=p, width=6, height=6)
+## batches$lambda <- batch.res$lambda[match(batches$plate, names(batch.res$lambda))]
+## p <- ggplot(batches, aes(x=racefrac, y=lambda, color=redo)) +
+##   geom_vline(x=mean(batches$racefrac), linetype='dashed') + # mean over all plates
+##   geom_point() +
+##   color_redo +
+##   ylab(expression(paste("genomic inflation factor ", lambda))) +
+##   xlab(paste("fraction of", majority, "samples per batch"))
+## ggsave(config["out_lambda_race_plot"], plot=p, width=6, height=6)
 
 
 # distribution of number of samples per batch
-p <- ggplot(batches, aes(x=nsamp)) + geom_histogram(binwidth=1)
+p <- ggplot(batches, aes(x=nsamp)) + geom_histogram(binwidth=1) +
+  xlab("number of samples per batch")
 ggsave(config["out_hist_plot"], plot=p, width=6, height=6)
 
 
@@ -127,35 +134,35 @@ anova(lmr)
 
 
 # missing call rate vs test stat
-if (type == "chisq") {
-  xlab <- expression(paste("mean ", chi^2, " test statistic"))
-  outfile <- config["out_meanmcr_meanchisq_plot"]
-} else if (type == "fisher") {
-  xlab <- "mean Fisher's OR"
-  outfile <- config["out_meanmcr_meanor_plot"]
-}
-p <- ggplot(batches, aes(x=stat, y=meanmiss, color=redo)) +
-  geom_point() +
-  xlab(xlab) +
-  ylab("mean autosomal missing call rate") +
-  color_redo
-ggsave(file=outfile, plot=p, widt=6, height=6)
+## if (type == "chisq") {
+##   xlab <- expression(paste("mean ", chi^2, " test statistic"))
+##   outfile <- config["out_meanmcr_meanchisq_plot"]
+## } else if (type == "fisher") {
+##   xlab <- "mean Fisher's OR"
+##   outfile <- config["out_meanmcr_meanor_plot"]
+## }
+## p <- ggplot(batches, aes(x=stat, y=meanmiss, color=redo)) +
+##   geom_point() +
+##   xlab(xlab) +
+##   ylab("mean autosomal missing call rate") +
+##   color_redo
+## ggsave(file=outfile, plot=p, widt=6, height=6)
 
 
 # test stat vs number of scans
-if (type == "chisq") {
-  ylab <- expression(paste("mean ", chi^2, " test statistic"))
-  outfile <- config["out_meanchisq_nscan_plot"]
-} else if (type == "fisher") {
-  ylab <- "mean Fisher's OR"
-  outfile <- config["out_meanor_nscan_plot"]
-}
-p <- ggplot(batches, aes(x=nsamp, y=stat, color=redo)) +
-  geom_point() +
-  xlab("number of samples per batch") +
-  ylab(ylab) +
-  color_redo
-ggsave(file=outfile, plot=p, widt=6, height=6)
+## if (type == "chisq") {
+##   ylab <- expression(paste("mean ", chi^2, " test statistic"))
+##   outfile <- config["out_meanchisq_nscan_plot"]
+## } else if (type == "fisher") {
+##   ylab <- "mean Fisher's OR"
+##   outfile <- config["out_meanor_nscan_plot"]
+## }
+## p <- ggplot(batches, aes(x=nsamp, y=stat, color=redo)) +
+##   geom_point() +
+##   xlab("number of samples per batch") +
+##   ylab(ylab) +
+##   color_redo
+## ggsave(file=outfile, plot=p, widt=6, height=6)
 
 
 
