@@ -14,8 +14,8 @@ config <- readConfig(args[1])
 
 # check config and set defaults
 required <- c("annot_scan_file", "annot_snp_file", "geno_file", "plink_prefix")
-optional <- c("annot_scan_nameCol", "annot_snp_nameCol", "out_plink_logfile")
-default <- c("Sample.Name", "rsID", "plink_check.log")
+optional <- c("annot_scan_nameCol", "annot_snp_nameCol", "out_plink_logfile", "annot_plink_alt")
+default <- c("Sample.Name", "rsID", "plink_check.log", NA)
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -37,12 +37,20 @@ if (length(args) > 1 & args[2] == "ABcoding") {
 data <- GenotypeReader(config["geno_file"])
 genoData <- GenotypeData(data, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
+# alternate mapping
+if (!is.na(config["annot_plink_alt"])) {
+    map.alt <- getobj(config["annot_plink_alt"])
+} else {
+    map.alt <- NULL
+}
+
 res <- plinkCheck(genoData,
                   pedFile=config["plink_prefix"],
                   logFile=config["out_plink_logfile"],
                   family.col=config["annot_scan_nameCol"],
                   individual.col=config["annot_scan_nameCol"],
                   rs.col=config["annot_snp_nameCol"],
+                  map.alt=map.alt,
                   check.parents=FALSE)
 close(genoData)
 

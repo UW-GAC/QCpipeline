@@ -98,4 +98,6 @@ for (b in 2:nbatches) {
 close(gds)
 
 file.rename(file1, config[paste0(type, "_file")])
-for (b in 2:nbatches) file.remove(filename(type, b))
+#for (b in 2:nbatches) file.remove(filename(type, b))
+message("remove the following files after successful completion:\n",
+        paste(filename(type, 2:nbatches), collapse="\n"))

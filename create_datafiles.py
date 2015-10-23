@@ -28,6 +28,7 @@ Optional config parameters [default]:
 annot_scan_fileCol    [file]                 column of raw data file in scan annotation
 annot_scan_nameCol    [Sample.Name]          column of raw data sample name in scan annotation
 annot_snp_nameCol     [rsID]                 column of raw data snp name in snp annotation
+annot_plink_alt       [NA]                   file with data.frame of alternate SNP annotation to pass to plinkCheck
 raw_scanNameInFile    [0]                    1=repeated in column, -1=embedded in column heading, 0=none
 raw_sepType           [,]                    column separator in raw data (e.g. ",", "\t")
 raw_skipNum           [12]                   number of rows to skip (including header)
@@ -68,7 +69,10 @@ parser.add_option("-o", "--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
 parser.add_option("-b", "--batches", dest="batches", default=None, 
-                  help="create GDS in this many batches and then combine")
+                  help="create GDS in this many batches")
+parser.add_option("-c", "--combine_batches", dest="combine",
+                  action="store_true", default=False, 
+                  help="combine batches")
 parser.add_option("--checkPlink", dest="plink",
                   action="store_true", default=False,
                   help="check PLINK file")
@@ -84,7 +88,11 @@ test = options.test
 overwrite = options.overwrite
 qname = options.qname
 nbatch = options.batches
+combine = options.combine
 plink = options.plink
+
+if nbatch is None and combine:
+    sys.exit("specify number of batches to combine")
 
 sys.path.append(pipeline)
 import QCpipeline
@@ -112,11 +120,13 @@ for type in ["geno", "xy", "bl"]:
     if nbatch is None:
         jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
     else:
-        arrayRange = "1:" + nbatch
-        jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config, nbatch], queue=qname, email=email, arrayRange=arrayRange)
-        holdid = [jobid[job].split(".")[0]]      
-        rscript = os.path.join(pipeline, "R", "create_from_batches.R")
-        jobid[job + "_combine"] = QCpipeline.submitJob(job + "_combine", driver, [rscript, config, nbatch, type], holdid=holdid, queue=qname, email=email)
+        if not combine:
+            arrayRange = "1:" + nbatch
+            jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config, nbatch], queue=qname, email=email, arrayRange=arrayRange)
+        else:
+            #holdid = [jobid[job].split(".")[0]]     
+            rscript = os.path.join(pipeline, "R", "create_from_batches.R")
+            jobid[job + "_combine"] = QCpipeline.submitJob(job + "_combine", driver, [rscript, config, nbatch, type], queue=qname, email=email)
         
 if plink:
     if nbatch is None:
