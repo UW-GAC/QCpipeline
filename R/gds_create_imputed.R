@@ -25,21 +25,24 @@ required <- c("orig_annot_scan_file",
               "out_gds_prefix")
 optional <- c("quality_name", "quality_minimum",
               "scan_annot_familyCol", "scan_annot_individCol",
-              "logfile_prefix")
+              "logfile_prefix", "gds_type")
 default <- c("info", 0,
              "family", "subjectID",
-             "log")
+             "log", "dosage")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
+# check for test
+if (length(args) < 2) stop ("missing chromosome ranges")
+chromosomes <- eval(parse(text=args[2]))
+  
 # check for chromosome
-if (length(args) < 2) stop("missing chromosome")
-chromosome <- as.integer(args[2])
+if (length(args) < 3) stop("missing chromosome")
+chromosome <- as.integer(args[3])
 print(chromosome)
 
 # make sure it's a valid chromosome - only 1-23 are imputed.
 stopifnot(chromosome %in% 1:23)
-
 
 scanAnnot.orig <- getobj(config["orig_annot_scan_file"])
 
@@ -59,7 +62,6 @@ stopifnot(file.exists(samp.file))
 impute.file <- paste(config["impute2_geno_prefix"], "_chr", chromosome, ".gprobs.gz", sep="")
 stopifnot(file.exists(impute.file))
 
-
 # set up input scan data frame
 samples <- read.table(samp.file, header=TRUE, as.is=TRUE)
 samples <- samples[-1, ] # first row is useless.
@@ -72,13 +74,12 @@ x <- apply(getVariable(scanAnnot.orig, c(config["scan_annot_familyCol"], config[
 y <- getScanID(scanAnnot.orig)
 scan.df <- data.frame(scanID=y, sampleID=x, stringsAsFactors=FALSE)
 
-
 # check for quality metric threshold
 filename <- paste(config["metrics_path"], "_chr", chromosome, ".metrics.gz", sep="")
 stopifnot(file.exists(filename))
 
 # read in the metric for that chromosome
-metrics <- read.table(filename, header=TRUE)
+metrics <- read.table(filename, header=TRUE, comment.char="")
 snp.exclude.logical <- metrics[[config["quality_name"]]] < config["quality_minimum"] # logical version is needed later.
 snp.exclude <- which(snp.exclude.logical)
 print(length(snp.exclude))
@@ -87,14 +88,16 @@ print(length(snp.exclude))
 snp.id.start <- 1
 
 # add # of snps included on previous chromosomes to snp.id.start
-chromosomes <- 1:23
+
 for (chr in chromosomes[chromosomes < chromosome]){
   fname <- paste(config["metrics_path"], "_chr", chr, ".metrics.gz", sep="")
+  ## for troubleshooting
+  #message("\treading in: ", fname)
   #if (!file.exists(fname)) next
-  tmp <- read.table(fname, header=TRUE)
+  tmp <- read.table(fname, header=TRUE, comment.char="")
   snp.id.start <- snp.id.start + sum(tmp[[config["quality_name"]]] >= config["quality_minimum"])
 }
-message(paste("Starting at snpID", snp.id.start))
+message("Starting at snpID ", snp.id.start)
 
 # set up input for gdsImputedDosage
 input.files <- c(impute.file, samp.file)
@@ -107,7 +110,11 @@ genotypeDim <- "scan,snp"
 
 # write to the scratch disk of each node
 gds.filename.tmp <- tempfile()
-imputedDosageFile(input.files, gds.filename.tmp, chromosome, input.type="IMPUTE2", input.dosage=FALSE,
+
+message("will write ",config["gds_type"], " gds file")
+message("gds temporarily located at ", gds.filename.tmp)
+
+imputedDosageFile(input.files, gds.filename.tmp, chromosome, input.type="IMPUTE2", input.dosage=FALSE, output.type=config["gds_type"],
                   file.type="gds",
                   snp.annot.filename=snp.filename.tmp, scan.annot.filename=scan.filename,
                   verbose=TRUE, genotypeDim=genotypeDim, scan.df=scan.df, snp.exclude=snp.exclude,
@@ -131,11 +138,19 @@ snpAnnot <- getobj(snp.filename.tmp)
 geno.gds <- GdsGenotypeReader(gds.filename)
 genoData <- GenotypeData(geno.gds, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
 
-
-logfile <- file.path(paste(config["logfile_prefix"], "_chr-", chromosome, "_log.txt", sep=""))
+# logfile for snp and sample IDs of all missing data in gds
+if(!is.na(config["logfile_prefix"])) {
+	message("writing out snp and sample IDs with missing ", config["gds_type"], " data") 
+	logfile <- file.path(paste(config["logfile_prefix"], "_chr-", chromosome, "_log.txt", sep=""))
+} else if (is.na(config["logfile_prefix"])) {
+	logfile <- NULL
+	message("NOT writing out log file of all snp and sample IDs with missing ", config["gds_type"], "data")
+}
+	
 res <- checkImputedDosageFile(genoData, snpAnnot, scanAnnot, 
                        input.files=input.files, chromosome,
                        input.type="IMPUTE2", 
+					   output.type=config["gds_type"],
                        input.dosage=FALSE,
                        snp.exclude=snp.exclude,
                        snp.id.start=snp.id.start,
