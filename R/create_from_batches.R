@@ -34,50 +34,75 @@ filename <- function(type, batch) {
     batchfile(config[paste0(type, "_file")], batch)
 }
 
+
 ## open first file
 file1 <- filename(type, 1)
-gds <- openfn.gds(file1, readonly=FALSE)
-n1 <- objdesp.gdsn(index.gdsn(gds, "sample.id"))$dim
+bgds <- openfn.gds(file1)
+nsnp <- objdesp.gdsn(index.gdsn(bgds, "snp.id"))$dim
 
 ## variables to copy
-vars <- ls.gdsn(gds)
+vars <- ls.gdsn(bgds)
+vars.snp <- vars[grepl("^snp", vars)]
 vars <- vars[!grepl("^sample", vars) & !grepl("^snp", vars)]
 
-## decompress data for writing
-vars.compress <- c("sample.id",  setdiff(vars, "genotype"))
-for (v in vars.compress) compression.gdsn(index.gdsn(gds, v), "")
-## must close and reopen
-closefn.gds(gds)
-gds <- openfn.gds(file1, readonly=FALSE)
+## create new gds file
+newfile <- config[paste0(type, "_file")]
+gds <- createfn.gds(newfile)
 
-## for each subsequent file, read and append to first file
-for (b in 2:nbatches) {
+## sample ID (fill in later)
+add.gdsn(gds, "sample.id", storage="integer", valdim=0, compress="ZIP_RA")
+
+## add snp variables
+for (v in vars.snp) {
+    node <- index.gdsn(bgds, v)
+    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=0, compress="ZIP_RA")
+    newnode <- index.gdsn(gds, v)
+    append.gdsn(newnode, node)
+    readmode.gdsn(newnode)
+}
+sync.gds(gds)
+
+## add other variables (but not data yet)
+if ("genotype" %in% vars) {
+    geno.node <- add.gdsn(gds, "genotype", storage="bit2", valdim=c(nsnp, 0))
+    put.attr.gdsn(geno.node, "snp.order")
+}
+for (v in setdiff(vars, "genotype")) {
+    node <- index.gdsn(bgds, v)
+    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=c(nsnp, 0), compress="ZIP_RA.max:8M")
+}
+sync.gds(gds)
+
+closefn.gds(bgds)
+
+
+## for each batch, read and append
+for (b in 1:nbatches) {
     bfile <- filename(type, b)
-    bgds <- GdsReader(bfile)
+    bgds <- openfn.gds(bfile)
 
-    # get data
-    nsamp <- getDimension(bgds, "sample.id")
-    for (s in 1:nsamp) {
-        sample.id <- getVariable(bgds, "sample.id", start=s, count=1)
-        dat <- lapply(setNames(vars, vars),
-                      function(v) getVariable(bgds, v, start=c(1,s), count=c(-1,1)))
-        GWASTools:::.addData.gds.class(gds, vars, dat, sample.id)
+    ## add sample.id
+    samp.node <- index.gdsn(bgds, "sample.id")
+    append.gdsn(index.gdsn(gds, "sample.id"), samp.node)
+    
+    ## add other variables
+    for (v in vars) {
+        append.gdsn(index.gdsn(gds, v), index.gdsn(bgds, v))
     }
-    close(bgds)
+    closefn.gds(bgds)
     sync.gds(gds)
 }
 
-## compress and close
-for (v in vars.compress) compression.gdsn(index.gdsn(gds, v), "ZIP.max")
+## close
 GWASTools:::.close.gds.class(gds, verbose=TRUE)
 
 
-## for each batch (starting with second), compare both files
-gds <- GdsReader(file1)
+## for each batch, compare both files
+gds <- GdsReader(newfile)
 sample.id <- getVariable(gds, "sample.id")
 
-i <- n1
-for (b in 2:nbatches) {
+i <- 0
+for (b in 1:nbatches) {
     bfile <- filename(type, b)
     bgds <- GdsReader(bfile)
 
@@ -97,7 +122,5 @@ for (b in 2:nbatches) {
 
 close(gds)
 
-file.rename(file1, config[paste0(type, "_file")])
-#for (b in 2:nbatches) file.remove(filename(type, b))
 message("remove the following files after successful completion:\n",
-        paste(filename(type, 2:nbatches), collapse="\n"))
+        paste(filename(type, 1:nbatches), collapse="\n"))

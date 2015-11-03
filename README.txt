@@ -17,6 +17,7 @@ and "group" is geneva/olga/cidr/etc.)
 config file:
 > R -q --vanilla --args create_datafiles.config outfile < sample_id_from_files.R
 
+
 9) Create netCDF or GDS files
 test 5 samples first:
 > create_datafiles.py --email user@uw.edu --test create_datafiles.config
@@ -34,8 +35,11 @@ the newly created netCDF/GDS file.
 
 To create files in batches and combine:
 > create_datafiles.py --email user@uw.edu --batches 5 create_datafiles.config
-(5 batches - creates 5 separate GDS files with subsets of the data,
-then appends batches 2-5 to batch 1)
+(creates 5 separate GDS files with subsets of the data)
+> create_datafiles.py --email user@uw.edu --batches 5 --combine_batches create_datafiles.config
+(combines batches into single file)
+> rm batch*.gds
+(delete batches after verifying that combine was successful)
 
 
 13-15) Gender check (heterozygosity and mean intensity)
@@ -49,12 +53,10 @@ then appends batches 2-5 to batch 1)
 
 20) Chromosome anomalies (need missing call rate first)
 test first:
-> chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5 \
---baf --loh --stats
+> chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5 --baf --loh --stats
 (first 10 scans in 2 batches of 5 scans each)
 
-> chrom_anomalies.py --email user@uw.edu chrom_anom.config start end by \
---baf --loh --stats
+> chrom_anomalies.py --email user@uw.edu chrom_anom.config start end by --baf --loh --stats
 (where "start end by" indicates how many scans to run at a time,
  e.g. "1 2000 500" means run scans 1-2000 in batches of 500)
 
@@ -72,11 +74,8 @@ does not make sense to use options --baf --stats together without
 --loh.)
 
 
-21) Batch quality checks (allele frequency test and plots)
+21) Batch quality checks
 > batch.py --email user@uw.edu batch.config
-Default is fisher test (--type fisher).  
-For chisq test (arrays with < 2.5M SNPs):
-> batch.py --type chisq --email user@uw.edu batch.config
 
 
 25) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
@@ -174,14 +173,10 @@ vii-viii) Allele frequency and heterozygosity by ethnic group and sex. Run using
 Association tests:
 
 To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config \
-start_chrom end_chrom --assoc --merge --plotQQManh --plotClust --queue gcc.q --email netID@uw.edu
+> assoc.py assoc.config start_chrom end_chrom --assoc --merge --plotQQManh --plotClust --queue gcc.q --email netID@uw.edu
 
 To run step by step:
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/assoc.py \
-/projects/geneva/geneva_sata/GCC_code/QCpipeline/config_examples/assoc.config
-start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netID@uw.edu
+> assoc.py assoc.config start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netID@uw.edu
 
 --merge generates a combined file for each model
 
@@ -189,7 +184,7 @@ start_chrom end_chrom --assoc (or --merge/--plotQQManh/--plotClust) --email netI
   SNPs on the chromosomes specified with plot_chroms in the  config file 
 
 --queue gcc.q (or other queues) specifies the queue to use. The
-  default is gcc.q. Check qstat first to decide which queue to use for
+  default is all.q. Check qstat first to decide which queue to use for
   --assoc
         
 If there are categorical covariates in the model(s), specify them in the config file so they will be converted into factors automatically.
