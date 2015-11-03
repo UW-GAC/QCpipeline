@@ -122,7 +122,7 @@ imputedDosageFile(input.files, gds.filename.tmp, chromosome, input.type="IMPUTE2
 
 # compress the genotypes
 gds <- openfn.gds(gds.filename.tmp, readonly=F)
-compression.gdsn(index.gdsn(gds, "genotype"), compress="ZIP.max")
+compression.gdsn(index.gdsn(gds, "genotype"), compress="ZIP_RA.max:8M")
 closefn.gds(gds)
 
 cleanup.gds(gds.filename.tmp, verbose=T)
