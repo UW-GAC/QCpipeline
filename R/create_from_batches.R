@@ -78,6 +78,7 @@ closefn.gds(bgds)
 
 ## for each batch, read and append
 for (b in 1:nbatches) {
+    message("Copying batch ", b)
     bfile <- filename(type, b)
     bgds <- openfn.gds(bfile)
 
@@ -103,6 +104,7 @@ sample.id <- getVariable(gds, "sample.id")
 
 i <- 0
 for (b in 1:nbatches) {
+    message("Checking batch ", b)
     bfile <- filename(type, b)
     bgds <- GdsReader(bfile)
 
