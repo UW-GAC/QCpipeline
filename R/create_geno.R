@@ -99,6 +99,7 @@ res <- createDataFile(path = config["raw_path"], filename = ncfile,
                       col.total=col.total,
                       col.nums=col.nums, scan.name.in.file=scan.name.in.file,
                       allele.coding=config["raw_alleleCoding"],
+                      compress.geno="ZIP_RA.max", compress.annot="ZIP_RA.max",
                       array.name = config["array_name"],
                       genome.build = config["array_build"],
                       diagnostics.filename=diagfile)

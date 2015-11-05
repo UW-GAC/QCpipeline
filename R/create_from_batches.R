@@ -50,12 +50,12 @@ newfile <- config[paste0(type, "_file")]
 gds <- createfn.gds(newfile)
 
 ## sample ID (fill in later)
-add.gdsn(gds, "sample.id", storage="integer", valdim=0, compress="ZIP_RA")
+add.gdsn(gds, "sample.id", storage="integer", valdim=0, compress="ZIP_RA.max")
 
 ## add snp variables
 for (v in vars.snp) {
     node <- index.gdsn(bgds, v)
-    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=0, compress="ZIP_RA")
+    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=0, compress="ZIP_RA.max")
     newnode <- index.gdsn(gds, v)
     append.gdsn(newnode, node)
     readmode.gdsn(newnode)

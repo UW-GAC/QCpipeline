@@ -86,6 +86,7 @@ res <- createDataFile(path = config["raw_path"], filename = ncfile,
                       sep.type=config["raw_sepType"], skip.num=skip.num,
                       col.total=col.total,
                       col.nums=col.nums, scan.name.in.file=scan.name.in.file,
+                      compress="ZIP_RA.max:8M", compress.annot="ZIP_RA.max",
                       array.name = config["array_name"],
                       genome.build = config["array_build"],
                       diagnostics.filename=diagfile)
