@@ -86,13 +86,13 @@ gdsMerge <- function(genoDataList, outPrefix="new", sampleList=NULL, snpList=NUL
   gdsfile <- paste0(outPrefix, ".gds")
   gds <- createfn.gds(gdsfile)
 
-  add.gdsn(gds, "sample.id", scanID.all, compress="ZIP.max", closezip=TRUE)
-  add.gdsn(gds, "snp.id", snp$snpID, compress="ZIP.max", closezip=TRUE)
+  add.gdsn(gds, "sample.id", scanID.all, compress="ZIP_RA.max", closezip=TRUE)
+  add.gdsn(gds, "snp.id", snp$snpID, compress="ZIP_RA.max", closezip=TRUE)
   add.gdsn(gds, "snp.chromosome", snp$chromosome, storage="uint8",
-           compress="ZIP.max", closezip=TRUE)
-  add.gdsn(gds, "snp.position", snp$position, compress="ZIP.max", closezip=TRUE)
+           compress="ZIP_RA.max", closezip=TRUE)
+  add.gdsn(gds, "snp.position", snp$position, compress="ZIP_RA.max", closezip=TRUE)
   add.gdsn(gds, "snp.allele", paste(snp$alleleA, snp$alleleB, sep="/"),
-           compress="ZIP.max", closezip=TRUE)
+           compress="ZIP_RA.max", closezip=TRUE)
   ## rsID???
   sync.gds(gds)
 
@@ -117,8 +117,14 @@ gdsMerge <- function(genoDataList, outPrefix="new", sampleList=NULL, snpList=NUL
       write.gdsn(geno.node, geno, start=c(1, which(scanID.all == s)), count=c(-1,1))
     }
   }
-  if (verbose) message("Cleaning up")
   closefn.gds(gds)
+  if (verbose) message("Compressing")
+  gds <- openfn.gds(gdsfile, readonly=FALSE)
+  geno.node <- index.gdsn(gds, "genotype")
+  compression.gdsn(geno.node, compress=ifelse(dosage, "ZIP_RA.max:8M", "ZIP_RA.max"))
+  readmode.gdsn(geno.node)
+  closefn.gds(gds)
+  if (verbose) message("Cleaning up")
   cleanup.gds(gdsfile, verbose=FALSE)
 
   if (verbose) message("Saving annotation")

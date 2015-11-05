@@ -116,7 +116,7 @@ unlink(gdsfile)
 gdsfile <- tempfile()
 snps.unique <- laiDosageFile(lafile, gdsfile, pops, onlyUnique=TRUE)
 snps.unique
-unlink(gdsfile)
+unlink(c(gdsfile, lafile))
  
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
