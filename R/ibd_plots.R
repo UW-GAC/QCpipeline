@@ -100,8 +100,8 @@ table(ibd$exp.rel)
 
 
 ## make our own color code so we can modify the plot legend
-rels <- c("Dup", "PO", "FS", "Deg2", "Deg3", "Q", "U")
-cols <- c(brewer.pal(length(rels)-1, "Dark2")[c(1, 2, 3, 5, 4, 6)], "black")
+rels <- c("Dup", "PO", "FS", "Deg1", "Deg2", "Deg3", "Q", "U")
+cols <- c(brewer.pal(length(rels)-1, "Dark2")[c(1, 2, 3, 6, 5, 4, 7)], "black")
 cmap <- setNames(cols, rels)
 
 
@@ -121,6 +121,7 @@ if (config["ibd_method"] == "KING") {
     geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
     geom_point(alpha=alpha) +
     scale_color_manual(values=cmap, breaks=names(cmap)) +
+    guides(colour=guide_legend(override.aes=list(alpha=1))) +
     xlab("Fraction of IBS=0") + ylab("Kinship coefficient") +
     theme(legend.position=c(1, 1), legend.justification=c(1,1)) +
     ggtitle("IBD - expected")
@@ -136,6 +137,7 @@ if (config["ibd_method"] == "KING") {
     geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
     geom_point(alpha=alpha) +
     scale_color_manual(values=cmap, breaks=names(cmap)) +
+    guides(colour=guide_legend(override.aes=list(alpha=1))) +
     xlab("Fraction of IBS=0") + ylab("Kinship coefficient") +
     ggtitle("IBD - observed")
   ggsave(plotname(config["out_ibd_obs_plot"]), plot=p, width=6, height=6)
@@ -149,12 +151,13 @@ if (config["ibd_method"] == "KING") {
   message("unexpected relative pairs")
   print(table(ibd$obs.rel[ibd$unexp]))
   
-  
+  ibd<-ibd[order(ibd$unexp),] # order the file before plotting to highlight the unexpected relationships
   p <- ggplot(ibd, aes(x=IBS0, y=kinship, color=exp.rel, pch=unexp)) +
     geom_hline(y=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
     geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
     geom_point(alpha=alpha) +
     scale_color_manual(values=cmap, breaks=names(cmap)) +
+    guides(colour=guide_legend(override.aes=list(alpha=1))) +
     xlab("Fraction of IBS=0") + ylab("Kinship coefficient") +
     ggtitle("IBD - unexpected")
   ggsave(plotname(config["out_ibd_unexp_plot"]), plot=p, width=6, height=6)
