@@ -156,16 +156,17 @@ rm(ethn)
 x <- pca$varprop[1:4]
 lbls <- paste("EV", 1:4, " (", format(100*x,digits=2), "%)", sep="")
 
-#samp$nrace <- table(samp$race, useNA="ifany")[samp$race]
-#samp$nrace[is.na(samp$nrace)] <- sum(is.na(samp$nrace))
-#zorder <- order(-samp$nrace)
-
 pcs <- pca$eigenvect
 colnames(pcs) <- paste0("EV", 1:ncol(pcs))
 pcs <- as.data.frame(pcs)
 pcs$scanID <- pca$sample.id
 
 dat <- merge(pcs, samp)
+
+# order by number of samples in race group
+dat$nrace <- table(dat$race, useNA="ifany")[dat$race]
+dat$nrace[is.na(dat$nrace)] <- sum(is.na(dat$nrace))
+dat <- dat[order(-dat$nrace),]
 
 # plot the first four pcs
 nev <- 4
