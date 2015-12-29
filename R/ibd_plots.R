@@ -22,12 +22,14 @@ optional <- c("annot_scan_subjectCol", "exp_rel_file", "ibd_method",
               "out_ibd_con_plot", "out_ibd_exp_plot", "out_ibd_obs_plot",
               "out_ibd_rel_file", "out_ibd_unexp_plot",
               "out_ibd_unobs_dup_file", "out_ibd_unobs_rel_file",
-              "scan_ibd_include_file")
+              "scan_ibd_include_file",
+              "unexpected_threshold")
 default <- c("subjectID", NA, "KING", "ibd_kc32.RData",
              "ibd_connectivity.RData", "ibd_connectivity.pdf",
              "ibd_expected.pdf", "ibd_observed.pdf", "ibd_obsrel.RData",
              "ibd_unexpected.pdf",
-             "ibd_unobs_dup.RData", "ibd_unobs_rel.RData", NA)
+             "ibd_unobs_dup.RData", "ibd_unobs_rel.RData", NA,
+             "deg2")
 config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
@@ -142,8 +144,9 @@ if (config["ibd_method"] == "KING") {
     ggtitle("IBD - observed")
   ggsave(plotname(config["out_ibd_obs_plot"]), plot=p, width=6, height=6)
   
-  
-  ibd$unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.deg2 # use degree 2 cutoff in KING paper - ~0.088
+
+  cut.unexp <- switch(config["unexpected_threshold"], deg2=cut.deg2, deg3=cut.deg3)
+  ibd$unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.unexp
   ## ## check for Deg2 and Deg3
   ## deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
   ## deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"

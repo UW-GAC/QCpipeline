@@ -32,6 +32,7 @@ maf_threshold              [0.05]                    minimum MAF for non-monomor
 scan_ibd_include_file      [NA]                      vector of scanID to include in IBD (NA=all)
 scan_pruning_include_file  [NA]                      vector of scanID to include in LD pruning (NA=all)
 snp_pruning_include_file   [NA]                      vector of snpID to include in LD pruning (NA=all)
+unexpected_threshold       [deg2]                    threshold for defining relationships as unexpected (deg2 or deg3)
 out_ibd_con_file           [ibd_connectivity.RData]  output connectivity data file
 out_ibd_con_plot           [ibd_connectivity.pdf]    output connectivity plot
 out_ibd_exp_plot           [ibd_expected.pdf]        output IBD plot color-coded by expected relationships
