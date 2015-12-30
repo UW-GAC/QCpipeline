@@ -146,7 +146,7 @@ if (config["ibd_method"] == "KING") {
   
 
   cut.unexp <- switch(config["unexpected_threshold"], deg2=cut.deg2, deg3=cut.deg3)
-  ibd$unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > cut.unexp
+  ibd$unexp <- ibd$exp.rel != ibd$obs.rel & (ibd$kinship > cut.unexp | ibd$exp.rel != "U")
   ## ## check for Deg2 and Deg3
   ## deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
   ## deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
@@ -180,7 +180,7 @@ if (config["ibd_method"] == "KING") {
   dev.off()
 
   ## plot of unexpected relationships (kinship > 0.1)
-  unexp <- ibd$exp.rel != ibd$obs.rel & ibd$kinship > 0.09833927
+  unexp <- ibd$exp.rel != ibd$obs.rel & (ibd$kinship > 0.09833927 | ibd$exp.rel != "U")
   ## ## check for Deg2 and Deg3
   ## deg2 <- ibd$exp.rel %in% deg2.rel & ibd$obs.rel == "Deg2"
   ## deg3 <- ibd$exp.rel %in% deg3.rel & ibd$obs.rel == "Deg3"
