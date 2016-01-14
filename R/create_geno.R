@@ -28,6 +28,8 @@ config <- setConfigDefaults(config, required, optional, default)
 print(config)
 
 scanAnnot <- getobj(config["annot_scan_file"])
+if (!allequal(scanAnnot$scanID, sort(scanAnnot$scanID))) warning("scanIDs are not sorted")
+
 ncfile <- config["geno_file"]
 diagfile <- config["geno_diagFile"]
 checkfile <- config["geno_checkFile"]
