@@ -176,7 +176,7 @@ anova(lm.result)
 
 p <- ggplot(scan, aes(x=batchLabel, y=missing, color=redo)) +
   geom_boxplot(varwidth=TRUE) +
-  ylab("log10(autosomal missing call rate)") +
+  ylab("autosomal missing call rate") +
   xlab("") +
   scale_y_log10() +
   theme(axis.text.x=element_text(angle = 90, hjust = 0)) +
