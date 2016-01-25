@@ -210,7 +210,8 @@ dev.off()
 
 
 # plot EV1 vs EV2
-p <- p + theme(legend.position="right")
+p <- p + theme(legend.position="right") +
+  guides(colour = guide_legend(override.aes = list(alpha=1)))
 ggsave(config["out_ev12_plot"], plot=p, width=6, height=6)
 
 
@@ -227,7 +228,8 @@ ggParcoordTheme <- theme(axis.title.x=element_blank(),
 # parallel coordinates plot
 ev.ind <- which(names(dat) %in% sprintf("EV%s", 1:12))
 p <- ggparcoord(dat, columns=ev.ind, groupColumn="race", scale="uniminmax", alphaLines=0.5) +
-  colorScale + ggParcoordTheme
+  colorScale + ggParcoordTheme +
+  guides(colour = guide_legend(override.aes = list(alpha=1)))
 ggsave(config["out_parcoord_plot"], plot=p, width=10, height=5)
 
 
@@ -241,7 +243,8 @@ if (type == "study" & length(vars) > 0){
     dat[["fvar"]] <- as.factor(dat[[var]])
     
     p <- ggparcoord(dat, columns=ev.ind, groupColumn="fvar", scale="uniminmax", alphaLines=0.5) +
-      scale_color_brewer(var, palette="Set1", na.value="grey") + ggParcoordTheme
+      scale_color_brewer(var, palette="Set1", na.value="grey") + ggParcoordTheme +
+      guides(colour = guide_legend(override.aes = list(alpha=1)))
     ggsave(fname, plot=p, width=10, height=5)
     
   }
