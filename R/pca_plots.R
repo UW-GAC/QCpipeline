@@ -171,34 +171,26 @@ dat <- dat[order(-dat$nrace),]
 # plot the first four pcs
 nev <- 4
 pairs <- ggpairs(dat,
+                 mapping=aes(color=race, shape=ethnicity),
                  columns=which(names(dat) %in% sprintf("EV%s", 1:nev)),
-                 upper=list(continuous="points"),
-                 color="race",
-                 pch="ethnicity",
+                 upper=list(continuous=wrap("points", alpha=0.7)),
+                 lower=list(continuous=wrap("points", alpha=0.7)),
                  columnLabels=lbls[1:nev],
-                 axisLabels="internal",
-                 params=c(alpha=0))
-for (i in 1:length(pairs$columns)){
-  for (j in 1:length(pairs$columns)){
+                 axisLabels="internal")
+for (i in 1:pairs$nrow){
+  for (j in 1:pairs$ncol){
     subplot <- getPlot(pairs, i, j)
-    if (i != j){
-      subplot <- subplot + geom_point(alpha=0.7, size=2, aes(pch=ethnicity))
-    } else {
-    }
     subplot <- subplot + colorScale + symbolScale
-    #subplot <- subplot + theme()
-    #subplot <- subplot + guides(colour = guide_legend(override.aes = list(size=3)))
-    #if (i == 2 & j == 1) leg <- g_legend(subplot)
     pairs <- putPlot(pairs, subplot, i, j)
   }
 }
-png(config["out_pairs_plot"], width=720, height=720)
+png(config["out_pairs_plot"], width=1000, height=1000)
 print(pairs)
 dev.off()
 
 
 # plot EV1 vs EV2 with density plots
-p <- ggplot(dat, aes(x=EV1, y=EV2, color=race, pch=ethnicity)) +
+p <- ggplot(dat, aes(x=EV1, y=EV2, color=race, shape=ethnicity)) +
   geom_point(alpha=0.7) +
   colorScale +
   symbolScale +
@@ -258,7 +250,7 @@ if (type == "combined"){
   # hapmap plot
   dat$plotcol <- dat$race
 	dat$plotcol[dat$geno.cntl %in% 0] <- NA
-  p <- ggplot(dat, aes(x=EV1, y=EV2, color=plotcol, pch=ethnicity)) +
+  p <- ggplot(dat, aes(x=EV1, y=EV2, color=plotcol, shape=ethnicity)) +
     geom_point() +
     colorScale +
     symbolScale +
@@ -266,7 +258,7 @@ if (type == "combined"){
     xlim(xlim)
   ggsave(config["out_ev12_plot_hapmap"], plot=p, width=6, height=6)
   	
-  p <- ggplot(dat[dat$geno.cntl %in% 0, ], aes(x=EV1, y=EV2, color=race, pch=ethnicity)) +
+  p <- ggplot(dat[dat$geno.cntl %in% 0, ], aes(x=EV1, y=EV2, color=race, shape=ethnicity)) +
     geom_point() +
     colorScale +
     symbolScale +
