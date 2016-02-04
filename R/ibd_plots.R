@@ -119,8 +119,8 @@ if (config["ibd_method"] == "KING") {
   alpha <- 0.7
   
   p <- ggplot(ibd, aes(x=IBS0, y=kinship, color=exp.rel)) +
-    geom_hline(y=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
-    geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
+    geom_hline(yintercept=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
+    geom_vline(xintercept=cut.ibs, linetype='dashed', color="grey") +
     geom_point(alpha=alpha) +
     scale_color_manual(values=cmap, breaks=names(cmap)) +
     guides(colour=guide_legend(override.aes=list(alpha=1))) +
@@ -135,8 +135,8 @@ if (config["ibd_method"] == "KING") {
   print(table(ibd$obs.rel, useNA="ifany"))
   
   p <- ggplot(ibd, aes(x=IBS0, y=kinship, color=obs.rel)) +
-    geom_hline(y=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
-    geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
+    geom_hline(yintercept=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
+    geom_vline(xintercept=cut.ibs, linetype='dashed', color="grey") +
     geom_point(alpha=alpha) +
     scale_color_manual(values=cmap, breaks=names(cmap)) +
     guides(colour=guide_legend(override.aes=list(alpha=1))) +
@@ -156,8 +156,8 @@ if (config["ibd_method"] == "KING") {
   
   ibd<-ibd[order(ibd$unexp),] # order the file before plotting to highlight the unexpected relationships
   p <- ggplot(ibd, aes(x=IBS0, y=kinship, color=exp.rel, pch=unexp)) +
-    geom_hline(y=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
-    geom_vline(x=cut.ibs, linetype='dashed', color="grey") +
+    geom_hline(yintercept=c(cut.deg1, cut.deg2, cut.deg3, cut.dup), linetype='dashed', color="grey") +
+    geom_vline(xintercept=cut.ibs, linetype='dashed', color="grey") +
     geom_point(alpha=alpha) +
     scale_color_manual(values=cmap, breaks=names(cmap)) +
     guides(colour=guide_legend(override.aes=list(alpha=1))) +
