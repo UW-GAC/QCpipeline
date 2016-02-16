@@ -34,7 +34,7 @@ scan_contaminated_file      [NA]                    vector of contaminated scanI
 """
 parser = OptionParser(usage=usage)
 parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/geneva_sata/GCC_code/QCpipeline",
+                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
                   help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")

@@ -26,7 +26,7 @@ outputVCF=$3
 echo  -e "\tRunning GATK left align tool\n"
 
 # point to current GATK
-gatk="/projects/geneva/geneva_sata/apps/GenomeAnalysisTK-3.4-46/"
+gatk="/projects/resources/software/apps/GenomeAnalysisTK-3.4-46/"
 
 # specify input VCF file name, including file path
 vcfNeedsLeftAlign="${dir}/${indelVCF}"
