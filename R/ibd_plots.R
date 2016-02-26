@@ -17,14 +17,14 @@ config <- readConfig(args[1])
 
 ## check config and set defaults
 required <- c("annot_scan_file")
-optional <- c("annot_scan_subjectCol", "exp_rel_file", "ibd_method",
+optional <- c("annot_scan_subjectCol", "exp_rel_file", "ibd_method", "cut.ibs0",
               "out_ibd_kc32_file", "out_ibd_con_file",
               "out_ibd_con_plot", "out_ibd_exp_plot", "out_ibd_obs_plot",
               "out_ibd_rel_file", "out_ibd_unexp_plot",
               "out_ibd_unobs_dup_file", "out_ibd_unobs_rel_file",
               "scan_ibd_include_file",
               "unexpected_threshold")
-default <- c("subjectID", NA, "KING", "ibd_kc32.RData",
+default <- c("subjectID", NA, "KING", 0.003, "ibd_kc32.RData",
              "ibd_connectivity.RData", "ibd_connectivity.pdf",
              "ibd_expected.pdf", "ibd_observed.pdf", "ibd_obsrel.RData",
              "ibd_unexpected.pdf",
@@ -59,6 +59,9 @@ if (nrow(ibd) > 5000) {
 
 
 (scanAnnot <- getobj(config["annot_scan_file"]))
+## convert scanAnnot if necessary
+if (!is(scanAnnot, "ScanAnnotationDataFrame")) scanAnnot <- ADFtoScanADF(scanAnnot)
+
 scanID <- getScanID(scanAnnot)
 samp <- getVariable(scanAnnot, c("scanID", config["annot_scan_subjectCol"]))
 names(samp) <- c("scanID", "Individ")
@@ -114,7 +117,7 @@ if (config["ibd_method"] == "KING") {
   cut.deg1 <- 1/(2^(5/2))
   cut.deg2 <- 1/(2^(7/2))
   cut.deg3 <- 1/(2^(9/2))
-  cut.ibs <- 0.003 # should be 0 for PO, but sometimes is greater due to genotyping error. 0.003 works for OLGA, Kittner, and HRS2
+  cut.ibs <- as.numeric(config["cut.ibs0"]) # should be 0 for PO, but sometimes is greater due to genotyping error. 0.003 works for OLGA, Kittner, and HRS2
   
   alpha <- 0.7
   
@@ -130,7 +133,7 @@ if (config["ibd_method"] == "KING") {
   ggsave(plotname(config["out_ibd_exp_plot"]), plot=p, width=6, height=6)
   
   ## assign observed relationships (duplicates)
-  ibd$obs.rel <- ibdAssignRelatednessKing(ibd$IBS0, ibd$kinship)
+  ibd$obs.rel <- ibdAssignRelatednessKing(ibd$IBS0, ibd$kinship, cut.ibs0.err=cut.ibs)
   message("observed relative pairs")
   print(table(ibd$obs.rel, useNA="ifany"))
   
