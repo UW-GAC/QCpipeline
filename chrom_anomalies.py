@@ -109,7 +109,7 @@ else:
 # if MAF threshold is needed, calculate allele freq
 useMAF = False
 waitAfreq = False
-if maf is not None:
+if maf is not None and float(maf) > 0:
     useMAF = True
     if os.path.exists(configdict['out_afreq_file']):
         print "using allele freq file " + configdict['out_afreq_file']
