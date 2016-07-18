@@ -55,7 +55,7 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
                   help="cluster queue name [default %default]")
-parser.add_option("-m", "--maf", dest="maf", default="0.05",
+parser.add_option("-m", "--maf", dest="maf", default=None,
                   help="do not use SNPs with MAF below this threshold [default %default]")
 parser.add_option("--baf", dest="baf",
                   action="store_true", default=False,
