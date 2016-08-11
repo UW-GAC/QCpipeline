@@ -32,5 +32,6 @@ export(readConfig, writeConfig, setConfigDefaults,
        laiDosageFile, checkLaiDosageFile,
        multiplot,
        expRelsCategory,
-       ADFtoScanADF
+       ADFtoScanADF,
+       ibdAssignRelatednessPCRelate
        )
