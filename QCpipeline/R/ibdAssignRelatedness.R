@@ -13,7 +13,7 @@ ibdAssignRelatednessPCRelate <- function(
   cut.k0=0.1 #
 ){
   
-  ## returns a vector of assignments to "PO", "FS", "HS", "FC","U" (unrelated) and "Q" for everything else, for each pair of (k0,k1)
+  ## returns a vector of assignments to "PO", "FS", "Deg2", "Deg3","U" (unrelated) and "Q" for everything else, for each pair of (k0,kc)
   
   ## default thresholds for assigning relationships use kinship coefficients in table 1 of Manichaikul (2010) - KING paper
   

@@ -20,9 +20,8 @@ required <- c("annot_scan_file",
 optional <- c("annot_scan_subjectCol"="subjectID",
               "ibd_method"="pcrelate",
               "out_ibd_file"="ibd_obsrel.RData",
-              "out_twins_file"="ibd_twins.RData",
-              "scan_include_file"=NA,
-              "unexpected_threshold"="deg2")
+              "out_plot"="ibd.pdf",
+              "scan_include_file"=NA)
 config <- setConfigDefaults(config, required, optional=names(optional), default=optional)
 print(config)
 
@@ -52,7 +51,7 @@ nrow(ibd)
 rel <- getobj(config["exp_rel_file"])
 rel <- rel %>%
     mutate(pair=pasteSorted(Individ1, Individ2)) %>%
-    select(pair, family, relation, exp.rel, MZtwinID, twin.fam)
+    select(pair, family, relation, exp.rel, MZtwinID)
 
 ibd <- select(ibd, ID1, ID2, kin, k0) %>%
     left_join(annot, by=c(ID1="sample.id")) %>%
@@ -71,13 +70,22 @@ ibd <- ibd %>%
 nrow(ibd)
 save(ibd, file=config["out_ibd_file"])
 
-## separate families with MZ twins
-twin.fam.subj <- filter(ibd, twin.fam) %>%
-    select(ID1, ID2) %>%
-    unlist(use.names=FALSE) %>%
-    unique()
-ibd.twins <- filter(ibd, ID1 %in% twin.fam.subj | ID2 %in% twin.fam.subj)
-save(ibd.twins, file=config["out_twins_file"])
-
-ibd <- filter(ibd, !twin.fam)
 table(ibd$exp.rel, ibd$obs.rel)
+
+## plot unexpected relatives
+ibd <- mutate(ibd, unexp=ifelse(exp.rel == obs.rel, "expected", "unexpected"))
+
+rels <- c("Dup", "PO", "FS", "Deg1", "Deg2", "Deg3", "Q", "U")
+cols <- c(brewer.pal(length(rels)-1, "Dark2")[c(1, 2, 3, 6, 5, 4, 7)], "black")
+cmap <- setNames(cols, rels)
+
+theme_set(theme_bw() + theme(legend.position=c(1, 1), legend.justification=c(1,1), legend.background = element_rect(colour = "black")))
+
+p <- ggplot(ibd, aes(k0, kin, color=exp.rel)) + facet_wrap(~unexp) +
+    geom_hline(yintercept=2^(-seq(3,9,2)/2), linetype='dashed', color="grey") +
+    geom_point() +
+    scale_color_manual(values=cmap, breaks=names(cmap)) +
+    ylab("kinship estimate")
+
+ggsave(config["out_plot"], plot=p, width=12, height=6)
+
