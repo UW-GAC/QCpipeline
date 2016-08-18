@@ -2,6 +2,7 @@ library(GWASTools)
 library(QCpipeline)
 library(gdsfmt)
 library(GENESIS)
+library(SNPRelate)
 library(RColorBrewer)
 library(ggplot2)
 library(dplyr)
@@ -40,11 +41,19 @@ if (!is.na(config["scan_include_file"])) {
 }
 
 ## read ibd file
-## currently only PC-Relate format, maybe allow others also?
-stopifnot(config["ibd_method"] == "pcrelate")
-pcr <- openfn.gds(config["ibd_file"])
-ibd <- pcrelateReadKinship(pcr, scan.include=ids)
-closefn.gds(pcr)
+if (config["ibd_method"] == "pcrelate") {
+    pcr <- openfn.gds(config["ibd_file"])
+    ibd <- pcrelateReadKinship(pcr, scan.include=ids) %>%
+        rename(kinship=kin) %>%
+        mutate(obs.rel=ibdAssignRelatednessPCRelate(k0, kinship))
+    closefn.gds(pcr)
+    xvar <- "k0"
+} else if (config["ibd_method"] == "king" ) {
+    king <- getobj(config["ibd_file"])
+    ibd <- snpgdsIBDSelection(king, samp.sel=which(king$sample.id %in% ids)) %>%
+        mutate(obs.rel=ibdAssignRelatednessKing(IBS0, kinship))
+    xvar <- "IBS0"
+}
 nrow(ibd)
 
 ## expected relatives
@@ -53,7 +62,7 @@ rel <- rel %>%
     mutate(pair=pasteSorted(Individ1, Individ2)) %>%
     select(pair, family, relation, exp.rel, MZtwinID)
 
-ibd <- select(ibd, ID1, ID2, kin, k0) %>%
+ibd <- select_(ibd, "ID1", "ID2", xvar, "kinship", "obs.rel") %>%
     left_join(annot, by=c(ID1="sample.id")) %>%
     rename(Individ1=Individ) %>%
     left_join(annot, by=c(ID2="sample.id")) %>%
@@ -61,12 +70,10 @@ ibd <- select(ibd, ID1, ID2, kin, k0) %>%
     mutate(pair=pasteSorted(Individ1, Individ2)) %>%
     left_join(rel, by="pair") %>%
     select(-pair) %>%
-    mutate(exp.rel=ifelse(is.na(exp.rel), "U", exp.rel))
-
-## observed relatives
-ibd <- ibd %>%
-    mutate(obs.rel=ibdAssignRelatednessPCRelate(k0, kin)) %>%
+    mutate(exp.rel=ifelse(is.na(exp.rel), "U", exp.rel),
+           exp.rel=ifelse(Individ1 == Individ2, "Dup", exp.rel)) %>%
     filter(!(exp.rel == "U" & obs.rel == "U"))
+
 nrow(ibd)
 save(ibd, file=config["out_ibd_file"])
 
@@ -81,10 +88,11 @@ cmap <- setNames(cols, rels)
 
 theme_set(theme_bw() + theme(legend.position=c(1, 1), legend.justification=c(1,1), legend.background = element_rect(colour = "black")))
 
-p <- ggplot(ibd, aes(k0, kin, color=exp.rel)) + facet_wrap(~unexp) +
+p <- ggplot(ibd, aes_string(xvar, "kinship", color="exp.rel")) + facet_wrap(~unexp) +
     geom_hline(yintercept=2^(-seq(3,9,2)/2), linetype='dashed', color="grey") +
-    geom_point() +
+    geom_point(alpha=0.7) +
     scale_color_manual(values=cmap, breaks=names(cmap)) +
+    guides(colour=guide_legend(override.aes=list(alpha=1))) +
     ylab("kinship estimate")
 
 ggsave(config["out_plot"], plot=p, width=12, height=6)
