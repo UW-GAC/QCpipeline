@@ -63,7 +63,7 @@ Nelson, S.C.
 %}
 \examples{
 \dontrun{
- library(OLGApipline)
+ library(OLGApipeline)
  data.dir <- "/projects/geneva/gcc-fs2/OLGA/genotype/freeze1/gds/freeze1"
  olgaData <- OlgaGenotypeData(data.dir)
  snpAnnot <- getSnpAnnotation(olgaData, 21)

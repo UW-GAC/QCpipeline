@@ -68,14 +68,14 @@ convertBuild <- function(snpAnnot, chain.file, snp.include = NULL, verbose = TRU
     
     # check that elements length is never >1 (i.e. more than one mapping) -- don't
     # expect >1, but that would be a problem
-    mult.rslt <- sum(elementLengths(lift) > 1)
+    mult.rslt <- sum(elementNROWS(lift) > 1)
     if (mult.rslt > 0) 
         stop(mult.rslt, " input positions map to more than one position in target build\n")
     
     # report out number of successful liftovers
     if (verbose) {
-        one.rslt <- sum(elementLengths(lift) == 1)
-        no.rslt <- sum(elementLengths(lift) == 0)
+        one.rslt <- sum(elementNROWS(lift) == 1)
+        no.rslt <- sum(elementNROWS(lift) == 0)
         message(one.rslt, " input positions successfully converted; ", no.rslt, " positions failed conversion (will be set to NA)")
         pct <- round(one.rslt/nrow(snp), 6) * 100
         message(pct, "% successful conversions")
