@@ -86,7 +86,7 @@ if (config["maf.filter.type"] == "absolute") {
     N <- switch(model.type,
                 linear=max(combined$n, na.rm=TRUE),
                 logistic=max( pmin(combined$n0, combined$n1), na.rm=TRUE),
-                survival=combined$n.events)
+                survival=max(combined$n.events, na.rm=TRUE))
     
     maf <- quadSolveMAF(as.numeric(maf.thresh), N)
     mafhi.text <- paste("2*MAF*(1-MAF)*N >", maf.thresh)
