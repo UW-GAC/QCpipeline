@@ -22,12 +22,12 @@ IntensityReader(file)
 %\seealso{}
 \examples{
 ncfile <- "tmp.nc"
-simulateGenotypeMatrix(ncdf.filename=ncfile)
+simulateGenotypeMatrix(filename=ncfile, file.type="ncdf")
 dat <- GenotypeReader(ncfile)
 stopifnot(is(dat, "NcdfGenotypeReader"))
 close(dat)
 gdsfile <- "tmp.gds"
-convertNcdfGds(ncfile, gdsfile)
+simulateGenotypeMatrix(filename=gdsfile, file.type="gds")
 dat <- GenotypeReader(gdsfile)
 stopifnot(is(dat, "GdsGenotypeReader"))
 close(dat)

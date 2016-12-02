@@ -335,3 +335,43 @@ test_checkGdsCombine_snpExclude <- function() {
   unlink(filename)
   
 }
+
+
+test_gdsCombine_snpByScan <- function() {
+  
+  fileA <- tempfile()
+  .makeTestGds(fileA)
+  gdsA <- GdsGenotypeReader(fileA)
+  
+  fileB <- tempfile()
+  .makeTestGds(fileB)
+  gdsB <- GdsGenotypeReader(fileB)
+  
+  fileC <- tempfile()
+  .makeTestGds(fileC)
+  gdsC <- GdsGenotypeReader(fileC)
+  
+  gdsList <- list(A=gdsA, B=gdsB, C=gdsC)
+  
+  filename <- tempfile()
+  
+  # combine them
+  snp <- gdsCombine(gdsList, filename, genotypeDim="snp,scan")  
+  
+  for (blockSize in c(5000, nrow(snp)-1)){
+    for (bySnp in c(FALSE, TRUE)){
+      # make sure it works
+      gds <- GdsGenotypeReader(filename)
+      checkGdsCombine(gds, gdsList, snp, bySnp = bySnp, blockSize=blockSize)
+      close(gds)
+    } 
+  }
+  
+  lapply(gdsList, close)
+  
+  unlink(fileA)
+  unlink(fileB)
+  unlink(fileC)
+  unlink(filename)
+  
+}

@@ -1,10 +1,11 @@
-# this breaks many rules of object-oriented coding because something we need is not implemented yet, and we don't have time to implement it before we need this function. It will be fixed once getGenotypeSelection is implemented...
+
 
 gdsCombine <- function(gdsGenoList,filename,
-                           blockSize=5000,
-                           snpExcludeList=NULL,
-                           verbose=TRUE,
-                           dryRun=FALSE){
+                       blockSize=5000,
+                       snpExcludeList=NULL,
+                       genotypeDim="scan,snp",
+                       verbose=TRUE,
+                       dryRun=FALSE){
   
   if (is.null(names(gdsGenoList))) stop("Please supply names for gdsGenoList")
   
@@ -62,13 +63,16 @@ gdsCombine <- function(gdsGenoList,filename,
     add.gdsn(gfile, "snp.chromosome", snp$chromosome)
     add.gdsn(gfile, "snp.position", snp$position)
     add.gdsn(gfile, "snp.allele", paste(snp$alleleA, snp$alleleB, sep="/"))
-    
-    valdim <- c(length(scanID), nrow(snp))
-    gGeno <- add.gdsn(gfile, "genotype", valdim=c(length(scanID), nrow(snp)), storage=storage)
-    
-    # add order for gds file
-    put.attr.gdsn(gGeno, "sample.order")
-    
+
+    if (genotypeDim == "scan,snp") {
+        gGeno <- add.gdsn(gfile, "genotype", valdim=c(length(scanID), nrow(snp)), storage=storage)
+        # add order for gds file
+        put.attr.gdsn(gGeno, "sample.order")
+    } else {
+        gGeno <- add.gdsn(gfile, "genotype", valdim=c(nrow(snp), length(scanID)), storage=storage)
+        put.attr.gdsn(gGeno, "snp.order")
+    }
+        
     # add missing value
     put.attr.gdsn(gGeno, "missing.value", miss.val)
     
@@ -91,7 +95,11 @@ gdsCombine <- function(gdsGenoList,filename,
     
     if (verbose) message(paste("Block", block, "of", nblocks))
     
-    geno <- matrix(NA, ncol=nsnp.block, nrow=nsamp)
+    if (genotypeDim == "scan,snp") {
+        geno <- matrix(NA, ncol=nsnp.block, nrow=nsamp)
+    } else {
+        geno <- matrix(NA, ncol=nsamp, nrow=nsnp.block)
+    }
     
     # create the combined genotype array for this block
     for (n in names(gdsGenoList)){
@@ -102,11 +110,18 @@ gdsCombine <- function(gdsGenoList,filename,
       
       # select those SNPs in the gds file
       sel.set <- getSnpID(genoData) %in% snp.block$snpID.original[sel.comb]
-      # read them
-      ggeno <- getGenotypeSelection(genoData, snp=sel.set, transpose=TRUE)
-      
-      # put them in the combined matrix
-      geno[, sel.comb] <- ggeno
+
+      if (genotypeDim == "scan,snp") {
+          # read them
+          ggeno <- getGenotypeSelection(genoData, snp=sel.set, transpose=TRUE)
+          # put them in the combined matrix
+          geno[, sel.comb] <- ggeno
+      } else {
+          # read them
+          ggeno <- getGenotypeSelection(genoData, snp=sel.set, transpose=FALSE)
+          # put them in the combined matrix
+          geno[sel.comb, ] <- ggeno
+      }
       
     }
     
@@ -115,8 +130,13 @@ gdsCombine <- function(gdsGenoList,filename,
     
     # write the genotype to the file
     if (!dryRun){
-      start = c(1, snp.start)
-      count <- c(-1, snp.end-snp.start+1)
+      if (genotypeDim == "scan,snp") {
+          start = c(1, snp.start)
+          count <- c(-1, snp.end-snp.start+1)
+      } else {
+          start = c(snp.start, 1)
+          count <- c(snp.end-snp.start+1, -1)
+      }
       write.gdsn(gGeno, geno, start=start, count=count)
     }
     
