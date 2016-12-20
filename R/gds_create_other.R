@@ -88,15 +88,15 @@ pos <- getPosition(gds.orig)[snp.include]
 new.file <- file.path(config["out_gds_dir"], paste(config["out_gds_prefix"], "_chr-", chromosome, ".gds", sep=""))
 gfile <- createfn.gds(new.file)
 
-add.gdsn(gfile, "sample.id", scan.df$scanID, compress="ZIP_RA.max", closezip=TRUE)
-add.gdsn(gfile, "snp.id", snpID, compress="ZIP_RA.max", closezip=TRUE)
+add.gdsn(gfile, "sample.id", scan.df$scanID, compress="LZMA_RA", closezip=TRUE)
+add.gdsn(gfile, "snp.id", snpID, compress="LZMA_RA", closezip=TRUE)
 if (hasVariable(gds.orig, "snp.allele")) {
   add.gdsn(gfile, "snp.allele", getVariable(gds.orig, "snp.allele")[snp.include],
-           compress="ZIP_RA.max", closezip=TRUE)
+           compress="LZMA_RA", closezip=TRUE)
 }
-add.gdsn(gfile, "snp.position", pos, compress="ZIP_RA.max", closezip=TRUE)
+add.gdsn(gfile, "snp.position", pos, compress="LZMA_RA", closezip=TRUE)
 add.gdsn(gfile, "snp.chromosome", chrom, storage="uint8",
-         compress="ZIP_RA.max", closezip=TRUE)
+         compress="LZMA_RA", closezip=TRUE)
 put.attr.gdsn(index.gdsn(gfile, "snp.chromosome"), "autosome.start", min(autosomeCode(gds.orig)))
 put.attr.gdsn(index.gdsn(gfile, "snp.chromosome"), "autosome.end", max(autosomeCode(gds.orig)))
 put.attr.gdsn(index.gdsn(gfile, "snp.chromosome"), "X", XchromCode(gds.orig))
@@ -141,8 +141,6 @@ for (ind.new in 1:nrow(scan.df)) {
   write.gdsn(gGeno, geno, start=start, count=count)
 }
 
-# compress - maybe?
-#compression.gdsn(gGeno, compress="ZIP_RA.max")
 
 closefn.gds(gfile)
 

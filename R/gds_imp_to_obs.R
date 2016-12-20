@@ -41,13 +41,7 @@ stopifnot(file.exists(gds.imputed.file))
 gds.observed.file <- paste(config["out_gds_dir"], "/", config["out_gds_prefix"], "_chr-", chromosome, ".gds", sep="")
 
 gds.observed.file.tmp <- tempfile()
-gdsSubset(parent.gds=gds.imputed.file, sub.gds=gds.observed.file.tmp, snp.include=snp.include, sub.storage="bit2", compress="ZIP_RA.max", verbose=TRUE)
-
-# add compression -- no need here, plus it gives a stream write error...
-#gds <- openfn.gds(gds.observed.file.tmp, readonly=F)
-#genoNode <- index.gdsn(gds, "genotype")
-#compression.gdsn(genoNode, compress="ZIP_RA.max")
-#closefn.gds(gds)
+gdsSubset(parent.gds=gds.imputed.file, sub.gds=gds.observed.file.tmp, snp.include=snp.include, sub.storage="bit2", compress="LZMA_RA", verbose=TRUE)
 
 cleanup.gds(gds.observed.file.tmp)
 

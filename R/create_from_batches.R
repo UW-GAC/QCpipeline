@@ -50,12 +50,12 @@ newfile <- config[paste0(type, "_file")]
 gds <- createfn.gds(newfile)
 
 ## sample ID (fill in later)
-add.gdsn(gds, "sample.id", storage="integer", valdim=0, compress="ZIP_RA.max")
+add.gdsn(gds, "sample.id", storage="integer", valdim=0, compress="LZMA_RA")
 
 ## add snp variables
 for (v in vars.snp) {
     node <- index.gdsn(bgds, v)
-    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=0, compress="ZIP_RA.max")
+    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=0, compress="LZMA_RA")
     newnode <- index.gdsn(gds, v)
     append.gdsn(newnode, node)
     readmode.gdsn(newnode)
@@ -64,12 +64,12 @@ sync.gds(gds)
 
 ## add other variables (but not data yet)
 if ("genotype" %in% vars) {
-    geno.node <- add.gdsn(gds, "genotype", storage="bit2", valdim=c(nsnp, 0))
+    geno.node <- add.gdsn(gds, "genotype", storage="bit2", valdim=c(nsnp, 0), compress="")
     put.attr.gdsn(geno.node, "snp.order")
 }
 for (v in setdiff(vars, "genotype")) {
     node <- index.gdsn(bgds, v)
-    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=c(nsnp, 0), compress="ZIP_RA.max:8M")
+    add.gdsn(gds, v, storage=objdesp.gdsn(node)$storage, valdim=c(nsnp, 0), compress="LZMA_RA:1M")
 }
 sync.gds(gds)
 
