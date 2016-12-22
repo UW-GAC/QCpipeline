@@ -2,6 +2,7 @@
 
 """Create NetCDF or GDS files"""
 
+import QCpipeline
 import sys
 import os
 import subprocess
@@ -55,9 +56,6 @@ bl_checkFile          [bl_check.RData]       output file for BAF/LRR check
 bl_diagFile           [bl_diag.RData]        output file for BAF/LRR creation
 out_plink_logfile     [plink_check.log]      output file for PLINK check"""
 parser = OptionParser(usage=usage)
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                  help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
@@ -82,7 +80,6 @@ if len(args) != 1:
     parser.error("incorrect number of arguments")
 
 config = args[0]
-pipeline = options.pipeline
 email = options.email
 test = options.test
 overwrite = options.overwrite
@@ -94,8 +91,7 @@ plink = options.plink
 if nbatch is None and combine:
     sys.exit("specify number of batches to combine")
 
-sys.path.append(pipeline)
-import QCpipeline
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 if test:
     testStr = "test"

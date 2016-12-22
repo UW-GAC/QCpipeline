@@ -2,6 +2,7 @@
 
 """Mixed model association tests"""
 
+import QCpipeline as qcp
 import sys
 import os
 import subprocess
@@ -12,9 +13,6 @@ description = "Run association tests using the mixed model."
 parser = argparse.ArgumentParser(description=description, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("config", help="config file", nargs=1)
 parser.add_argument("chromosomes", help="chromosomes to run (e.g. 1:23 or 1 3 5)", nargs="*") # nargs="*" means match 0 to any number
-parser.add_argument("-p", "--pipeline", dest="pipeline",
-                    default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                    help="pipeline source directory")
 parser.add_argument("-e", "--email", dest="email", default=None,
                     help="email address for job reporting")
 parser.add_argument("-q", "--queue", dest="queue", default="all.q", 
@@ -38,10 +36,7 @@ if arguments.assoc and len(arguments.chromosomes) < 1:
     print "chromosomes must be given if --assoc is specified."
     parser.print_usage()
 
-# import selected pipeline version of QCpipeline
-pipeline = arguments.pipeline
-sys.path.append(pipeline)
-import QCpipeline as qcp
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 # parse chromosomes
 chromosomes = qcp.parseChromosomes(arguments.chromosomes)

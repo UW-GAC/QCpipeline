@@ -2,6 +2,7 @@
 
 """Hardy-Weinberg Equilibrium test"""
 
+import QCpipeline
 import sys
 import os
 import subprocess
@@ -34,9 +35,6 @@ out_qq_plot           [hwe_qq.png]     output QQ plots (autosomal and X)
 out_sim_prefix        [hwe_sim]        prefix for simulated HWE results
 nsnp_simulate         [50000]          max number of SNPs to simulate"""
 parser = OptionParser(usage=usage)
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                  help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
@@ -47,7 +45,6 @@ if len(args) < 1 or len(args) > 3:
     parser.error("incorrect number of arguments")
 
 config = args[0]
-pipeline = options.pipeline
 email = options.email
 qname = options.qname
 
@@ -65,8 +62,7 @@ if int(cStart) <= int(cEnd):
 else:
     sys.exit("cEnd is smaller than cStart")
 
-sys.path.append(pipeline)
-import QCpipeline
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 driver = os.path.join(pipeline, "runRscript.sh")
 driver_array = os.path.join(pipeline, "runRscript_array.sh")

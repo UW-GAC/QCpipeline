@@ -2,6 +2,7 @@
 
 """Create NetCDF and GDS files"""
 
+import QCpipeline as qcp
 import sys
 import os
 import subprocess
@@ -21,9 +22,6 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
                   help="cluster queue name [default %default]")
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default=None,
-                  help="test pipeline path")
 parser.add_option("-o", "--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
@@ -39,9 +37,7 @@ if len(args) != 2:
     parser.error("incorrect number of arguments")
 
 config = args[0]
-#pipeline = options.pipeline
 email = options.email
-pipeline = options.pipeline
 overwrite = options.overwrite
 qname = options.qname
 verbose = True
@@ -49,8 +45,7 @@ verbose = True
 
 chromosomeString = args[1]
 
-sys.path.append(pipeline)
-import QCpipeline as qcp
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 # can get chromosomes here, later.
 configdict = qcp.readConfig(config)

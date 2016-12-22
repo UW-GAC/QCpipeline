@@ -2,6 +2,7 @@
 
 """Chromosome anomalies"""
 
+import QCpipeline
 import sys
 import os
 import subprocess
@@ -48,9 +49,6 @@ out_eligible_snps           [snps_eligible.RData]           output file of eligi
 out_plot_prefix             [long_plot]                     output prefix for anomaly plots
 """
 parser = OptionParser(usage=usage)
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                  help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
@@ -68,7 +66,6 @@ parser.add_option("--stats", dest="stats",
                   help="Run anom stats")
 (options, args) = parser.parse_args()
 
-pipeline = options.pipeline
 email = options.email
 maf = options.maf
 qname = options.qname
@@ -87,8 +84,7 @@ if len(args) > 1:
     end = int(args[2])
     by = int(args[3])
 
-sys.path.append(pipeline)
-import QCpipeline
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 configdict = QCpipeline.readConfig(config)
 

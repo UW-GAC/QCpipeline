@@ -2,6 +2,7 @@
 
 """SNP filters: allele frequency and heterozygosity by ethnic group and sex"""
 
+import QCpipeline
 import sys
 import os
 import subprocess
@@ -22,9 +23,6 @@ scan_exclude_file   [NA]                 vector of scanID to exclude (all but on
 out_afreq_file      [allele_freq.RData]  output file for allele frequency
 out_het_file        [het_by_snp.RData]   output file for heterozygosity by snp"""
 parser = OptionParser(usage=usage)
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                  help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
@@ -35,13 +33,10 @@ if len(args) != 1:
     parser.error("incorrect number of arguments")
 
 config = args[0]
-pipeline = options.pipeline
 email = options.email
 qname = options.qname
 
-sys.path.append(pipeline)
-import QCpipeline
-
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 driver = os.path.join(pipeline, "runRscript.sh")
 
 jobid = dict()

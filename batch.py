@@ -2,6 +2,7 @@
 
 """Batch quality checks"""
 
+import QCpipeline
 import sys
 import os
 import subprocess
@@ -41,9 +42,6 @@ out_meanmcr_nscan_plot      [batch_meanmcr_nscan.pdf]      output MCR vs nscan p
 # out_meanor_race_plot        [batch_meanor_race.pdf]        output OR vs race frac plot
 
 parser = OptionParser(usage=usage)
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                  help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
@@ -56,13 +54,11 @@ if len(args) != 1:
     parser.error("incorrect number of arguments")
 
 config = args[0]
-pipeline = options.pipeline
 email = options.email
 #type = options.type
 qname = options.qname
 
-sys.path.append(pipeline)
-import QCpipeline
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 driver = os.path.join(pipeline, "runRscript.sh")
 

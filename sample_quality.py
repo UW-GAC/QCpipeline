@@ -2,6 +2,7 @@
 
 """Sample quality checks"""
 
+import QCpipeline
 import sys
 import os
 import subprocess
@@ -34,9 +35,6 @@ out_plot_prefix       [qual_check]        output prefix for BAF/LRR plots
 out_baf_sd_boxplot    [baf_sd.pdf]        output BAF SD boxplot
 out_het_boxplot       [het_outl.pdf]      output heterozygosity by race boxplot"""
 parser = OptionParser(usage=usage)
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                  help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
@@ -47,13 +45,10 @@ if len(args) != 1:
     parser.error("incorrect number of arguments")
 
 config = args[0]
-pipeline = options.pipeline
 email = options.email
 qname = options.qname
 
-sys.path.append(pipeline)
-import QCpipeline
-
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 driver = os.path.join(pipeline, "runRscript.sh")
 
 job = "sample_quality"

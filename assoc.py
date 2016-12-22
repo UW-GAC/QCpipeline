@@ -2,6 +2,7 @@
 
 """Association tests"""
 
+import QCpipeline
 import sys
 import os
 import subprocess
@@ -45,9 +46,6 @@ signif_line             [5e-08]           genome-wide significance level for man
 out_assoc_prefix        [assoc]           output prefix for association results       
 out_plot_prefix         [assoc]           output prefix for plots"""
 parser = OptionParser(usage=usage)
-parser.add_option("-p", "--pipeline", dest="pipeline",
-                  default="/projects/geneva/gcc-fs2/GCC_Code/QCpipeline",
-                  help="pipeline source directory")
 parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
@@ -68,7 +66,6 @@ parser.add_option("--plotClust", dest="plotcl",
                   help="cluster plots")
 (options, args) = parser.parse_args()
 
-pipeline = options.pipeline
 email = options.email
 assoc = options.assoc
 merge = options.merge
@@ -88,8 +85,7 @@ if len(args) > 1:
     cStart = args[1] 
     cEnd = args[2] 
 
-sys.path.append(pipeline)
-import QCpipeline
+pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
 configdict = QCpipeline.readConfig(config)
 
