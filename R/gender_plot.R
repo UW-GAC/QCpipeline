@@ -47,6 +47,7 @@ dat$sex.genotype <- ifelse(dat$mninten.Y > 0.5 & dat$mninten.X < 1.0, "M", "F")
 # order so that mismatches are on top
 dat$mismatch <- ifelse(dat$sex.genotype == dat$sex.annot, 0, 1)
 dat$mismatch[is.na(dat$mismatch)] <- 1
+dat <- dat[order(dat$mismatch),]
 
 # replace so it shows up on the axis label
 dat$sex.annot[is.na(dat$sex.annot)] <- "NA"
@@ -66,7 +67,7 @@ theme_set(theme_bw())
 ggcol <- scale_color_manual(breaks=c("F", "M", "NA"), values=c("#FF4D4D", "#0099FF", "black"))
 
 plots[[1]] <- ggplot(dat, aes(x=mninten.X, y=mninten.Y, color=sex.annot)) +
-  geom_point(aes(order=mismatch)) +
+  geom_point() +
   xlab(xlab) +
   ylab(ylab) +
   ggcol + 
@@ -74,21 +75,21 @@ plots[[1]] <- ggplot(dat, aes(x=mninten.X, y=mninten.Y, color=sex.annot)) +
   theme(legend.position=c(1,1), legend.justification=c(1,1))
 
 plots[[2]] <- ggplot(dat, aes(x=mninten.X, y=het.X, color=sex.annot)) +
-  geom_point(aes(order=mismatch)) +
+  geom_point() +
   xlab(xlab) +
   ylab("X heterozygosity") +
   ggcol + 
   guides(color=FALSE, alpha=FALSE)
 
 plots[[3]] <- ggplot(dat, aes(x=mninten.Y, y=het.X, color=sex.annot)) +
-  geom_point(aes(order=mismatch)) +
+  geom_point() +
   xlab(ylab) +
   ylab("X heterozygosity") +
   ggcol +
   guides(color=FALSE, alpha=FALSE)
 
 plots[[4]] <- ggplot(dat[dat$sex.annot %in% "F", ], aes(x=het.A, y=het.X, color=sex.annot)) +
-  geom_point(aes(order=mismatch)) +
+  geom_point() +
   xlab("Autosomal heterozygosity") +
   ylab("X heterozygosity") +
   ggcol +
@@ -110,7 +111,7 @@ for (autosome in autosomes){
   png(paste(autoPrefix, "_", autosome, ".png", sep=""), width=600, height=600)
   
   p <- ggplot(dat, aes_string(x="mninten.X", y=paste0("mninten.", autosome), color="sex.annot")) +
-    geom_point(aes(order=mismatch)) +
+    geom_point() +
     xlab(xlab) + ylab(ylab) +
     ggcol +
     theme(legend.position=c(1,1), legend.justification=c(1,1))
