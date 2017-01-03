@@ -10,7 +10,7 @@ unset args[0] # remove first argument (R script name)
 
 len=${#args[@]} # number of arguments
 
-export R_LIBS=/projects/geneva/gcc-fs2/R_packages/library
+export R_LIBS=/projects/resources/gactools/R_packages/library
 
 if [ $len -gt 0 ]; then
     R -q --vanilla --args ${args[@]} < $1
