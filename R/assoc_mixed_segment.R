@@ -32,7 +32,7 @@ required <- c("annot_scan_file", "covars", "covars_as_factor",
 opt <- c("out_assoc_prefix"="assoc_mixed/study",
          "out_plot_prefix"="assoc_mixed/study",
          "block_size"=5000, 
-         "annot_snp_file"="illumina_snp_annot_v02.RData")
+         "annot_snp_file"=NA)
 optional <- names(opt)
 default <- unname(opt)
 config <- setConfigDefaults(config, required, optional, default)
