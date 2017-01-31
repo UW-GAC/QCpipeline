@@ -31,8 +31,8 @@ getTxDb <- function(build, database_table) {
        {stop("Only implemented for human genome builds hg18 or hg19, not ", build)}  
 
   # check if specified database table is supported
-  if(!is.element(database_table,
-                 rownames(supportedUCSCtables()))){
+    if(!is.element(database_table, supportedUCSCtables()$tablename)) {
+                 # rownames(supportedUCSCtables()))){
     stop("Database table ", database_table," not found in list of 'supportedUCSCtables()'")
   }
 

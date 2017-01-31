@@ -15,9 +15,9 @@
 # 4) geneID: Values returned from locateVariants. For genic SNPs, one or more Entrez GeneIDs; NA otherwise. If collapsed=TRUE, multiple records are concatenated by ";". 
 # 5) exomic: logical vector, TRUE where variant is located in exomic region (at least one loctype value of coding); FALSE if not located in exomic region; NA if not included in query (either because excl.chr=TRUE, excl.pos=TRUE, or no match found by locateVariants query)
 
-## # values for testing:
-## # rm(list=objects())
-## snpAnnot <- getobj("/projects/cidr/Marazita_ofc/sample_snp_annot/Marazita_ofc_HumanCoreExomePlusCustom_Marazita_15050181_A_V13_scn.RData")
+# values for testing:
+# rm(list=objects())
+# snpAnnot <- getobj("/projects/cidr/Marazita_ofc/sample_snp_annot/Marazita_ofc_HumanCoreExomePlusCustom_Marazita_15050181_A_V13_scn.RData")
 
 
 ################# Start function definition
