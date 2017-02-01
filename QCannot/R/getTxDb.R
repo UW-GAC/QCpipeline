@@ -44,7 +44,8 @@ getTxDb <- function(build, database_table) {
 
   else {
     message("Fetching database table ", database_table)
-    txdb <- makeTranscriptDbFromUCSC(genome = build, tablename = database_table)
+    # txdb <- makeTranscriptDbFromUCSC(genome = build, tablename = database_table)
+    txdb <- makeTxDbFromUCSC(genome = build, tablename = database_table)
 }
 
   return(txdb)
