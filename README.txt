@@ -1,24 +1,24 @@
 QC Pipeline
-Step numbers refer to the SOP
-Python scripts must be run on pearson, as they submit cluster jobs
+Step numbers refer to the SOP (version "transition_revised")
+Python scripts must be run on cluster head node, as they submit cluster jobs
 Run "<script.py> --help" to see options and config parameters for each script
-see QCpipeline-manual.pdf for R function help
+for R function help, use "help(function_name)" within R
 
-1) Create project directory
+2) Create project directory
 create_project_dir.sh ProjectName user group
 (where "user" is the first analyst working on the project,
 and "group" is geneva/olga/cidr/etc.)
 
 
-2-8) Create scan and snp annotation files
+4-5) Create scan and snp annotation files
 (save as ScanAnnotationDataFrame and SnpAnnotationDataFrame)
 
-3f) Check that the Sample ID - file mapping is correct using the
+5b) Check that the Sample ID - file mapping is correct using the
 config file:
 > R -q --vanilla --args create_datafiles.config outfile < sample_id_from_files.R
 
 
-9) Create netCDF or GDS files
+6) Create GDS files
 test 5 samples first:
 > create_datafiles.py --email user@uw.edu --test create_datafiles.config
 (where "user@uw.edu" is your email address)
@@ -31,7 +31,7 @@ Pay attention to sections marked "MANUAL REVIEW"
 Quality score will only be included in "xy" file if raw_qCol is not NA.
 
 Use option "--checkPlink" to check a CIDR-generated PLINK file against
-the newly created netCDF/GDS file.
+the newly created GDS file.
 
 To create files in batches and combine:
 > create_datafiles.py --email user@uw.edu --batches 5 create_datafiles.config
@@ -42,16 +42,16 @@ To create files in batches and combine:
 (delete batches after verifying that combine was successful)
 
 
-13-15) Gender check (heterozygosity and mean intensity)
+9) Gender check (heterozygosity and mean intensity)
 > gender_check.py --email user@uw.edu gender.config
 
 
-17-19) Missing call rate
+10) Missing call rate
 "round2" in config file should be FALSE
 > missing.py --email user@uw.edu missing.config
 
 
-20) Chromosome anomalies (need missing call rate first)
+NA) Chromosome anomalies (need missing call rate first)
 test first:
 > chrom_anomalies.py --email user@uw.edu chrom_anom.config 1 10 5 --baf --loh --stats
 (first 10 scans in 2 batches of 5 scans each)
@@ -74,11 +74,11 @@ does not make sense to use options --baf --stats together without
 --loh.)
 
 
-21) Batch quality checks
+11) Batch quality checks
 > batch.py --email user@uw.edu batch.config
 
 
-25) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
+14) IBD (SNP selection, run IBD, plots, inbreeding coefficients)
 > ibd.py --email user@uw.edu ibd.config
 SNPs for IBD are selected with LD pruning.
 The LD pruning file will be used if it already exists, otherwise it
@@ -93,26 +93,26 @@ use the maximum number of cores available (between 1-4), and
 For family studies, provide a family variable in the config file.
 
 
-26) Sample quality check
+NA) Sample quality check
 > sample_qualty.py --email user@uw.edu sample_quality.config
 
 
-27a) Plate layout maps
+16a) Plate layout maps
 "annot_scan_plateCol" and "annot_scan_wellCol" should refer to the plates
 on which the samples were shipped to the genotyping center.
 > plate_layout.py --email user@uw.edu plate_layout.config
 
 
-31) Recalculate missing call rates
+19) Recalculate missing call rates
 "round2" in config file should be TRUE
 > missing.py --email user@uw.edu missing.config
 
 
-35) Create subject-level netCDF/GDS genotype file with anomalies filtered
+24) Create subject-level GDS genotype file with anomalies filtered
 > geno_filt_subset.py --email user@uw.edu subset.config
 
 
-36) PCA
+25) PCA
 First round, unduplicated study samples + external hapmaps:
 > pca.py --email user@uw.edu pca.config --combined
 
@@ -139,19 +139,18 @@ use the maximum number of cores available (between 1-4), and
 "--multithread 4" will request 4 cores. Do not request more than 8 cores.
 
 
-40a)
-iii) HWE
+30) HWE
 > hwe.py --email user@uw.edu hwe.config
 (repeat with different config files for mutiple ethnic groups)
 Chomosomes 1-23 will be run in parallel. To specify a chromosome range:
 > hwe.py --email user@uw.edu hwe.config start_chrom end_chrom
 
 
-iv-vi) Allele frequency, duplicate discordance and Mendelian errors
+31) Allele frequency, duplicate discordance and Mendelian errors
 > snp_filt.py --email user@uw.edu snp_filt.config
 use option --MAconc for minor allele concordance 
 
-Allele frequency, mendelian errors, and dupSNP will be run using the filtered subject-level netCDF/GDS.
+Allele frequency, mendelian errors, and dupSNP will be run using the filtered subject-level GDS.
 
 use option --dupSNP for duplicate SNP discordance - snp annotation
 needs a column with integer ids for duplicate SNPs (and NA for
@@ -164,12 +163,12 @@ set corr.by.snp=TRUE in the config file to calculate correlation by
 SNP (this is slow)
 
 
-vii-viii) Allele frequency and heterozygosity by ethnic group and sex. Run using the filtered subject-level netCDF/GDS.
+32) Allele frequency and heterozygosity by ethnic group and sex. Run using the filtered subject-level GDS.
 > snp_filt_ethn.py --email user@uw.edu snp_filt_ethn.config
 (repeat with different config files for mutiple ethnic groups)
 
 
-41d-e)
+34)
 Association tests:
 
 To do association tests and plotting (including QQ, Manhattan and cluster plots) in one shot:
@@ -191,9 +190,9 @@ If there are categorical covariates in the model(s), specify them in the config 
 
 
 dbGaP files:
-3) make PLINK files
+make PLINK files
 > plink.py  --email user@uw.edu --filtered plink.config
-The unfiltered plink file will be made from the sample-level netCDF/GDS
+The unfiltered plink file will be made from the sample-level GDS
 using only subj.plink samples.
 If "--filtered" argument is given, the script will ALSO create a
-filtered plink file from the subject-level netCDF/GDS.
+filtered plink file from the subject-level GDS.
