@@ -76,6 +76,11 @@ if (as.logical(config["include_study_hapmaps"])) {
 }
 length(comb.scan.ids)
 
+# reduce combined scan annot to selected samples before assessing whether there are dups
+dim(comb.scanAnnot)
+comb.scanAnnot <- comb.scanAnnot[getScanID(comb.scanAnnot) %in% comb.scan.ids]
+dim(comb.scanAnnot)
+
 # remove duplicate scans between study and external (if any)
 dups <- comb.scanAnnot$scanID[duplicated(comb.scanAnnot$subjectID)]
 undup.scans <- setdiff(comb.scan.ids, dups)
