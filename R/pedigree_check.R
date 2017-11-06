@@ -60,7 +60,7 @@ nrow(ibd)
 rel <- getobj(config["exp_rel_file"])
 rel <- rel %>%
     mutate(pair=pasteSorted(Individ1, Individ2)) %>%
-    select(pair, family, relation, exp.rel, MZtwinID)
+    select(one_of("pair", "family", "relation", "exp.rel", "MZtwinID"))
 
 ibd <- select_(ibd, "ID1", "ID2", xvar, "kinship", "obs.rel") %>%
     left_join(annot, by=c(ID1="sample.id")) %>%
@@ -91,7 +91,7 @@ theme_set(theme_bw() + theme(legend.position=c(1, 1), legend.justification=c(1,1
 p <- ggplot(ibd, aes_string(xvar, "kinship", color="exp.rel")) + facet_wrap(~unexp) +
     geom_hline(yintercept=2^(-seq(3,9,2)/2), linetype='dashed', color="grey") +
     geom_point(alpha=0.7) +
-    scale_color_manual(values=cmap, breaks=names(cmap)) +
+    scale_color_manual(values=cmap, breaks=names(cmap), na.value="grey30") +
     guides(colour=guide_legend(override.aes=list(alpha=1))) +
     ylab("kinship estimate")
 
