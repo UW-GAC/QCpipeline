@@ -55,6 +55,8 @@ parser.add_option("--miss2fail", dest="miss2fail",
 parser.add_option("--senspec", dest="senspec",
                   action="store_true", default=False,
                   help="minor allele sensitivity and specificity")
+parser.add_option("--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -63,6 +65,7 @@ if len(args) != 1:
 config = args[0]
 email = options.email
 qname = options.qname
+qsubOptions = options.qsubOptions
 
 # which tests to run?
 tests = []
@@ -86,9 +89,9 @@ jobid = dict()
 for type in tests:
     job = "dup_disc_2sets"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[type] = QCpipeline.submitJob("disc_"+type, driver, [rscript, config, type], queue=qname, email=email)
+    jobid[type] = QCpipeline.submitJob("disc_"+type, driver, [rscript, config, type], queue=qname, email=email, qsubOptions=qsubOptions)
 
     # bin by MAF and cluster separation - requires these columns in SNP annotation
     # job = "disc_snp_bins"
     # rscript = os.path.join(pipeline, "R", job + ".R")
-    # jobid[type+"_summary"] = QCpipeline.submitJob("disc_"+type+"_summary", driver, [rscript, config, type], holdid=jobid[type], queue=qname, email=email)
+    # jobid[type+"_summary"] = QCpipeline.submitJob("disc_"+type+"_summary", driver, [rscript, config, type], holdid=jobid[type], queue=qname, email=email, qsubOptions=qsubOptions)

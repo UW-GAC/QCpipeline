@@ -39,6 +39,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
                   help="cluster queue name [default %default]")
+parser.add_option("-o", "--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) < 1 or len(args) > 3:
@@ -47,6 +49,7 @@ if len(args) < 1 or len(args) > 3:
 config = args[0]
 email = options.email
 qname = options.qname
+qsubOptions = options.qsubOptions
 
 if len(args) > 1:
     cStart = args[1] 
@@ -71,21 +74,21 @@ jobid = dict()
 
 job = "hwe"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config], queue=qname, email=email, arrayRange=arrayRange)
+jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions, arrayRange=arrayRange)
 
 holdid = [jobid["hwe"].split(".")[0]]
 job = "hwe_combine"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, cStart, cEnd], holdid=holdid, queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, cStart, cEnd], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
 
 
 holdid = [jobid['hwe_combine']]
 job = "hwe_simulate"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
 
 job = "hwe_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
 holdid = [jobid["hwe_simulate"]]
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
 

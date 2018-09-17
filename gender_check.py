@@ -38,6 +38,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
                   help="cluster queue name [default %default]")
+parser.add_option("-o", "--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -46,6 +48,7 @@ if len(args) != 1:
 config = args[0]
 email = options.email
 qname = options.qname
+qsubOptions = options.qsubOptions
 
 pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
@@ -54,8 +57,8 @@ driver = os.path.join(pipeline, "runRscript.sh")
 jobid = dict()
 for job in ["het_by_scan", "mean_inten", "sexchrom_anom_plot"]:
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
 job = "gender_plot"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['het_by_scan'], jobid['mean_inten']], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['het_by_scan'], jobid['mean_inten']], queue=qname, email=email, qsubOptions=qsubOptions)

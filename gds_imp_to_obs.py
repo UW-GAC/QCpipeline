@@ -21,9 +21,11 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
                   help="cluster queue name [default %default]")
-parser.add_option("-o", "--overwrite", dest="overwrite",
+parser.add_option("--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
+parser.add_option("--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -34,6 +36,7 @@ email = options.email
 overwrite = options.overwrite
 qname = options.qname
 verbose = True
+qsubOptions = options.qsubOptions
 
 
 pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -75,6 +78,6 @@ job = "gds_imp_to_obs"
 rscript = os.path.join(pipeline, "R", "gds_imp_to_obs.R")
 
 # array job for imputed chromosomes
-jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email,
+jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email, qsubOptions=qsubOptions,
                                     verbose=verbose, arrayRange="1:23")
 

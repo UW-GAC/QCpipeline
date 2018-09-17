@@ -71,6 +71,8 @@ parser.add_option("--dupSNP", dest="dupsnp",
 parser.add_option("--mendClust", dest="mendclust",
                   action="store_true", default=False,
                   help="make cluster plots for Mendelian errors")
+parser.add_option("-o", "--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -82,6 +84,7 @@ qname = options.qname
 mac = options.mac
 dupsnp = options.dupsnp
 mendclust = options.mendclust
+qsubOptions = options.qsubOptions
 
 pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 driver = os.path.join(pipeline, "runRscript.sh")
@@ -89,34 +92,34 @@ driver = os.path.join(pipeline, "runRscript.sh")
 jobid = dict()
 job = "allele_freq"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
 job = "dup_disc"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email, qsubOptions=qsubOptions)
 
 if mac:
     job = "dup_disc_maf"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["allele_freq"]], queue=qname, email=email, qsubOptions=qsubOptions)
 
 job = "snp_filt_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
 holdid = [jobid["dup_disc"]]
 if mac:
     holdid.append(jobid["dup_disc_maf"])
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
 
 job = "mendel_err"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
 if mendclust:
     job = "mendel_plots"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["mendel_err"]], queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid["mendel_err"]], queue=qname, email=email, qsubOptions=qsubOptions)
 
 if dupsnp:
     job = "dup_snps"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)

@@ -92,6 +92,8 @@ parser.add_option("-c", "--combined", dest="combined",
                   help="make combined dataset")
 parser.add_option("-m", "--multithread", dest="multithread", default=None,
                   help="number of cores to use; either a number (e.g, 1) or a range of numbers (e.g., 1-4) [default 1 core]")
+parser.add_option("-o", "--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -102,6 +104,7 @@ email = options.email
 combined = options.combined
 qname = options.qname
 multithread = options.multithread
+qsubOptions = options.qsubOptions
 
 
 pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
@@ -114,9 +117,9 @@ jobid = dict()
 
 
 if multithread is not None:
-    optionsMulti = "-pe local " + multithread
+    optionsMulti = qsubOptions + " -pe local " + multithread
 else:
-    optionsMulti = ""
+    optionsMulti = qsubOptions
 
 if combined:
     type = "combined"
@@ -126,7 +129,7 @@ else:
 if combined:
     job = "combine_gds"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
 
 # skip LD if file already exists
 # multithreading not implemented in SNPRelate code for snpgdsLDpruning, so don't pass optionsMulti
@@ -140,7 +143,7 @@ else:
     else:
         holdid = None
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=holdid, queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
     waitLD = True
 
 if combined:
@@ -162,4 +165,4 @@ else:
 
 job = "pca_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job+"_"+type, driver, [rscript, config, type], holdid=[jobid['pca']], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job+"_"+type, driver, [rscript, config, type], holdid=[jobid['pca']], queue=qname, email=email, qsubOptions=qsubOptions)

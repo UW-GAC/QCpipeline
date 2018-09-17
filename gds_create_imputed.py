@@ -22,9 +22,11 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="all.q", 
                   help="cluster queue name [default %default]")
-parser.add_option("-o", "--overwrite", dest="overwrite",
+parser.add_option("--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
+parser.add_option("--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 # parser.add_option("-t", "--test", dest="test",
                   # action="store_true", default=False,
                   # help="test with chromosomes 21 and 22 only")
@@ -41,6 +43,7 @@ email = options.email
 overwrite = options.overwrite
 qname = options.qname
 verbose = True
+qsubOptions = options.qsubOptions
 # test = options.test
 
 chromosomeString = args[1]
@@ -88,7 +91,7 @@ rscript = os.path.join(pipeline, "R", "gds_create_imputed.R")
 # borrowed from below - not sure it's right (SN)
 
 # array job for imputed chromosomes
-jobid[job] = qcp.submitJob(job, driver, [rscript, config, args, chromosomeString], queue=qname, email=email,
+jobid[job] = qcp.submitJob(job, driver, [rscript, config, args, chromosomeString], queue=qname, email=email, qsubOptions=qsubOptions,
                                     verbose=verbose, arrayRange=chromosomeString)
 
 ## OTHER AND FAILED commented out for now
@@ -99,7 +102,7 @@ jobid[job] = qcp.submitJob(job, driver, [rscript, config, args, chromosomeString
 # args = " ".join(["other", testStr])
 # job = "gds_create_other_chr-other"
 # rscript = os.path.join(pipeline, "R", "gds_create_other.R")
-# jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email,
+# jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email, qsubOptions=qsubOptions,
 #                                     holdid=holdid, verbose=verbose)
 # 
 # # submit "failed" snps
@@ -107,12 +110,12 @@ jobid[job] = qcp.submitJob(job, driver, [rscript, config, args, chromosomeString
 # args = " ".join(["failed", testStr])
 # job = "gds_create_other_chr-failed"
 # rscript = os.path.join(pipeline, "R", "gds_create_other.R")
-# jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email,
+# jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email, qsubOptions=qsubOptions,
 #                                     holdid=holdid, verbose=verbose)
 
 holdid = [jobid["gds_create_imputed"].split(".")[0]]
 job = "gds_imputed_cleanup"
 rscript = os.path.join(pipeline, "R", "gds_imputed_cleanup.R")
 
-jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email,
+jobid[job] = qcp.submitJob(job, driver, [rscript, config, args], queue=qname, email=email, qsubOptions=qsubOptions,
                                     holdid=holdid, verbose=verbose)

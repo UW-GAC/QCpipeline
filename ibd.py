@@ -55,6 +55,8 @@ parser.add_option("-m", "--multithread", dest="multithread", default=None,
 parser.add_option("-i", "--inbreed", dest="inbreed",
                   action="store_true", default=False,
                   help="calculate individual inbreeding coefficients (not for use with KING)")
+parser.add_option("-o", "--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -65,6 +67,7 @@ email = options.email
 qname = options.qname
 multithread = options.multithread
 inbreed = options.inbreed
+qsubOptions = options.qsubOptions
 
 pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
@@ -76,9 +79,9 @@ jobid = dict()
 
 
 if multithread is not None:
-    optionsMulti = "-pe local " + multithread
+    optionsMulti = qsubOptions + " -pe local " + multithread
 else:
-    optionsMulti = ""
+    optionsMulti = qsubOptions
 
 
 # skip LD if file already exists
@@ -89,7 +92,7 @@ if os.path.exists(configdict['out_snp_file']):
 else:
     job = "ibd_snp_sel"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
     waitLD = True
 
 job = "ibd"
@@ -102,7 +105,7 @@ jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid,
 
 job = "ibd_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd']], queue=qname, email=email)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=[jobid['ibd']], queue=qname, email=email, qsubOptions=qsubOptions)
 
 # don't run inbreed_coeff for KING.
 if inbreed:
@@ -112,4 +115,4 @@ if inbreed:
     else:
         holdid = None
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)

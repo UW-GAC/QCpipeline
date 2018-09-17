@@ -63,7 +63,7 @@ parser.add_option("-q", "--queue", dest="qname", default="gcc.q",
 parser.add_option("-t", "--test", dest="test",
                   action="store_true", default=False,
                   help="test with first 5 scans only")
-parser.add_option("-o", "--overwrite", dest="overwrite",
+parser.add_option("--overwrite", dest="overwrite",
                   action="store_true", default=False,
                   help="overwrite existing files")
 parser.add_option("-b", "--batches", dest="batches", default=None, 
@@ -74,6 +74,8 @@ parser.add_option("-c", "--combine_batches", dest="combine",
 parser.add_option("--checkPlink", dest="plink",
                   action="store_true", default=False,
                   help="check PLINK file")
+parser.add_option("--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
@@ -87,6 +89,7 @@ qname = options.qname
 nbatch = options.batches
 combine = options.combine
 plink = options.plink
+qsubOptions = options.qsubOptions
 
 if nbatch is None and combine:
     sys.exit("specify number of batches to combine")
@@ -114,15 +117,15 @@ for type in ["geno", "xy", "bl"]:
     rscript = os.path.join(pipeline, "R", job + ".R")
 
     if nbatch is None:
-        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email)
+        jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, testStr], queue=qname, email=email, qsubOptions=qsubOptions)
     else:
         if not combine:
             arrayRange = "1:" + nbatch
-            jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config, nbatch], queue=qname, email=email, arrayRange=arrayRange)
+            jobid[job] = QCpipeline.submitJob(job, driver_array, [rscript, config, nbatch], queue=qname, email=email, qsubOptions=qsubOptions, arrayRange=arrayRange)
         else:
             #holdid = [jobid[job].split(".")[0]]     
             rscript = os.path.join(pipeline, "R", "create_from_batches.R")
-            jobid[job + "_combine"] = QCpipeline.submitJob(job + "_combine", driver, [rscript, config, nbatch, type], queue=qname, email=email)
+            jobid[job + "_combine"] = QCpipeline.submitJob(job + "_combine", driver, [rscript, config, nbatch, type], queue=qname, email=email, qsubOptions=qsubOptions)
         
 if plink:
     if nbatch is None:
@@ -143,5 +146,5 @@ if plink:
 
     job = "plink_check"
     rscript = os.path.join(pipeline, "R", job + ".R")
-    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email)
+    jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], holdid=holdid, queue=qname, email=email, qsubOptions=qsubOptions)
         

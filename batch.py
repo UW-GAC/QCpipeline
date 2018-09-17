@@ -46,6 +46,8 @@ parser.add_option("-e", "--email", dest="email", default=None,
                   help="email address for job reporting")
 parser.add_option("-q", "--queue", dest="qname", default="gcc.q", 
                   help="cluster queue name [default %default]")
+parser.add_option("-o", "--options", dest="qsubOptions", default="",
+                  help="additional options to pass to qsub, excluding -hold_jid, -N, -m e -M, -N, and -q")
 # parser.add_option("-t", "--type", dest="type", default="fisher",
 #                   help="test type [fisher (default) or chisq]")
 (options, args) = parser.parse_args()
@@ -57,6 +59,7 @@ config = args[0]
 email = options.email
 #type = options.type
 qname = options.qname
+qsubOptions = options.qsubOptions
 
 pipeline = os.path.dirname(os.path.abspath(sys.argv[0]))
 
@@ -66,9 +69,9 @@ jobid = dict()
 
 # job = "batch_test"
 # rscript = os.path.join(pipeline, "R", job + ".R")
-# jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], queue=qname, email=email)
+# jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], queue=qname, email=email, qsubOptions=qsubOptions)
 
 job = "batch_plots"
 rscript = os.path.join(pipeline, "R", job + ".R")
-# jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=[jobid['batch_test']], queue=qname, email=email)
-jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email)
+# jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config, type], holdid=[jobid['batch_test']], queue=qname, email=email, qsubOptions=qsubOptions)
+jobid[job] = QCpipeline.submitJob(job, driver, [rscript, config], queue=qname, email=email, qsubOptions=qsubOptions)
