@@ -1,0 +1,258 @@
+\documentclass{article}
+\usepackage{fullpage}
+\usepackage[pdftex, colorlinks, linkcolor=blue, urlcolor=blue]{hyperref}
+
+\title{Dataset Merging}
+\author{UW GCC}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+This document gives an example of how to merge multiple datasets into a single GDS file. It addresses related issues of genome build conversion, retrieving up-to-date rsIDs, and harmonizing SNP allele nomenclature (i.e., genotype coding and strand). Example data are taken from three publicly available datasets: HapMap, 1000 Genomes Project, and the Human Genome Diversity Project. 
+
+\tableofcontents
+
+\section{Update all datasets to a common build}
+Dataset 1: HapMap 3 samples genotyped on the Illumina Human 1M array, build 36.
+
+<<>>=
+library(QCpipeline)
+library(QCannot)
+dir <- "exampleDatasets"
+gdsfile <- file.path(dir, "hapmap3_1M_b36.gds")
+scanfile <- file.path(dir, "hapmap3_1M_b36_scanAnnot.RData")
+snpfile <- file.path(dir, "hapmap3_1M_b36_snpAnnot.RData")
+hm.gds <- GdsGenotypeReader(gdsfile)
+hm.scanAnnot <- getobj(scanfile)
+hm.snpAnnot <- getobj(snpfile)
+hmData <- GenotypeData(hm.gds, scanAnnot=hm.scanAnnot, snpAnnot=hm.snpAnnot)
+@
+
+First we need to update this dataset from build 36 to build 37\footnote{Note that there is more than one way to refer to a genome build. Build 36 may be called ``NCBI36'' or - in UCSC Browser nomenclature - ``hg18.'' Similarly, build 37 may be called ``GRCh37'' or ``hg19,'' and build 38 may be called ``GRCh38.'' The prefix ``GRC'' stands for Genome Reference Consortium, a group that essentially took over the curation of the human reference sequence starting with build 37.}. convertBuild takes a SNP annotation object and uses liftOver to get chromosome and position in the new build. The R package liftOver is an R implementation of the UCSC Genome Browser's liftOver tool%
+\footnote{\href{http://genome.ucsc.edu/cgi-bin/hgLiftOver}{http://genome.ucsc.edu/cgi-bin/hgLiftOver}}.
+
+<<>>=
+## need to specify a chain file for liftOver
+## chain files were downloaded from the UCSC Browser ftp site
+chain.file <- file.path("/projects/geneva/gcc-fs2/SNP_annotation/UCSC_downloads",
+                        "hg18/liftOver/hg18ToHg19.over.chain")
+## if converting from build 37 to build 36, the chain file argument would be:
+## chain.file <- file.path("/projects/geneva/gcc-fs2/SNP_annotation/UCSC_downloads",
+##                         "hg19/liftOver/hg19ToHg18.over.chain")
+converted <- convertBuild(hm.snpAnnot, chain.file)
+map <- converted[,c("rsID", "chromosome", "position",
+                    "rsID", "chromosome.converted", "position.converted")]
+names(map) <- c("old.rsID", "old.chromosome", "old.position",
+                "new.rsID", "new.chromosome", "new.position")
+outPrefix <- file.path(dir, "hapmap3_1M_b37")
+
+## gdsUpdateBuild will create a new GDS file reflecting the updated 
+## (i.e. build converted) positions
+## set remove.unmapped=FALSE to keep unmapped (chromosome=27) SNPs in new file
+gdsUpdateBuild(hmData, map, outPrefix=outPrefix, remove.unmapped=FALSE)
+## close hmData
+close(hmData)
+@ 
+
+A note on the ``rsID'' SNP identifier and build updates. The convertBuild function converts map information only (chromosome and base pair pair), \textit{not} SNP names. In the example usage of gdsUpdateBuild given above, ``old.rsID'' and ``new.rsID'' are the same. However, other sources may also be used for getting updated build information, including array-specific build conversion files provided by Illumina. Illumina's build conversion information includes updates for chromosome, position, and potentailly also rsIDs. Therefore when running gdsUpdateBuild with information from Illumina build conversion files, ``old.rsID'' and ``new.rsID'' may potentially hold different information. 
+
+To obtain updated rsIDs in a given build, you can use the getSnpNames function. This function will use dbSNP tables downloaded from the UCSC Browser ftp site to look up rsIDs at a given SNP position. While not required for this dataset merging exercise, getSnpNames is illustrated at the end of this section, with the 1000 Genomes dataset (which we know to have some non-rsIDs).
+
+<<>>=
+## Continuing on from gdsUpdateBuild...
+## re-open new files
+gdsfile <- file.path(dir, "hapmap3_1M_b37.gds")
+snpfile <- file.path(dir, "hapmap3_1M_b37_snpAnnot.RData")
+hm.gds <- GdsGenotypeReader(gdsfile)
+new.snpAnnot <- getobj(snpfile)
+cols <- intersect(varLabels(new.snpAnnot), varLabels(hm.snpAnnot))
+varMetadata(new.snpAnnot)[cols,] <- varMetadata(hm.snpAnnot)[cols,,drop=FALSE]
+hm.snpAnnot <- new.snpAnnot
+hmData <- GenotypeData(hm.gds, scanAnnot=hm.scanAnnot, snpAnnot=hm.snpAnnot)
+@
+
+Dataset 2: Human Genome Diversity Project (HGDP) samples genotyped on the Illumina 650Y array, build 37.
+
+<<>>=
+gdsfile <- file.path(dir, "HGDP_650Y_b37.gds")
+scanfile <- file.path(dir, "HGDP_650Y_b37_scanAnnot.RData")
+snpfile <- file.path(dir, "HGDP_650Y_b37_snpAnnot.RData")
+hg.gds <- GdsGenotypeReader(gdsfile)
+hg.scanAnnot <- getobj(scanfile)
+hg.snpAnnot <- getobj(snpfile)
+hgData <- GenotypeData(hg.gds, scanAnnot=hg.scanAnnot, snpAnnot=hg.snpAnnot)
+@
+
+Dataset 3: 1000 Genomes Project samples genotyped on the Illumina Omni2.5M array, build 37.
+
+<<>>=
+gdsfile <- file.path(dir, "1000G_omni25_b37.gds")
+scanfile <- file.path(dir, "1000G_omni25_b37_scanAnnot.RData")
+snpfile <- file.path(dir, "1000G_omni25_b37_snpAnnot.RData")
+kg.gds <- GdsGenotypeReader(gdsfile)
+kg.scanAnnot <- getobj(scanfile)
+kg.snpAnnot <- getobj(snpfile)
+kgData <- GenotypeData(kg.gds, scanAnnot=kg.scanAnnot, snpAnnot=kg.snpAnnot)
+@ 
+
+We'll take a quick aside here to give an example of the getSnpNames function, as there are some non-rsID identifiers in these 1000 Genomes data.
+
+<<>>=
+## Side example of using getSnpNames to obtain updated rsID identifiers:
+## preview current rsID field
+kg.rsID.curr <- getVariable(kg.snpAnnot,"rsID")
+non.rs <- grep("^rs",kg.rsID.curr, invert=TRUE, value=TRUE)
+length(non.rs); head(non.rs)
+
+# Open the GDS file containing the dbSNP table information in build 37
+library(gdsfmt)
+gds.dbSNP.fn <- file.path("/projects/geneva/gcc-fs2/SNP_annotation/UCSC_downloads",
+                          "hg19/database/snp138.gds")
+gds.dbSNP <- openfn.gds(gds.dbSNP.fn)
+# getSnpNames must be run one chromosome at a time
+chrom <- 22
+snpChr <- kg.snpAnnot[kg.snpAnnot$chromosome %in% chrom,]
+# preview SNP annotation, now in build 37
+head(pData(snpChr),3)
+out <- getSnpNames(snpAnnot=snpChr, gds=gds.dbSNP, chromosome=chrom, 
+                   extraSnptabVars="refNCBI")
+# Returns a list 
+names(out)
+# preview the SNP annotation merged with the dbSNP table
+snp.names <- out[["merged"]]
+# preview where rsID was found for non-rsID variants:
+head(snp.names[grep("^rs",snp.names$rsID,invert=TRUE),],3)
+# close GDS with dbSNP table information
+closefn.gds(gds.dbSNP)
+
+# optionally -- loop through all chromosomes and update rsID in 
+# kg.snpAnnot with "name" field returned by getSnpNames.
+@
+
+\section{Choose a common allele coding}
+
+Before we can merge these datasets, we need to make sure that their allele coding is the same. Recall that GDS files represent genotypes as a count ({0,1,2}) or dosage ([0,2]) of a specified allele, referred to as ``alleleA.'' For Illumina arrays, this count is traditionally of the Illumina A allele, as defined in Illumina's TOP/BOT and A/B nomenclature system%
+\footnote{\href{http://res.illumina.com/documents/products/technotes/technote\_topbot.pdf}{http://res.illumina.com/documents/products/technotes/technote\_topbot.pdf}}. 
+The GDS files we are merging together do not necessarily have to be counting a consistent allele. For example, one file can have alleleA=C and alleleB=T while the other has alleleA=T and alleleB=C. The GDS files do, however, need to have accompanying SNP annotations that define alleles on a consistent strand: e.g., TOP, plus(+), or FORWARD\footnote{For more on SNP allele nomenclature, see \href{http://www.sciencedirect.com/science/article/pii/S0168952512000704}{Nelson, S.C., Laurie, C.C., Doheny, K.F. \& Mirel, D.B. Is 'forward' the same as 'plus'?...and other adventures in SNP allele nomenclature. Trends in Genetics 28, 361-363 (2012)}}. The GDS merging function will then be able to harmonize the different GDS files to count a consistent allele as ``alleleA,'' by default taking the convention of the first dataset listed.
+
+<<>>=
+varMetadata(hm.snpAnnot)[grep("allele", varLabels(hm.snpAnnot)),,drop=FALSE]
+varMetadata(hg.snpAnnot)[grep("allele", varLabels(hg.snpAnnot)),,drop=FALSE]
+varMetadata(kg.snpAnnot)[grep("allele", varLabels(kg.snpAnnot)),,drop=FALSE]
+@
+
+We need to set ``alleleA'' and ``alleleB'' to TOP for 1000 Genomes.
+
+<<>>=
+kg.snpAnnot$alleleA <- kg.snpAnnot$alleleA.top
+kg.snpAnnot$alleleB <- kg.snpAnnot$alleleB.top
+kgData <- GenotypeData(kg.gds, scanAnnot=kg.scanAnnot, snpAnnot=kg.snpAnnot)
+@
+
+\section{Select samples and SNPs from each dataset}
+To merge the datasets with gdsMerge, we make a list containing all GenotypeData objects.  The names of the list items will be used to refer to each dataset in the output annotation.
+
+<<>>=
+genoDataList <- list(hmData, hgData, kgData)
+names(genoDataList) <- c("HapMap3", "HGDP", "1000G")
+@
+
+We select samples to include from each dataset (the default is to include all).  This list must have the same names as genoDataList.  Here we include unrelated samples.
+
+<<>>=
+lapply(genoDataList, getScanVariableNames)
+sampleList <- list(hm.scanAnnot$scanID[hm.scanAnnot$unrelated],
+                   hg.scanAnnot$scanID[hg.scanAnnot$unrelated.deg3],
+                   kg.scanAnnot$scanID[kg.scanAnnot$unrelated.3rdDeg])
+names(sampleList) <- names(genoDataList)
+unlist(lapply(sampleList, length))
+@
+
+We select SNPs to include from each dataset (the default is to include all matching SNPs).  This list must have the same names as genoDataList.  Here we select high-quality SNPs from the datasets with quality information and remove duplicate SNPs on the Omni2.5.
+
+<<>>=
+lapply(genoDataList, getSnpVariableNames)
+snpList <- list(hm.snpAnnot$snpID,
+                hg.snpAnnot$snpID[hg.snpAnnot$quality.filter],
+                kg.snpAnnot$snpID[kg.snpAnnot$missing.n1 < 0.02 & !kg.snpAnnot$duplicated])
+names(snpList) <- names(genoDataList)
+unlist(lapply(snpList, length))
+@
+
+
+\section{Merge on common SNPs}
+We can match SNPs on position, name, or both.  If matching on name, the column in each SNP annotation with the SNP identifier must be given in snpNameList (usually rsID or similar). Because the same SNP may be duplicated on an array with multiple names, or rsID may change with annotation updates, we typically choose to match on position only.  Alleles are always required to match, while allowing for the the possibilty of reversed A/B alleles.  The A/B alleles in the output will be taken from the first dataset.
+
+The default is to sort samples by scanID.  If sortByScanID is FALSE, each dataset will be in a contiguous block in the new file.  Generating a new set of snpIDs 1:N is also the default.  If newSnpID=FALSE, the snpIDs from the first dataset in the list will be used.
+
+<<>>=
+outPrefix <- file.path(dir, "1000G_HGDP_HapMap3")
+gdsMerge(genoDataList, outPrefix=outPrefix,
+         sampleList=sampleList, snpList=snpList,
+         match.snps.on="position",
+         sortByScanID=TRUE, newSnpID=TRUE)
+@
+
+\section{Check against original files}
+After creating the merged file, we check it against the original files with gdsMergeCheck.
+
+<<>>=
+gdsMergeCheck(genoDataList, outPrefix)
+@
+
+\section{Combine annotations}
+gdsMerge creates sample and SNP annotations with basic information, but we will want to fill in more columns with additional annotation from the three input datasets.
+
+<<>>=
+scanfile <- paste0(outPrefix, "_scanAnnot.RData")
+scanAnnot <- getobj(scanfile)
+head(pData(scanAnnot))
+## merge sample annotations
+hm.samp <- pData(hm.scanAnnot)[,c("scanID", "sex", "coriell.id", "pop.group")]
+names(hm.samp)[3:4] <- c("subjectID", "population")
+head(hm.samp)
+hg.samp <- pData(hg.scanAnnot)[,c("scanID", "sex", "subjectID", "population")]
+head(hg.samp)
+kg.samp <- pData(kg.scanAnnot)[,c("scanID", "sex", "Individual.ID", "Population")]
+names(kg.samp)[3:4] <- c("subjectID", "population")
+head(kg.samp)
+samp <- rbind(hm.samp, hg.samp, kg.samp)
+samp <- samp[match(scanAnnot$scanID, samp$scanID),]
+dim(samp)
+pData(scanAnnot) <- samp
+save(scanAnnot, file=scanfile)
+
+snpfile <- paste0(outPrefix, "_snpAnnot.RData")
+snpAnnot <- getobj(snpfile)
+head(pData(snpAnnot))
+## get rsID from 1000genomes annotation
+snpAnnot$rsID <- kg.snpAnnot$rsID[match(snpAnnot$snpID.1000G, kg.snpAnnot$snpID)]
+save(snpAnnot, file=snpfile)
+@
+
+\section{Check duplicate discordance}
+As a final check, we run duplicateDiscordance to make sure that duplicate samples across the datasets have concordant genotypes.  SNPs with discordant genotypes may be removed from further analysis. SNPs with very high discordance rates may indicate a problem with the SNP annotation (e.g., a probe not actually mapping to the specified position or perhaps A/B alleles incorrectly specified). SNPs with low to moderate discordance rates suggest differences in genotyping performance across datasets, or possibly misidentification of duplicate samples.
+
+<<>>=
+gdsfile <- paste0(outPrefix, ".gds")
+gds <- GdsGenotypeReader(gdsfile)
+genoData <- GenotypeData(gds, scanAnnot=scanAnnot, snpAnnot=snpAnnot)
+sum(duplicated(scanAnnot$subjectID))
+# The arguemnt "subjName.col" points to the field in the sample annotation 
+## that should be used to identify duplicate samples. For example, Coriell ID 
+## ("NAxxxx") for both HapMap and 1000 Genomes samples.
+disc <- duplicateDiscordance(genoData, subjName.col="subjectID", verbose=FALSE)
+disc.subj <- unlist(lapply(disc$discordance.by.subject, function(x) x[1,2]))
+summary(disc.subj)
+summary(disc$discordance.by.snp$discordant)
+@
+
+<<>>=
+close(genoData)
+invisible(lapply(genoDataList, close))
+sessionInfo()
+@
+
+\end{document}
